@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Movement : MonoBehaviour
@@ -8,7 +9,7 @@ public class Movement : MonoBehaviour
     float horizontalVal;
     Animator anim;
     Rigidbody2D rb;
-    public bool isGround, isRunning;
+    public bool isGround, isRunning, isAttack;
     [SerializeField] Transform groundCheck;
     [SerializeField] LayerMask groundLayer;
     const float groundCheckRadius = 0.2f;
@@ -19,6 +20,7 @@ public class Movement : MonoBehaviour
     bool facingRight = true;
     bool multipleJumps;
     bool coyoteJump;
+    public Transform weamponPoint;
     void Start()
     {
         anim = GetComponent<Animator>();
@@ -42,6 +44,16 @@ public class Movement : MonoBehaviour
 
         if (Input.GetButtonDown("Jump"))
             Jump();
+        if (Input.GetMouseButtonDown(0))
+        {
+            isAttack = true;
+            anim.SetBool("attack", true);
+        }
+        if (Input.GetMouseButtonUp(0))
+        {
+            isAttack = false;
+            anim.SetBool("attack", false);
+        }
 
     }
     private void FixedUpdate()
