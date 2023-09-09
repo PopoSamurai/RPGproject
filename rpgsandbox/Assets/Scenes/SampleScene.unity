@@ -7003,7 +7003,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1868116527}
   - component: {fileID: 1868116524}
-  - component: {fileID: 1868116526}
   - component: {fileID: 1868116525}
   m_Layer: 0
   m_Name: UICAm
@@ -7107,14 +7106,6 @@ MonoBehaviour:
     mipBias: 0
     varianceClampScale: 0.9
     contrastAdaptiveSharpening: 0
---- !u!81 &1868116526
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1868116523}
-  m_Enabled: 1
 --- !u!4 &1868116527
 Transform:
   m_ObjectHideFlags: 0
