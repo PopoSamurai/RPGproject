@@ -165,10 +165,9 @@ public class Movement : MonoBehaviour
             currentWayPlatform = null;
         }
     }
-
     public IEnumerator DisableColl()
     {
-        BoxCollider2D platformCollider = currentWayPlatform.GetComponent<BoxCollider2D>();
+        CompositeCollider2D platformCollider = currentWayPlatform.GetComponent<CompositeCollider2D>();
         Physics2D.IgnoreCollision(playerColl, platformCollider);
         yield return new WaitForSeconds(0.25f);
         Physics2D.IgnoreCollision(playerColl, platformCollider, false);
