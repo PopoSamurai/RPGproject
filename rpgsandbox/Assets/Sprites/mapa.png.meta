@@ -777,8 +777,8 @@ TextureImporter:
       name: mapa_31
       rect:
         serializedVersion: 2
-        x: 16
-        y: 220
+        x: 176
+        y: 236
         width: 16
         height: 16
       alignment: 0
@@ -798,8 +798,8 @@ TextureImporter:
       name: mapa_32
       rect:
         serializedVersion: 2
-        x: 32
-        y: 220
+        x: 192
+        y: 236
         width: 16
         height: 16
       alignment: 0
@@ -819,8 +819,8 @@ TextureImporter:
       name: mapa_33
       rect:
         serializedVersion: 2
-        x: 48
-        y: 220
+        x: 208
+        y: 236
         width: 16
         height: 16
       alignment: 0
@@ -840,7 +840,7 @@ TextureImporter:
       name: mapa_34
       rect:
         serializedVersion: 2
-        x: 80
+        x: 16
         y: 220
         width: 16
         height: 16
@@ -861,7 +861,7 @@ TextureImporter:
       name: mapa_35
       rect:
         serializedVersion: 2
-        x: 96
+        x: 32
         y: 220
         width: 16
         height: 16
@@ -882,7 +882,7 @@ TextureImporter:
       name: mapa_36
       rect:
         serializedVersion: 2
-        x: 112
+        x: 48
         y: 220
         width: 16
         height: 16
@@ -903,7 +903,7 @@ TextureImporter:
       name: mapa_37
       rect:
         serializedVersion: 2
-        x: 128
+        x: 80
         y: 220
         width: 16
         height: 16
@@ -924,8 +924,8 @@ TextureImporter:
       name: mapa_38
       rect:
         serializedVersion: 2
-        x: 16
-        y: 204
+        x: 96
+        y: 220
         width: 16
         height: 16
       alignment: 0
@@ -945,8 +945,8 @@ TextureImporter:
       name: mapa_39
       rect:
         serializedVersion: 2
-        x: 32
-        y: 204
+        x: 112
+        y: 220
         width: 16
         height: 16
       alignment: 0
@@ -966,8 +966,8 @@ TextureImporter:
       name: mapa_40
       rect:
         serializedVersion: 2
-        x: 48
-        y: 204
+        x: 128
+        y: 220
         width: 16
         height: 16
       alignment: 0
@@ -987,8 +987,8 @@ TextureImporter:
       name: mapa_41
       rect:
         serializedVersion: 2
-        x: 64
-        y: 204
+        x: 192
+        y: 220
         width: 16
         height: 16
       alignment: 0
@@ -1008,7 +1008,7 @@ TextureImporter:
       name: mapa_42
       rect:
         serializedVersion: 2
-        x: 128
+        x: 16
         y: 204
         width: 16
         height: 16
@@ -1021,6 +1021,90 @@ TextureImporter:
       bones: []
       spriteID: 9a7cffcd1284c644b8b61ace380cdf5e
       internalID: 16154208
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: mapa_43
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 204
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 99668235c337eea40bd4e34cf5085ffc
+      internalID: -2042915122
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: mapa_44
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 204
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 979a1323a01efde4e99749d4b7719d53
+      internalID: -286855646
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: mapa_45
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 204
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 573a31039793f1544b3d6264a5a268da
+      internalID: 1965273462
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: mapa_46
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 204
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b12d44c59e3470e48bee582e036018cb
+      internalID: 1710650494
       vertices: []
       indices: 
       edges: []
@@ -1074,6 +1158,10 @@ TextureImporter:
       mapa_40: -1258752102
       mapa_41: 835190238
       mapa_42: 16154208
+      mapa_43: -2042915122
+      mapa_44: -286855646
+      mapa_45: 1965273462
+      mapa_46: 1710650494
       mapa_5: 853746977
       mapa_6: 1585031605
       mapa_7: -945439805
