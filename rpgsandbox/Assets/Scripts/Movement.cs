@@ -21,6 +21,8 @@ public class Movement : MonoBehaviour
     bool multipleJumps;
     bool coyoteJump;
     public Transform weamponPoint;
+    private GameObject currentWayPlatform;
+    [SerializeField] private BoxCollider2D playerColl;
     void Start()
     {
         anim = GetComponent<Animator>();
@@ -54,7 +56,13 @@ public class Movement : MonoBehaviour
             isAttack = false;
             anim.SetBool("attack", false);
         }
-
+        if(Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            if(currentWayPlatform != null)
+            {
+                StartCoroutine(DisableColl());
+            }
+        }
     }
     private void FixedUpdate()
     {
@@ -83,7 +91,6 @@ public class Movement : MonoBehaviour
         }
         anim.SetBool("jump", !isGround);
     }
-
     public void Move(float dir)
     {
         #region Move
@@ -143,5 +150,27 @@ public class Movement : MonoBehaviour
                 anim.SetBool("jump", true);
             }
         }
+    }
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Platform"))
+        {
+            currentWayPlatform = collision.gameObject;
+        }
+    }
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Platform"))
+        {
+            currentWayPlatform = null;
+        }
+    }
+
+    public IEnumerator DisableColl()
+    {
+        BoxCollider2D platformCollider = currentWayPlatform.GetComponent<BoxCollider2D>();
+        Physics2D.IgnoreCollision(playerColl, platformCollider);
+        yield return new WaitForSeconds(0.25f);
+        Physics2D.IgnoreCollision(playerColl, platformCollider, false);
     }
 }
