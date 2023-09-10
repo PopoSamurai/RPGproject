@@ -23,6 +23,8 @@ public class Movement : MonoBehaviour
     public Transform weamponPoint;
     private GameObject currentWayPlatform;
     [SerializeField] private BoxCollider2D playerColl;
+    //dust
+    public ParticleSystem dust;
     void Start()
     {
         anim = GetComponent<Animator>();
@@ -56,7 +58,7 @@ public class Movement : MonoBehaviour
             isAttack = false;
             anim.SetBool("attack", false);
         }
-        if(Input.GetKeyDown(KeyCode.DownArrow))
+        if(Input.GetKeyDown(KeyCode.S))
         {
             if(currentWayPlatform != null)
             {
@@ -104,11 +106,13 @@ public class Movement : MonoBehaviour
         //odwr t
         if (facingRight && dir < 0)
         {
+            CreateDust();
             transform.localScale = new Vector3(-1, 1, 1);
             facingRight = false;
         }
         else if (!facingRight && dir > 0)
         {
+            CreateDust();
             transform.localScale = new Vector3(1, 1, 1);
             facingRight = true;
         }
@@ -165,11 +169,24 @@ public class Movement : MonoBehaviour
             currentWayPlatform = null;
         }
     }
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if(other.CompareTag("Pot") && isAttack == true)
+        {
+            other.GetComponent<BreakAble>().Smash();
+        }
+    }
     public IEnumerator DisableColl()
     {
         CompositeCollider2D platformCollider = currentWayPlatform.GetComponent<CompositeCollider2D>();
         Physics2D.IgnoreCollision(playerColl, platformCollider);
-        yield return new WaitForSeconds(0.25f);
+        Physics.IgnoreLayerCollision(3, 6, true);
+        yield return new WaitForSeconds(0.5f);
         Physics2D.IgnoreCollision(playerColl, platformCollider, false);
+        Physics.IgnoreLayerCollision(3, 6, false);
+    }
+    public void CreateDust()
+    {
+        dust.Play();
     }
 }
