@@ -11,6 +11,7 @@ public class Movement : MonoBehaviour
     Animator anim;
     Rigidbody2D rb;
     public bool isGround, isRunning, isAttack;
+    public bool haveSword;
     [SerializeField] Transform groundCheck;
     [SerializeField] LayerMask groundLayer;
     const float groundCheckRadius = 0.2f;
@@ -51,7 +52,7 @@ public class Movement : MonoBehaviour
 
         if (Input.GetButtonDown("Jump"))
             Jump();
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && haveSword == true)
         {
             isAttack = true;
             anim.SetBool("attack", true);
