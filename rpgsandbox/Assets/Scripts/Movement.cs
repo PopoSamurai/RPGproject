@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -25,10 +26,12 @@ public class Movement : MonoBehaviour
     [SerializeField] private BoxCollider2D playerColl;
     //dust
     public ParticleSystem dust;
+    private GameObject cursor;
     void Start()
     {
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
+        cursor = GameObject.FindGameObjectWithTag("Aim");
     }
 
     void Update()
@@ -101,16 +104,14 @@ public class Movement : MonoBehaviour
             xVal *= runSpeed;
         Vector2 targetVelocity = new Vector2(xVal, rb.velocity.y);
         rb.velocity = targetVelocity;
-
-        Vector3 currentScale = transform.localScale;
-        //odwr t
-        if (facingRight && dir < 0)
+        //odwrót
+        if (facingRight && dir < 0 && isAttack == false || cursor.transform.position.x < this.transform.position.x && isAttack == true)
         {
             CreateDust();
             transform.localScale = new Vector3(-1, 1, 1);
             facingRight = false;
         }
-        else if (!facingRight && dir > 0)
+        else if (!facingRight && dir > 0 && isAttack == false || cursor.transform.position.x > this.transform.position.x && isAttack == true)
         {
             CreateDust();
             transform.localScale = new Vector3(1, 1, 1);
