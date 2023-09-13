@@ -19,7 +19,7 @@ public class Movement : MonoBehaviour
     public float jumpPower = 8;
     [SerializeField] int totalJumps;
     int availableJumps;
-    bool facingRight = true;
+    public bool facingRight = true;
     bool multipleJumps;
     bool coyoteJump;
     public Transform weamponPoint;
@@ -176,6 +176,10 @@ public class Movement : MonoBehaviour
         if(other.CompareTag("Pot") && isAttack == true)
         {
             other.GetComponent<BreakAble>().Smash();
+        }
+        if (other.CompareTag("Enemy") && isAttack == true)
+        {
+            other.GetComponent<Enemy>().Hit();
         }
     }
     public IEnumerator DisableColl()
