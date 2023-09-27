@@ -1,0 +1,16 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Converter : MonoBehaviour
+{
+    public GameObject[] EnemyTeam;
+    public int enemynum = 0;
+    private void Start()
+    {
+        Destroy(EnemyTeam[0]);
+        Destroy(EnemyTeam[1]);
+        Destroy(EnemyTeam[2]);
+        Destroy(EnemyTeam[3]);
+    }
+}
