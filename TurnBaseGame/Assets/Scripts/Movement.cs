@@ -16,7 +16,7 @@ namespace interactOn
         const float groundCheckRadius = 0.2f;
         public float speed = 3;
         float horizontalVal;
-        bool facingRight = false;
+        bool facingRight = true;
         [SerializeField] bool isGround;
         public AudioSource step1;
         public AudioSource step2;

@@ -48,7 +48,6 @@ public class Teleport : MonoBehaviour
             case 3:
                 if (set == true && Input.GetKeyDown(KeyCode.E))
                 {
-                    gamem.GetComponent<Converter>().spawnPoint = 1;
                     StartCoroutine(czekajNaTpBack());
                 }
                 break;
@@ -79,6 +78,7 @@ public class Teleport : MonoBehaviour
     {
         player.GetComponent<Movement>().move = false;
         skip.SetActive(true);
+        gamem.GetComponent<Converter>().spawnPoint = 1;
         yield return new WaitForSeconds(1f);
         SceneManager.LoadScene("Village");
     }
