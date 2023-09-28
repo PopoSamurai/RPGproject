@@ -8,6 +8,7 @@ public class Converter : MonoBehaviour
     public int enemynum = 0;
     private void Start()
     {
+        enemynum = 0;
         Destroy(EnemyTeam[0]);
         Destroy(EnemyTeam[1]);
         Destroy(EnemyTeam[2]);

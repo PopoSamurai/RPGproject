@@ -114,7 +114,7 @@ namespace BattleSystem
                     playerHud.gameObject.SetActive(true);
                     playerHud2.gameObject.SetActive(true);
                     playerHud3.gameObject.SetActive(true);
-                    playerHud4.gameObject.SetActive(false);
+                    playerHud4.gameObject.SetActive(true);
                     GameObject player1cGo = Instantiate(team.allCharacters[0], playerFirstPos.position, playerFirstPos.rotation);
                     playerClass = player1cGo.GetComponent<CharacterClass>();
                     playerHud.setHud(playerClass);
@@ -218,7 +218,6 @@ namespace BattleSystem
             state = BattleState.playerTurn;
             PlayerTurn();
         }
-
         public void PlayerTurn()
         {
             dialogueText.text = "Twoja tura: ";
