@@ -7517,7 +7517,6 @@ GameObject:
   - component: {fileID: 311799757}
   - component: {fileID: 311799756}
   - component: {fileID: 311799755}
-  - component: {fileID: 311799754}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -7525,20 +7524,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &311799754
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 311799753}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bf87c34998d51f44c956a41f2e34d2a4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playerIsRange: 0
-  interact: 0
 --- !u!82 &311799755
 AudioSource:
   m_ObjectHideFlags: 0
