@@ -11,8 +11,7 @@ namespace interactOn
     public enum InteractObject
     {
         npc,
-        shop,
-        cave
+        shop
     }
     public class NPC : MonoBehaviour
     {
@@ -73,12 +72,6 @@ namespace interactOn
                         Debug.Log("shop");
                     }
                     break;
-                case 3:
-                    if (Input.GetKeyDown(KeyCode.E))
-                    {
-                        Debug.Log("cave");
-                    }
-                    break;
             }
         }
         private void OnTriggerEnter2D(Collider2D other)
@@ -96,13 +89,6 @@ namespace interactOn
                 sound.Play();
                 InteractTag.SetActive(true);
                 objectID = 2;
-            }
-            if (other.CompareTag("Player") && objectMap == InteractObject.cave)
-            {
-                set = true;
-                sound.Play();
-                InteractTag.SetActive(true);
-                objectID = 3;
             }
         }
         private void OnTriggerExit2D(Collider2D other)

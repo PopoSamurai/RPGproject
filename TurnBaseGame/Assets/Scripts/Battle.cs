@@ -355,13 +355,29 @@ namespace BattleSystem
             enemyHud2.color.SetActive(true);
             enemyHud.color.SetActive(false);
         }
+        public void CheckTarget3()
+        {
+            enemyNum = 3;
+            enemyHud3.color.SetActive(true);
+            enemyHud.color.SetActive(false);
+        }
+        public void CheckTarget4()
+        {
+            enemyNum = 4;
+            enemyHud4.color.SetActive(true);
+            enemyHud.color.SetActive(false);
+        }
 
         public void disableColors()
         {
             playerHud.color.SetActive(false);
             playerHud2.color.SetActive(false);
-            enemyHud2.color.SetActive(false);
+            playerHud3.color.SetActive(false);
+            playerHud4.color.SetActive(false);
             enemyHud.color.SetActive(false);
+            enemyHud2.color.SetActive(false);
+            enemyHud3.color.SetActive(false);
+            enemyHud4.color.SetActive(false);
         }
 
         public IEnumerator PlayerAttack()

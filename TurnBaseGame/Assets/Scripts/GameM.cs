@@ -10,7 +10,25 @@ namespace BattleSystem
     {
         public Teammates playerTeam;
         public Converter enemyTeam;
-
+        public Transform[] spawn;
+        public Converter spawner;
+        private GameObject player;
+        public Vector3 startPos;
+        private void Start()
+        {
+            player = GameObject.FindGameObjectWithTag("Player");
+            switch (spawner.GetComponent<Converter>().spawnPoint)
+            {
+                case 0:
+                    startPos = spawn[0].position;
+                    player.transform.position = startPos;
+                    break;
+                case 1:
+                    startPos = spawn[1].position;
+                    player.transform.position = startPos;
+                    break;
+            }
+        }
         private void Update()
         {
             playerTeam.playernum = playerTeam.allCharacters.Count();
