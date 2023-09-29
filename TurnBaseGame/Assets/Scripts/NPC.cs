@@ -45,8 +45,6 @@ namespace interactOn
             else
             {
                 dialogueWin.SetActive(false);
-                //playermove off
-                player.GetComponent<Movement>().move = false;
                 upgradeWin.SetActive(true);
             }
         }

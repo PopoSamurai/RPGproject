@@ -25,6 +25,10 @@ namespace interactOn
         {
             move = true;
         }
+        public void MoveOff()
+        {
+            move = false;
+        }
         private void Awake()
         {
             rb = GetComponent<Rigidbody2D>();
