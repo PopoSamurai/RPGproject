@@ -41,6 +41,7 @@ namespace BattleSystem
         public AudioSource attackSword;
         public AudioSource HealS;
         public GameObject[] skills;
+        public GameObject teamPref;
         void Start()
         {
             firstPos = transform.position;

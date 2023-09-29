@@ -1326,7 +1326,7 @@ MonoBehaviour:
   anim: {fileID: 3194914857342370389}
   classChar: 2
   com: 0
-  id: 1
+  id: 2
   level: 1
   health: 80
   currentHp: 80
@@ -1343,6 +1343,7 @@ MonoBehaviour:
   skills:
   - {fileID: 8065499438375478664}
   - {fileID: 7696730125254187693}
+  teamPref: {fileID: 8188386129505682952, guid: 413cc6d6b3356bc4cb2a634abc8d2eb8, type: 3}
 --- !u!82 &4506496243753341569
 AudioSource:
   m_ObjectHideFlags: 0

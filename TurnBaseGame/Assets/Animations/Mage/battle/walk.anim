@@ -21,15 +21,15 @@ AnimationClip:
   - serializedVersion: 2
     curve:
     - time: 0
-      value: {fileID: -1837826149, guid: 73af343f15e3c21469320bad5fb4975d, type: 3}
+      value: {fileID: -302211404, guid: 651ec514266bfb447978f0bd87f1e330, type: 3}
     - time: 0.16666667
-      value: {fileID: 659530371, guid: 73af343f15e3c21469320bad5fb4975d, type: 3}
+      value: {fileID: 219491823, guid: 651ec514266bfb447978f0bd87f1e330, type: 3}
     - time: 0.33333334
-      value: {fileID: -927662624, guid: 73af343f15e3c21469320bad5fb4975d, type: 3}
+      value: {fileID: -1017510576, guid: 651ec514266bfb447978f0bd87f1e330, type: 3}
     - time: 0.5
-      value: {fileID: 1248404682, guid: 73af343f15e3c21469320bad5fb4975d, type: 3}
+      value: {fileID: -1716460787, guid: 651ec514266bfb447978f0bd87f1e330, type: 3}
     - time: 0.6666667
-      value: {fileID: 1248404682, guid: 73af343f15e3c21469320bad5fb4975d, type: 3}
+      value: {fileID: -1716460787, guid: 651ec514266bfb447978f0bd87f1e330, type: 3}
     attribute: m_Sprite
     path: 
     classID: 212
@@ -52,11 +52,11 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     pptrCurveMapping:
-    - {fileID: -1837826149, guid: 73af343f15e3c21469320bad5fb4975d, type: 3}
-    - {fileID: 659530371, guid: 73af343f15e3c21469320bad5fb4975d, type: 3}
-    - {fileID: -927662624, guid: 73af343f15e3c21469320bad5fb4975d, type: 3}
-    - {fileID: 1248404682, guid: 73af343f15e3c21469320bad5fb4975d, type: 3}
-    - {fileID: 1248404682, guid: 73af343f15e3c21469320bad5fb4975d, type: 3}
+    - {fileID: -302211404, guid: 651ec514266bfb447978f0bd87f1e330, type: 3}
+    - {fileID: 219491823, guid: 651ec514266bfb447978f0bd87f1e330, type: 3}
+    - {fileID: -1017510576, guid: 651ec514266bfb447978f0bd87f1e330, type: 3}
+    - {fileID: -1716460787, guid: 651ec514266bfb447978f0bd87f1e330, type: 3}
+    - {fileID: -1716460787, guid: 651ec514266bfb447978f0bd87f1e330, type: 3}
   m_AnimationClipSettings:
     serializedVersion: 2
     m_AdditiveReferencePoseClip: {fileID: 0}
@@ -83,14 +83,14 @@ AnimationClip:
   m_HasMotionFloatCurves: 0
   m_Events:
   - time: 0.16666667
-    functionName: 
+    functionName: Step1
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
   - time: 0.5
-    functionName: Step2
+    functionName: 
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
