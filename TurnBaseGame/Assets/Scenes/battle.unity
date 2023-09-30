@@ -1485,10 +1485,6 @@ RectTransform:
   - {fileID: 1041125761}
   - {fileID: 246448901}
   - {fileID: 850878993}
-  - {fileID: 707533930}
-  - {fileID: 761639856}
-  - {fileID: 1911511341}
-  - {fileID: 1349106082}
   m_Father: {fileID: 905408002}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -2069,6 +2065,7 @@ RectTransform:
   - {fileID: 1426155756}
   - {fileID: 261290989}
   - {fileID: 2079699123}
+  - {fileID: 1911511341}
   m_Father: {fileID: 152726422}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -5934,16 +5931,16 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 707533929}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 152726422}
+  m_Father: {fileID: 1191811164}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -292.5, y: 146}
+  m_AnchoredPosition: {x: 787.5, y: 326}
   m_SizeDelta: {x: 265.01, y: 280}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &707533931
@@ -6417,16 +6414,16 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 761639855}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 152726422}
+  m_Father: {fileID: 1863095209}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -757.97, y: 146.00002}
+  m_AnchoredPosition: {x: 794.53, y: 326}
   m_SizeDelta: {x: 263.71, y: 280}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &761639857
@@ -8230,6 +8227,7 @@ RectTransform:
   - {fileID: 1345158192}
   - {fileID: 1668313635}
   - {fileID: 1399214861}
+  - {fileID: 1349106082}
   m_Father: {fileID: 152726422}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -9298,6 +9296,7 @@ RectTransform:
   - {fileID: 1642646748}
   - {fileID: 2103786137}
   - {fileID: 62947788}
+  - {fileID: 707533930}
   m_Father: {fileID: 152726422}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -10325,16 +10324,16 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1349106081}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 152726422}
+  m_Father: {fileID: 1041125761}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -546, y: -160}
+  m_AnchoredPosition: {x: 781.5001, y: 267.5001}
   m_SizeDelta: {x: 263.71, y: 280}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1349106083
@@ -10383,7 +10382,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1735433173}
         m_TargetAssemblyTypeName: BattleSystem.Battle, Assembly-CSharp
-        m_MethodName: CheckTarget4
+        m_MethodName: CheckTarget3
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -13276,6 +13275,8 @@ MonoBehaviour:
   - {fileID: 246448900}
   team: {fileID: 1952093558}
   enemyback: {fileID: 3492922390178424820, guid: 820515a20be146f48be5f097873dbdbb, type: 3}
+  turnP: 0
+  turnE: 0
 --- !u!4 &1735433174
 Transform:
   m_ObjectHideFlags: 0
@@ -14322,6 +14323,7 @@ RectTransform:
   - {fileID: 1393430626}
   - {fileID: 1656850775}
   - {fileID: 595606018}
+  - {fileID: 761639856}
   m_Father: {fileID: 152726422}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -14599,16 +14601,16 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1911511340}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 152726422}
+  m_Father: {fileID: 246448901}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -102, y: -159.99997}
+  m_AnchoredPosition: {x: 798.0001, y: 267.50012}
   m_SizeDelta: {x: 265.01, y: 280}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1911511342
@@ -14657,7 +14659,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1735433173}
         m_TargetAssemblyTypeName: BattleSystem.Battle, Assembly-CSharp
-        m_MethodName: CheckTarget3
+        m_MethodName: CheckTarget4
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

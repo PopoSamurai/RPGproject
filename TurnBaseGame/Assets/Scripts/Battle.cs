@@ -1,7 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting;
+using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
+using static UnityEditor.Rendering.FilterWindow;
 
 namespace BattleSystem
 {
@@ -11,7 +16,7 @@ namespace BattleSystem
         playerTurn,
         enemyTurn,
         won,
-        lost
+        lost,
     }
     public class Battle : MonoBehaviour
     {
@@ -45,8 +50,8 @@ namespace BattleSystem
         public BattleHUD enemyHud2;
         public BattleHUD enemyHud3;
         public BattleHUD enemyHud4;
-        public int playersNum = 0;
-        public int enemyNum = 0;
+        public int playersNum;
+        public int enemyNum;
         public BattleState state;
         public Vector3 offset;
         public Vector3 offsetE;
@@ -56,8 +61,17 @@ namespace BattleSystem
         //
         public Teammates team;
         public Converter enemyback;
+        public int turnP = 0;
+        public int turnE = 0;
+        bool win = false;
+        //dedFix
+        int e1, e2, e3, e4;
         void Start()
         {
+            e1 = 0;
+            e2 = 0;
+            e3 = 0;
+            e4 = 0;
             playersNum = team.playernum;
             enemyNum = enemyback.enemynum;
             EnemyTeam[0] = enemyback.GetComponent<Converter>().EnemyTeam[0];
@@ -67,8 +81,18 @@ namespace BattleSystem
 
             state = BattleState.start;
             TeammateLoad();
-            EnemyLoad();
-            StartCoroutine(stetupBattle());
+            EnemyLoad(); 
+            StartCoroutine(stetupBattle()); 
+        }
+        private void Update()
+        {
+            foreach (GameObject element in EnemyTeam)
+            {
+                if (EnemyTeam[0] == null && EnemyTeam[1] == null && EnemyTeam[2] == null && EnemyTeam[3] == null)
+                {
+                    win = true;
+                }
+            }
         }
         public void TeammateLoad()
         {
@@ -221,9 +245,34 @@ namespace BattleSystem
         public void PlayerTurn()
         {
             dialogueText.text = "Twoja tura: ";
-            playersNum = Random.Range(1,3);
-            CheckTarget1();
-            switch (playersNum)
+            //playersNum = Random.Range(1,3);
+            if(turnP >= playersNum)
+            {
+                turnP = 1;
+            }
+            else
+            {
+                turnP++;
+            }
+            //automatyczny target
+            if (e1 == 0)
+            {
+                CheckTarget1();
+            }
+            else if (e2 == 0)
+            {
+                CheckTarget2();
+            }
+            else if(e3 == 0)
+            {
+                CheckTarget3();
+            }
+            else if(e4 == 0)
+            {
+                CheckTarget4();
+            }
+
+            switch (turnP)
             {
                 case 1:
                     foreach (var obj in playerClass.skills)
@@ -345,29 +394,36 @@ namespace BattleSystem
         }
         public void CheckTarget1()
         {
-            enemyNum = 1;
+            turnE = 1;
             enemyHud.color.SetActive(true);
             enemyHud2.color.SetActive(false);
+            enemyHud3.color.SetActive(false);
+            enemyHud4.color.SetActive(false);
         }
         public void CheckTarget2()
         {
-            enemyNum = 2;
+            turnE = 2;
             enemyHud2.color.SetActive(true);
             enemyHud.color.SetActive(false);
+            enemyHud3.color.SetActive(false);
+            enemyHud4.color.SetActive(false);
         }
         public void CheckTarget3()
         {
-            enemyNum = 3;
+            turnE = 3;
             enemyHud3.color.SetActive(true);
             enemyHud.color.SetActive(false);
+            enemyHud2.color.SetActive(false);
+            enemyHud4.color.SetActive(false);
         }
         public void CheckTarget4()
         {
-            enemyNum = 4;
+            turnE = 4;
             enemyHud4.color.SetActive(true);
             enemyHud.color.SetActive(false);
+            enemyHud2.color.SetActive(false);
+            enemyHud3.color.SetActive(false);
         }
-
         public void disableColors()
         {
             playerHud.color.SetActive(false);
@@ -379,14 +435,13 @@ namespace BattleSystem
             enemyHud3.color.SetActive(false);
             enemyHud4.color.SetActive(false);
         }
-
         public IEnumerator PlayerAttack()
         {
-            switch (playersNum)
+            switch (turnP)
             {
                 case 1:
                     playerClass.AttackCo();
-                    switch (enemyNum)
+                    switch (turnE)
                     {
                         case 1:
                             bool isDeadE1 = enemyClass.TakeDamage(playerClass.damage);
@@ -402,13 +457,24 @@ namespace BattleSystem
                             }
                             enemyHud.SetHp(enemyClass.currentHp);
                             enemyHud.SetSp(enemyClass.currentSp);
-                            dialogueText.text = "Atak siê uda³.";
+                            if(isDeadE1)
+                            {
+                                dialogueText.text = enemyClass.name + " nie ¿yje";
+                                enemyHud.gameObject.SetActive(false);
+                                //destroy prefab enemy
+                                EnemyTeam[0] = null;
+                                Destroy(enemyClass.gameObject);
+                                e1 = 1;
+                            }
+                            else
+                            {
+                                dialogueText.text = "Atak siê uda³.";
+                            }
                             disableColors();
-
                             yield return new WaitForSeconds(2f);
                             team.allCharacters[0].transform.position = playerFirstPos.position;
                             playerClass.GetComponent<SpriteRenderer>().sortingOrder = 2;
-                            if (isDeadE1)
+                            if (win == true)
                             {
                                 state = BattleState.won;
                                 EndBattle();
@@ -433,13 +499,110 @@ namespace BattleSystem
                             }
                             enemyHud2.SetHp(enemyClass2.currentHp);
                             enemyHud2.SetSp(enemyClass2.currentSp);
-                            dialogueText.text = "Atak siê uda³.";
-
+                            if (isDeadE2)
+                            {
+                                dialogueText.text = enemyClass2.name + " nie ¿yje";
+                                enemyHud2.gameObject.SetActive(false);
+                                //destroy prefab enemy
+                                EnemyTeam[1] = null;
+                                Destroy(enemyClass2.gameObject);
+                                e2 = 2;
+                            }
+                            else
+                            {
+                                dialogueText.text = "Atak siê uda³.";
+                            }
                             disableColors();
                             yield return new WaitForSeconds(2f);
                             team.allCharacters[0].transform.position = playerFirstPos.position;
                             playerClass.GetComponent<SpriteRenderer>().sortingOrder = 2;
-                            if (isDeadE2)
+                            if (win == true)
+                            {
+                                state = BattleState.won;
+                                EndBattle();
+                            }
+                            else
+                            {
+                                state = BattleState.enemyTurn;
+                                StartCoroutine(EnemyTour());
+                            }
+                            break;
+                        case 3:
+                            bool isDeadE3 = enemyClass3.TakeDamage(playerClass.damage);
+                            if (playerClass.classChar != CharClass.mage)
+                            {
+                                playerClass.GetComponent<SpriteRenderer>().sortingOrder = 3;
+                                playerClass.transform.position = enemyThreePos.transform.position + offset;
+                                Instantiate(effect[2], enemyThreePos);
+                            }
+                            else
+                            {
+                                Instantiate(effect[0], enemyThreePos);
+                            }
+                            enemyHud3.SetHp(enemyClass3.currentHp);
+                            enemyHud3.SetSp(enemyClass3.currentSp);
+                            if (isDeadE3)
+                            {
+                                dialogueText.text = enemyClass3.name + " nie ¿yje";
+                                enemyHud3.gameObject.SetActive(false);
+                                //destroy prefab enemy
+                                //destroy prefab enemy
+                                EnemyTeam[2] = null;
+                                Destroy(enemyClass3.gameObject);
+                                e3 = 3;
+                            }
+                            else
+                            {
+                                dialogueText.text = "Atak siê uda³.";
+                            }
+                            disableColors();
+                            yield return new WaitForSeconds(2f);
+                            team.allCharacters[0].transform.position = playerFirstPos.position;
+                            playerClass.GetComponent<SpriteRenderer>().sortingOrder = 2;
+                            if (win == true)
+                            {
+                                state = BattleState.won;
+                                EndBattle();
+                            }
+                            else
+                            {
+                                state = BattleState.enemyTurn;
+                                StartCoroutine(EnemyTour());
+                            }
+                            break;
+                        case 4:
+                            bool isDeadE4 = enemyClass4.TakeDamage(playerClass.damage);
+                            if (playerClass.classChar != CharClass.mage)
+                            {
+                                playerClass.GetComponent<SpriteRenderer>().sortingOrder = 3;
+                                playerClass.transform.position = enemyFourPos.transform.position + offset;
+                                Instantiate(effect[2], enemyFourPos);
+                            }
+                            else
+                            {
+                                Instantiate(effect[0], enemyFourPos);
+                            }
+                            enemyHud4.SetHp(enemyClass4.currentHp);
+                            enemyHud4.SetSp(enemyClass4.currentSp);
+                            if (isDeadE4)
+                            {
+                                dialogueText.text = enemyClass4.name + " nie ¿yje";
+                                enemyHud4.gameObject.SetActive(false);
+                                //destroy prefab enemy
+                                //destroy prefab enemy
+                                EnemyTeam[3] = null;
+                                Destroy(enemyClass4.gameObject);
+                                e4 = 4;
+                            }
+                            else
+                            {
+                                dialogueText.text = "Atak siê uda³.";
+                            }
+                            disableColors();
+                            yield return new WaitForSeconds(2f);
+                            team.allCharacters[0].transform.position = playerFirstPos.position;
+                            playerClass.GetComponent<SpriteRenderer>().sortingOrder = 2;
+                            if (win == true)
                             {
                                 state = BattleState.won;
                                 EndBattle();
@@ -454,7 +617,7 @@ namespace BattleSystem
                     break;
                 case 2:
                     playerClass2.AttackCo();
-                    switch (enemyNum)
+                    switch (turnE)
                     {
                         case 1:
                             bool isDeadE1 = enemyClass.TakeDamage(playerClass2.damage);
@@ -470,13 +633,24 @@ namespace BattleSystem
                             }
                             enemyHud.SetHp(enemyClass.currentHp);
                             enemyHud.SetSp(enemyClass.currentSp);
-                            dialogueText.text = "Atak siê uda³.";
+                            if (isDeadE1)
+                            {
+                                dialogueText.text = enemyClass.name + " nie ¿yje";
+                                enemyHud.gameObject.SetActive(false);
+                                //destroy prefab enemy
+                                EnemyTeam[0] = null;
+                                Destroy(enemyClass.gameObject);
+                                e1 = 1;
+                            }
+                            else
+                            {
+                                dialogueText.text = "Atak siê uda³.";
+                            }
                             disableColors();
-
                             yield return new WaitForSeconds(2f);
                             team.allCharacters[1].transform.position = playerTwoPos.position;
                             playerClass2.GetComponent<SpriteRenderer>().sortingOrder = 2;
-                            if (isDeadE1)
+                            if (win == true)
                             {
                                 state = BattleState.won;
                                 EndBattle();
@@ -493,7 +667,7 @@ namespace BattleSystem
                             {
                                 playerClass2.GetComponent<SpriteRenderer>().sortingOrder = 3;
                                 playerClass2.transform.position = enemyTwoPos.transform.position + offset;
-                                Instantiate(effect[1], enemyTwoPos);
+                                Instantiate(effect[2], enemyTwoPos);
                             }
                             else
                             {
@@ -501,13 +675,459 @@ namespace BattleSystem
                             }
                             enemyHud2.SetHp(enemyClass2.currentHp);
                             enemyHud2.SetSp(enemyClass2.currentSp);
-                            dialogueText.text = "Atak siê uda³.";
+                            if (isDeadE2)
+                            {
+                                dialogueText.text = enemyClass2.name + " nie ¿yje";
+                                enemyHud2.gameObject.SetActive(false);
+                                //destroy prefab enemy
+                                //destroy prefab enemy
+                                EnemyTeam[1] = null;
+                                Destroy(enemyClass2.gameObject);
+                                e2 = 2;
+                            }
+                            else
+                            {
+                                dialogueText.text = "Atak siê uda³.";
+                            }
                             disableColors();
-
                             yield return new WaitForSeconds(2f);
                             team.allCharacters[1].transform.position = playerTwoPos.position;
                             playerClass2.GetComponent<SpriteRenderer>().sortingOrder = 2;
+                            if (win == true)
+                            {
+                                state = BattleState.won;
+                                EndBattle();
+                            }
+                            else
+                            {
+                                state = BattleState.enemyTurn;
+                                StartCoroutine(EnemyTour());
+                            }
+                            break;
+                        case 3:
+                            bool isDeadE3 = enemyClass3.TakeDamage(playerClass2.damage);
+                            if (playerClass2.classChar != CharClass.mage)
+                            {
+                                playerClass2.GetComponent<SpriteRenderer>().sortingOrder = 3;
+                                playerClass2.transform.position = enemyThreePos.transform.position + offset;
+                                Instantiate(effect[2], enemyThreePos);
+                            }
+                            else
+                            {
+                                Instantiate(effect[0], enemyThreePos);
+                            }
+                            enemyHud3.SetHp(enemyClass3.currentHp);
+                            enemyHud3.SetSp(enemyClass3.currentSp);
+                            if (isDeadE3)
+                            {
+                                dialogueText.text = enemyClass3.name + " nie ¿yje";
+                                enemyHud3.gameObject.SetActive(false);
+                                //destroy prefab enemy
+                                //destroy prefab enemy
+                                EnemyTeam[2] = null;
+                                Destroy(enemyClass3.gameObject);
+                                e3 = 3;
+                            }
+                            else
+                            {
+                                dialogueText.text = "Atak siê uda³.";
+                            }
+                            disableColors();
+                            yield return new WaitForSeconds(2f);
+                            team.allCharacters[1].transform.position = playerTwoPos.position;
+                            playerClass2.GetComponent<SpriteRenderer>().sortingOrder = 2;
+                            if (win == true)
+                            {
+                                state = BattleState.won;
+                                EndBattle();
+                            }
+                            else
+                            {
+                                state = BattleState.enemyTurn;
+                                StartCoroutine(EnemyTour());
+                            }
+                            break;
+                        case 4:
+                            bool isDeadE4 = enemyClass4.TakeDamage(playerClass2.damage);
+                            if (playerClass2.classChar != CharClass.mage)
+                            {
+                                playerClass2.GetComponent<SpriteRenderer>().sortingOrder = 3;
+                                playerClass2.transform.position = enemyFourPos.transform.position + offset;
+                                Instantiate(effect[2], enemyFourPos);
+                            }
+                            else
+                            {
+                                Instantiate(effect[0], enemyFourPos);
+                            }
+                            enemyHud4.SetHp(enemyClass4.currentHp);
+                            enemyHud4.SetSp(enemyClass4.currentSp);
+                            if (isDeadE4)
+                            {
+                                dialogueText.text = enemyClass4.name + " nie ¿yje";
+                                enemyHud4.gameObject.SetActive(false);
+                                //destroy prefab enemy
+                                //destroy prefab enemy
+                                EnemyTeam[3] = null;
+                                Destroy(enemyClass4.gameObject);
+                                e4 = 4;
+                            }
+                            else
+                            {
+                                dialogueText.text = "Atak siê uda³.";
+                            }
+                            disableColors();
+                            yield return new WaitForSeconds(2f);
+                            team.allCharacters[1].transform.position = playerTwoPos.position;
+                            playerClass2.GetComponent<SpriteRenderer>().sortingOrder = 2;
+                            if (win == true)
+                            {
+                                state = BattleState.won;
+                                EndBattle();
+                            }
+                            else
+                            {
+                                state = BattleState.enemyTurn;
+                                StartCoroutine(EnemyTour());
+                            }
+                            break;
+                    }
+                    break;
+                case 3:
+                    playerClass3.AttackCo();
+                    switch (turnE)
+                    {
+                        case 1:
+                            bool isDeadE1 = enemyClass.TakeDamage(playerClass3.damage);
+                            if (playerClass3.classChar != CharClass.mage)
+                            {
+                                playerClass3.GetComponent<SpriteRenderer>().sortingOrder = 3;
+                                playerClass3.transform.position = enemyFirstPos.transform.position + offset;
+                                Instantiate(effect[1], enemyFirstPos);
+                            }
+                            else
+                            {
+                                Instantiate(effect[0], enemyFirstPos);
+                            }
+                            enemyHud.SetHp(enemyClass.currentHp);
+                            enemyHud.SetSp(enemyClass.currentSp);
+                            if (isDeadE1)
+                            {
+                                dialogueText.text = enemyClass.name + " nie ¿yje";
+                                enemyHud.gameObject.SetActive(false);
+                                //destroy prefab enemy
+                                EnemyTeam[0] = null;
+                                Destroy(enemyClass.gameObject);
+                                e1 = 1;
+                            }
+                            else
+                            {
+                                dialogueText.text = "Atak siê uda³.";
+                            }
+                            disableColors();
+                            yield return new WaitForSeconds(2f);
+                            team.allCharacters[2].transform.position = playerThreePos.position;
+                            playerClass3.GetComponent<SpriteRenderer>().sortingOrder = 2;
+                            if (win == true)
+                            {
+                                state = BattleState.won;
+                                EndBattle();
+                            }
+                            else
+                            {
+                                state = BattleState.enemyTurn;
+                                StartCoroutine(EnemyTour());
+                            }
+                            break;
+                        case 2:
+                            bool isDeadE2 = enemyClass2.TakeDamage(playerClass3.damage);
+                            if (playerClass3.classChar != CharClass.mage)
+                            {
+                                playerClass3.GetComponent<SpriteRenderer>().sortingOrder = 3;
+                                playerClass3.transform.position = enemyTwoPos.transform.position + offset;
+                                Instantiate(effect[2], enemyTwoPos);
+                            }
+                            else
+                            {
+                                Instantiate(effect[0], enemyTwoPos);
+                            }
+                            enemyHud2.SetHp(enemyClass2.currentHp);
+                            enemyHud2.SetSp(enemyClass2.currentSp);
                             if (isDeadE2)
+                            {
+                                dialogueText.text = enemyClass2.name + " nie ¿yje";
+                                enemyHud2.gameObject.SetActive(false);
+                                //destroy prefab enemy
+                                EnemyTeam[1] = null;
+                                Destroy(enemyClass2.gameObject);
+                                e2 = 2;
+                            }
+                            else
+                            {
+                                dialogueText.text = "Atak siê uda³.";
+                            }
+                            disableColors();
+                            yield return new WaitForSeconds(2f);
+                            team.allCharacters[2].transform.position = playerThreePos.position;
+                            playerClass3.GetComponent<SpriteRenderer>().sortingOrder = 2;
+                            if (win == true)
+                            {
+                                state = BattleState.won;
+                                EndBattle();
+                            }
+                            else
+                            {
+                                state = BattleState.enemyTurn;
+                                StartCoroutine(EnemyTour());
+                            }
+                            break;
+                        case 3:
+                            bool isDeadE3 = enemyClass3.TakeDamage(playerClass3.damage);
+                            if (playerClass3.classChar != CharClass.mage)
+                            {
+                                playerClass3.GetComponent<SpriteRenderer>().sortingOrder = 3;
+                                playerClass3.transform.position = enemyThreePos.transform.position + offset;
+                                Instantiate(effect[2], enemyThreePos);
+                            }
+                            else
+                            {
+                                Instantiate(effect[0], enemyThreePos);
+                            }
+                            enemyHud3.SetHp(enemyClass3.currentHp);
+                            enemyHud3.SetSp(enemyClass3.currentSp);
+                            if (isDeadE3)
+                            {
+                                dialogueText.text = enemyClass3.name + " nie ¿yje";
+                                enemyHud3.gameObject.SetActive(false);
+                                //destroy prefab enemy
+                                EnemyTeam[2] = null;
+                                Destroy(enemyClass3.gameObject);
+                                e3 = 3;
+                            }
+                            else
+                            {
+                                dialogueText.text = "Atak siê uda³.";
+                            }
+                            disableColors();
+                            yield return new WaitForSeconds(2f);
+                            team.allCharacters[2].transform.position = playerThreePos.position;
+                            playerClass3.GetComponent<SpriteRenderer>().sortingOrder = 2;
+                            if (win == true)
+                            {
+                                state = BattleState.won;
+                                EndBattle();
+                            }
+                            else
+                            {
+                                state = BattleState.enemyTurn;
+                                StartCoroutine(EnemyTour());
+                            }
+                            break;
+                        case 4:
+                            bool isDeadE4 = enemyClass4.TakeDamage(playerClass3.damage);
+                            if (playerClass3.classChar != CharClass.mage)
+                            {
+                                playerClass3.GetComponent<SpriteRenderer>().sortingOrder = 3;
+                                playerClass3.transform.position = enemyFourPos.transform.position + offset;
+                                Instantiate(effect[2], enemyFourPos);
+                            }
+                            else
+                            {
+                                Instantiate(effect[0], enemyFourPos);
+                            }
+                            enemyHud4.SetHp(enemyClass4.currentHp);
+                            enemyHud4.SetSp(enemyClass4.currentSp);
+                            if (isDeadE4)
+                            {
+                                dialogueText.text = enemyClass4.name + " nie ¿yje";
+                                enemyHud4.gameObject.SetActive(false);
+                                //destroy prefab enemy
+                                EnemyTeam[3] = null;
+                                Destroy(enemyClass4.gameObject);
+                                e4 = 4;
+                            }
+                            else
+                            {
+                                dialogueText.text = "Atak siê uda³.";
+                            }
+                            disableColors();
+                            yield return new WaitForSeconds(2f);
+                            team.allCharacters[2].transform.position = playerThreePos.position;
+                            playerClass3.GetComponent<SpriteRenderer>().sortingOrder = 2;
+                            if (win == true)
+                            {
+                                state = BattleState.won;
+                                EndBattle();
+                            }
+                            else
+                            {
+                                state = BattleState.enemyTurn;
+                                StartCoroutine(EnemyTour());
+                            }
+                            break;
+                    }
+                    break;
+                case 4:
+                    playerClass4.AttackCo();
+                    switch (turnE)
+                    {
+                        case 1:
+                            bool isDeadE1 = enemyClass.TakeDamage(playerClass4.damage);
+                            if (playerClass4.classChar != CharClass.mage)
+                            {
+                                playerClass4.GetComponent<SpriteRenderer>().sortingOrder = 3;
+                                playerClass4.transform.position = enemyFirstPos.transform.position + offset;
+                                Instantiate(effect[1], enemyFirstPos);
+                            }
+                            else
+                            {
+                                Instantiate(effect[0], enemyFirstPos);
+                            }
+                            enemyHud.SetHp(enemyClass.currentHp);
+                            enemyHud.SetSp(enemyClass.currentSp);
+                            if (isDeadE1)
+                            {
+                                dialogueText.text = enemyClass.name + " nie ¿yje";
+                                enemyHud.gameObject.SetActive(false);
+                                //destroy prefab enemy
+                                EnemyTeam[0] = null;
+                                Destroy(enemyClass.gameObject);
+                                e1 = 1;
+                            }
+                            else
+                            {
+                                dialogueText.text = "Atak siê uda³.";
+                            }
+                            disableColors();
+                            yield return new WaitForSeconds(2f);
+                            team.allCharacters[3].transform.position = playerFourPos.position;
+                            playerClass4.GetComponent<SpriteRenderer>().sortingOrder = 2;
+                            if (win == true)
+                            {
+                                state = BattleState.won;
+                                EndBattle();
+                            }
+                            else
+                            {
+                                state = BattleState.enemyTurn;
+                                StartCoroutine(EnemyTour());
+                            }
+                            break;
+                        case 2:
+                            bool isDeadE2 = enemyClass2.TakeDamage(playerClass4.damage);
+                            if (playerClass4.classChar != CharClass.mage)
+                            {
+                                playerClass4.GetComponent<SpriteRenderer>().sortingOrder = 3;
+                                playerClass4.transform.position = enemyTwoPos.transform.position + offset;
+                                Instantiate(effect[2], enemyTwoPos);
+                            }
+                            else
+                            {
+                                Instantiate(effect[0], enemyTwoPos);
+                            }
+                            enemyHud2.SetHp(enemyClass2.currentHp);
+                            enemyHud2.SetSp(enemyClass2.currentSp);
+                            if (isDeadE2)
+                            {
+                                dialogueText.text = enemyClass2.name + " nie ¿yje";
+                                enemyHud2.gameObject.SetActive(false);
+                                //destroy prefab enemy
+                                EnemyTeam[1] = null;
+                                Destroy(enemyClass2.gameObject);
+                                e2 = 2;
+                            }
+                            else
+                            {
+                                dialogueText.text = "Atak siê uda³.";
+                            }
+                            disableColors();
+                            yield return new WaitForSeconds(2f);
+                            team.allCharacters[3].transform.position = playerFourPos.position;
+                            playerClass4.GetComponent<SpriteRenderer>().sortingOrder = 2;
+                            if (win == true)
+                            {
+                                state = BattleState.won;
+                                EndBattle();
+                            }
+                            else
+                            {
+                                state = BattleState.enemyTurn;
+                                StartCoroutine(EnemyTour());
+                            }
+                            break;
+                        case 3:
+                            bool isDeadE3 = enemyClass3.TakeDamage(playerClass4.damage);
+                            if (playerClass4.classChar != CharClass.mage)
+                            {
+                                playerClass4.GetComponent<SpriteRenderer>().sortingOrder = 3;
+                                playerClass4.transform.position = enemyThreePos.transform.position + offset;
+                                Instantiate(effect[2], enemyThreePos);
+                            }
+                            else
+                            {
+                                Instantiate(effect[0], enemyThreePos);
+                            }
+                            enemyHud3.SetHp(enemyClass3.currentHp);
+                            enemyHud3.SetSp(enemyClass3.currentSp);
+                            if (isDeadE3)
+                            {
+                                dialogueText.text = enemyClass3.name + " nie ¿yje";
+                                enemyHud3.gameObject.SetActive(false);
+                                //destroy prefab enemy
+                                EnemyTeam[2] = null;
+                                Destroy(enemyClass3.gameObject);
+                                e3 = 3;
+                            }
+                            else
+                            {
+                                dialogueText.text = "Atak siê uda³.";
+                            }
+                            disableColors();
+                            yield return new WaitForSeconds(2f);
+                            team.allCharacters[3].transform.position = playerFourPos.position;
+                            playerClass4.GetComponent<SpriteRenderer>().sortingOrder = 2;
+                            if (win == true)
+                            {
+                                state = BattleState.won;
+                                EndBattle();
+                            }
+                            else
+                            {
+                                state = BattleState.enemyTurn;
+                                StartCoroutine(EnemyTour());
+                            }
+                            break;
+                        case 4:
+                            bool isDeadE4 = enemyClass4.TakeDamage(playerClass4.damage);
+                            if (playerClass4.classChar != CharClass.mage)
+                            {
+                                playerClass4.GetComponent<SpriteRenderer>().sortingOrder = 3;
+                                playerClass4.transform.position = enemyFourPos.transform.position + offset;
+                                Instantiate(effect[2], enemyFourPos);
+                            }
+                            else
+                            {
+                                Instantiate(effect[0], enemyFourPos);
+                            }
+                            enemyHud4.SetHp(enemyClass4.currentHp);
+                            enemyHud4.SetSp(enemyClass4.currentSp);
+                            if (isDeadE4)
+                            {
+                                dialogueText.text = enemyClass4.name + " nie ¿yje";
+                                enemyHud4.gameObject.SetActive(false);
+                                //destroy prefab enemy
+                                EnemyTeam[3] = null;
+                                Destroy(enemyClass4.gameObject);
+                                e4 = 4;
+                            }
+                            else
+                            {
+                                dialogueText.text = "Atak siê uda³.";
+                            }
+                            disableColors();
+                            yield return new WaitForSeconds(2f);
+                            team.allCharacters[3].transform.position = playerFourPos.position;
+                            playerClass4.GetComponent<SpriteRenderer>().sortingOrder = 2;
+                            if (win == true)
                             {
                                 state = BattleState.won;
                                 EndBattle();
@@ -522,11 +1142,26 @@ namespace BattleSystem
                     break;
             }
         }
+        public void ChangeEnemy()
+        {
+            foreach (GameObject element in EnemyTeam)
+            {
+                if (turnE > enemyNum)
+                {
+                    turnE = 1;
+                }
+                if (turnE == e1 || turnE == e2 || turnE == e3 || turnE == e4)
+                {
+                    turnE++;
+                }
+            }
+        }
         public IEnumerator EnemyTour()
         {
-            enemyNum = Random.Range(1, 3);
+            ChangeEnemy();
             playersNum = Random.Range(1, 3);
-            switch (enemyNum)
+
+            switch (turnE)
             {
                 case 1:
                     enemyClass.AttackCo();
@@ -580,6 +1215,64 @@ namespace BattleSystem
                             EnemyTeam[0].transform.position = enemyFirstPos.position;
                             enemyClass.GetComponent<SpriteRenderer>().sortingOrder = 2;
                             if (isDeadP2)
+                            {
+                                state = BattleState.lost;
+                                EndBattle();
+                            }
+                            else
+                            {
+                                state = BattleState.playerTurn;
+                                PlayerTurn();
+                            }
+                            break;
+                        case 3:
+                            bool isDeadP3 = playerClass3.TakeDamage(enemyClass.damage);
+                            if (enemyClass.classChar != CharClass.mage)
+                            {
+                                enemyClass.GetComponent<SpriteRenderer>().sortingOrder = 3;
+                                enemyClass.transform.position = playerThreePos.transform.position + offsetE;
+                                Instantiate(effect[1], playerThreePos);
+                            }
+                            else
+                            {
+                                Instantiate(effect[0], playerThreePos);
+                            }
+                            playerHud3.SetHp(playerClass3.currentHp);
+                            playerHud3.SetSp(playerClass3.currentSp);
+                            dialogueText.text = enemyClass.nameP + " atakuje..";
+                            yield return new WaitForSeconds(1f);
+                            EnemyTeam[0].transform.position = enemyFirstPos.position;
+                            enemyClass.GetComponent<SpriteRenderer>().sortingOrder = 2;
+                            if (isDeadP3)
+                            {
+                                state = BattleState.lost;
+                                EndBattle();
+                            }
+                            else
+                            {
+                                state = BattleState.playerTurn;
+                                PlayerTurn();
+                            }
+                            break;
+                        case 4:
+                            bool isDeadP4 = playerClass4.TakeDamage(enemyClass.damage);
+                            if (enemyClass.classChar != CharClass.mage)
+                            {
+                                enemyClass.GetComponent<SpriteRenderer>().sortingOrder = 3;
+                                enemyClass.transform.position = playerFourPos.transform.position + offsetE;
+                                Instantiate(effect[1], playerFourPos);
+                            }
+                            else
+                            {
+                                Instantiate(effect[0], playerFourPos);
+                            }
+                            playerHud4.SetHp(playerClass4.currentHp);
+                            playerHud4.SetSp(playerClass4.currentSp);
+                            dialogueText.text = enemyClass.nameP + " atakuje..";
+                            yield return new WaitForSeconds(1f);
+                            EnemyTeam[0].transform.position = enemyFirstPos.position;
+                            enemyClass.GetComponent<SpriteRenderer>().sortingOrder = 2;
+                            if (isDeadP4)
                             {
                                 state = BattleState.lost;
                                 EndBattle();
@@ -644,6 +1337,308 @@ namespace BattleSystem
                             EnemyTeam[1].transform.position = enemyTwoPos.position;
                             enemyClass2.GetComponent<SpriteRenderer>().sortingOrder = 2;
                             if (isDeadP2)
+                            {
+                                state = BattleState.lost;
+                                EndBattle();
+                            }
+                            else
+                            {
+                                state = BattleState.playerTurn;
+                                PlayerTurn();
+                            }
+                            break;
+                        case 3:
+                            bool isDeadP3 = playerClass3.TakeDamage(enemyClass2.damage);
+                            if (enemyClass2.classChar != CharClass.mage)
+                            {
+                                enemyClass2.GetComponent<SpriteRenderer>().sortingOrder = 3;
+                                enemyClass2.transform.position = playerThreePos.transform.position + offsetE;
+                                Instantiate(effect[1], playerThreePos);
+                            }
+                            else
+                            {
+                                Instantiate(effect[0], playerThreePos);
+                            }
+                            playerHud3.SetHp(playerClass3.currentHp);
+                            playerHud3.SetSp(playerClass3.currentSp);
+                            dialogueText.text = enemyClass2.nameP + " atakuje..";
+                            yield return new WaitForSeconds(1f);
+                            EnemyTeam[1].transform.position = enemyTwoPos.position;
+                            enemyClass2.GetComponent<SpriteRenderer>().sortingOrder = 2;
+                            if (isDeadP3)
+                            {
+                                state = BattleState.lost;
+                                EndBattle();
+                            }
+                            else
+                            {
+                                state = BattleState.playerTurn;
+                                PlayerTurn();
+                            }
+                            break;
+                        case 4:
+                            bool isDeadP4 = playerClass4.TakeDamage(enemyClass2.damage);
+                            if (enemyClass2.classChar != CharClass.mage)
+                            {
+                                enemyClass2.GetComponent<SpriteRenderer>().sortingOrder = 3;
+                                enemyClass2.transform.position = playerFourPos.transform.position + offsetE;
+                                Instantiate(effect[1], playerFourPos);
+                            }
+                            else
+                            {
+                                Instantiate(effect[0], playerFourPos);
+                            }
+                            playerHud4.SetHp(playerClass4.currentHp);
+                            playerHud4.SetSp(playerClass4.currentSp);
+                            dialogueText.text = enemyClass2.nameP + " atakuje..";
+                            yield return new WaitForSeconds(1f);
+                            EnemyTeam[1].transform.position = enemyTwoPos.position;
+                            enemyClass2.GetComponent<SpriteRenderer>().sortingOrder = 2;
+                            if (isDeadP4)
+                            {
+                                state = BattleState.lost;
+                                EndBattle();
+                            }
+                            else
+                            {
+                                state = BattleState.playerTurn;
+                                PlayerTurn();
+                            }
+                            break;
+                    }
+                    break;
+                case 3:
+                    enemyClass3.AttackCo();
+                    switch (playersNum)
+                    {
+                        case 1:
+                            bool isDeadP1 = playerClass.TakeDamage(enemyClass3.damage);
+                            if (enemyClass3.classChar != CharClass.mage)
+                            {
+                                enemyClass3.GetComponent<SpriteRenderer>().sortingOrder = 3;
+                                enemyClass3.transform.position = playerFirstPos.transform.position + offsetE;
+                                Instantiate(effect[1], playerFirstPos);
+                            }
+                            else
+                            {
+                                Instantiate(effect[0], playerFirstPos);
+                            }
+                            playerHud.SetHp(playerClass.currentHp);
+                            playerHud.SetSp(playerClass.currentSp);
+                            dialogueText.text = enemyClass3.nameP + " atakuje..";
+                            yield return new WaitForSeconds(1f);
+                            EnemyTeam[2].transform.position = enemyThreePos.position;
+                            enemyClass3.GetComponent<SpriteRenderer>().sortingOrder = 2;
+                            if (isDeadP1)
+                            {
+                                state = BattleState.lost;
+                                EndBattle();
+                            }
+                            else
+                            {
+                                state = BattleState.playerTurn;
+                                PlayerTurn();
+                            }
+                            break;
+                        case 2:
+                            bool isDeadP2 = playerClass2.TakeDamage(enemyClass3.damage);
+                            if (enemyClass3.classChar != CharClass.mage)
+                            {
+                                enemyClass3.GetComponent<SpriteRenderer>().sortingOrder = 3;
+                                enemyClass3.transform.position = playerTwoPos.transform.position + offsetE;
+                                Instantiate(effect[1], playerTwoPos);
+                            }
+                            else
+                            {
+                                Instantiate(effect[0], playerTwoPos);
+                            }
+                            playerHud2.SetHp(playerClass2.currentHp);
+                            playerHud2.SetSp(playerClass2.currentSp);
+                            dialogueText.text = enemyClass3.nameP + " atakuje..";
+                            yield return new WaitForSeconds(1f);
+                            EnemyTeam[2].transform.position = enemyThreePos.position;
+                            enemyClass3.GetComponent<SpriteRenderer>().sortingOrder = 2;
+                            if (isDeadP2)
+                            {
+                                state = BattleState.lost;
+                                EndBattle();
+                            }
+                            else
+                            {
+                                state = BattleState.playerTurn;
+                                PlayerTurn();
+                            }
+                            break;
+                        case 3:
+                            bool isDeadP3 = playerClass3.TakeDamage(enemyClass3.damage);
+                            if (enemyClass3.classChar != CharClass.mage)
+                            {
+                                enemyClass3.GetComponent<SpriteRenderer>().sortingOrder = 3;
+                                enemyClass3.transform.position = playerThreePos.transform.position + offsetE;
+                                Instantiate(effect[1], playerThreePos);
+                            }
+                            else
+                            {
+                                Instantiate(effect[0], playerThreePos);
+                            }
+                            playerHud3.SetHp(playerClass3.currentHp);
+                            playerHud3.SetSp(playerClass3.currentSp);
+                            dialogueText.text = enemyClass3.nameP + " atakuje..";
+                            yield return new WaitForSeconds(1f);
+                            EnemyTeam[2].transform.position = enemyThreePos.position;
+                            enemyClass3.GetComponent<SpriteRenderer>().sortingOrder = 2;
+                            if (isDeadP3)
+                            {
+                                state = BattleState.lost;
+                                EndBattle();
+                            }
+                            else
+                            {
+                                state = BattleState.playerTurn;
+                                PlayerTurn();
+                            }
+                            break;
+                        case 4:
+                            bool isDeadP4 = playerClass4.TakeDamage(enemyClass3.damage);
+                            if (enemyClass3.classChar != CharClass.mage)
+                            {
+                                enemyClass3.GetComponent<SpriteRenderer>().sortingOrder = 3;
+                                enemyClass3.transform.position = playerFourPos.transform.position + offsetE;
+                                Instantiate(effect[1], playerFourPos);
+                            }
+                            else
+                            {
+                                Instantiate(effect[0], playerFourPos);
+                            }
+                            playerHud4.SetHp(playerClass4.currentHp);
+                            playerHud4.SetSp(playerClass4.currentSp);
+                            dialogueText.text = enemyClass3.nameP + " atakuje..";
+                            yield return new WaitForSeconds(1f);
+                            EnemyTeam[2].transform.position = enemyThreePos.position;
+                            enemyClass3.GetComponent<SpriteRenderer>().sortingOrder = 2;
+                            if (isDeadP4)
+                            {
+                                state = BattleState.lost;
+                                EndBattle();
+                            }
+                            else
+                            {
+                                state = BattleState.playerTurn;
+                                PlayerTurn();
+                            }
+                            break;
+                    }
+                    break;
+                case 4:
+                    enemyClass4.AttackCo();
+                    switch (playersNum)
+                    {
+                        case 1:
+                            bool isDeadP1 = playerClass.TakeDamage(enemyClass4.damage);
+                            if (enemyClass4.classChar != CharClass.mage)
+                            {
+                                enemyClass4.GetComponent<SpriteRenderer>().sortingOrder = 3;
+                                enemyClass4.transform.position = playerFirstPos.transform.position + offsetE;
+                                Instantiate(effect[1], playerFirstPos);
+                            }
+                            else
+                            {
+                                Instantiate(effect[0], playerFirstPos);
+                            }
+                            playerHud.SetHp(playerClass.currentHp);
+                            playerHud.SetSp(playerClass.currentSp);
+                            dialogueText.text = enemyClass4.nameP + " atakuje..";
+                            yield return new WaitForSeconds(1f);
+                            EnemyTeam[3].transform.position = enemyFourPos.position;
+                            enemyClass4.GetComponent<SpriteRenderer>().sortingOrder = 2;
+                            if (isDeadP1)
+                            {
+                                state = BattleState.lost;
+                                EndBattle();
+                            }
+                            else
+                            {
+                                state = BattleState.playerTurn;
+                                PlayerTurn();
+                            }
+                            break;
+                        case 2:
+                            bool isDeadP2 = playerClass2.TakeDamage(enemyClass4.damage);
+                            if (enemyClass4.classChar != CharClass.mage)
+                            {
+                                enemyClass4.GetComponent<SpriteRenderer>().sortingOrder = 3;
+                                enemyClass4.transform.position = playerTwoPos.transform.position + offsetE;
+                                Instantiate(effect[1], playerTwoPos);
+                            }
+                            else
+                            {
+                                Instantiate(effect[0], playerTwoPos);
+                            }
+                            playerHud2.SetHp(playerClass2.currentHp);
+                            playerHud2.SetSp(playerClass2.currentSp);
+                            dialogueText.text = enemyClass4.nameP + " atakuje..";
+                            yield return new WaitForSeconds(1f);
+                            EnemyTeam[3].transform.position = enemyFourPos.position;
+                            enemyClass4.GetComponent<SpriteRenderer>().sortingOrder = 2;
+                            if (isDeadP2)
+                            {
+                                state = BattleState.lost;
+                                EndBattle();
+                            }
+                            else
+                            {
+                                state = BattleState.playerTurn;
+                                PlayerTurn();
+                            }
+                            break;
+                        case 3:
+                            bool isDeadP3 = playerClass3.TakeDamage(enemyClass4.damage);
+                            if (enemyClass4.classChar != CharClass.mage)
+                            {
+                                enemyClass4.GetComponent<SpriteRenderer>().sortingOrder = 3;
+                                enemyClass4.transform.position = playerThreePos.transform.position + offsetE;
+                                Instantiate(effect[1], playerThreePos);
+                            }
+                            else
+                            {
+                                Instantiate(effect[0], playerThreePos);
+                            }
+                            playerHud3.SetHp(playerClass3.currentHp);
+                            playerHud3.SetSp(playerClass3.currentSp);
+                            dialogueText.text = enemyClass4.nameP + " atakuje..";
+                            yield return new WaitForSeconds(1f);
+                            EnemyTeam[3].transform.position = enemyFourPos.position;
+                            enemyClass4.GetComponent<SpriteRenderer>().sortingOrder = 2;
+                            if (isDeadP3)
+                            {
+                                state = BattleState.lost;
+                                EndBattle();
+                            }
+                            else
+                            {
+                                state = BattleState.playerTurn;
+                                PlayerTurn();
+                            }
+                            break;
+                        case 4:
+                            bool isDeadP4 = playerClass4.TakeDamage(enemyClass4.damage);
+                            if (enemyClass4.classChar != CharClass.mage)
+                            {
+                                enemyClass4.GetComponent<SpriteRenderer>().sortingOrder = 3;
+                                enemyClass4.transform.position = playerFourPos.transform.position + offsetE;
+                                Instantiate(effect[1], playerFourPos);
+                            }
+                            else
+                            {
+                                Instantiate(effect[0], playerFourPos);
+                            }
+                            playerHud4.SetHp(playerClass4.currentHp);
+                            playerHud4.SetSp(playerClass4.currentSp);
+                            dialogueText.text = enemyClass4.nameP + " atakuje..";
+                            yield return new WaitForSeconds(1f);
+                            EnemyTeam[3].transform.position = enemyFourPos.position;
+                            enemyClass4.GetComponent<SpriteRenderer>().sortingOrder = 2;
+                            if (isDeadP4)
                             {
                                 state = BattleState.lost;
                                 EndBattle();

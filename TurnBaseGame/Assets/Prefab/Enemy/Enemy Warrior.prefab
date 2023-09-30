@@ -2468,7 +2468,7 @@ Transform:
   m_GameObject: {fileID: 9035452152017455905}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -1.2760217, y: -2.56, z: 0}
   m_LocalScale: {x: -1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2583,6 +2583,7 @@ MonoBehaviour:
   skills:
   - {fileID: 7934975888365136148}
   - {fileID: 5243634693782959452}
+  teamPref: {fileID: 0}
 --- !u!82 &2451933207250495061
 AudioSource:
   m_ObjectHideFlags: 0
