@@ -65,6 +65,7 @@ namespace BattleSystem
             StartCoroutine(czekajNaHita());
             if (currentHp <= 0)
             {
+                anim.SetBool("ded", true);
                 return true;
             }
             else
