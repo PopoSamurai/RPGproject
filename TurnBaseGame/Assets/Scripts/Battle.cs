@@ -64,8 +64,10 @@ namespace BattleSystem
         public int turnP = 0;
         public int turnE = 0;
         bool win = false;
+        bool ded = false;
         //dedFix
         int e1, e2, e3, e4;
+        int p1, p2, p3, p4;
         void Start()
         {
             e1 = 0;
@@ -91,6 +93,14 @@ namespace BattleSystem
                 if (EnemyTeam[0] == null && EnemyTeam[1] == null && EnemyTeam[2] == null && EnemyTeam[3] == null)
                 {
                     win = true;
+                }
+            }
+
+            foreach (GameObject element in team.allCharacters)
+            {
+                if (team.allCharacters[0] == null && team.allCharacters[1] == null && team.allCharacters[2] == null && team.allCharacters[3] == null)
+                {
+                    ded = true;
                 }
             }
         }
@@ -242,18 +252,25 @@ namespace BattleSystem
             state = BattleState.playerTurn;
             PlayerTurn();
         }
+        public void ChangePlayer()
+        {
+            foreach (GameObject element in team.allCharacters)
+            {
+                if (turnP > playersNum)
+                {
+                    turnP = 1;
+                }
+                if (turnP == p1 || turnP == p2 || turnP == p3 || turnP == p4)
+                {
+                    turnP++;
+                }
+            }
+        }
         public void PlayerTurn()
         {
             dialogueText.text = "Twoja tura: ";
             //playersNum = Random.Range(1,3);
-            if(turnP >= playersNum)
-            {
-                turnP = 1;
-            }
-            else
-            {
-                turnP++;
-            }
+            ChangePlayer();
             //automatyczny target
             if (e1 == 0)
             {
@@ -463,7 +480,7 @@ namespace BattleSystem
                                 enemyHud.gameObject.SetActive(false);
                                 //destroy prefab enemy
                                 EnemyTeam[0] = null;
-                                Destroy(enemyClass.gameObject);
+                                //Destroy(enemyClass.gameObject);
                                 e1 = 1;
                             }
                             else
@@ -505,7 +522,6 @@ namespace BattleSystem
                                 enemyHud2.gameObject.SetActive(false);
                                 //destroy prefab enemy
                                 EnemyTeam[1] = null;
-                                Destroy(enemyClass2.gameObject);
                                 e2 = 2;
                             }
                             else
@@ -548,7 +564,6 @@ namespace BattleSystem
                                 //destroy prefab enemy
                                 //destroy prefab enemy
                                 EnemyTeam[2] = null;
-                                Destroy(enemyClass3.gameObject);
                                 e3 = 3;
                             }
                             else
@@ -591,7 +606,6 @@ namespace BattleSystem
                                 //destroy prefab enemy
                                 //destroy prefab enemy
                                 EnemyTeam[3] = null;
-                                Destroy(enemyClass4.gameObject);
                                 e4 = 4;
                             }
                             else
@@ -639,7 +653,6 @@ namespace BattleSystem
                                 enemyHud.gameObject.SetActive(false);
                                 //destroy prefab enemy
                                 EnemyTeam[0] = null;
-                                Destroy(enemyClass.gameObject);
                                 e1 = 1;
                             }
                             else
@@ -682,7 +695,6 @@ namespace BattleSystem
                                 //destroy prefab enemy
                                 //destroy prefab enemy
                                 EnemyTeam[1] = null;
-                                Destroy(enemyClass2.gameObject);
                                 e2 = 2;
                             }
                             else
@@ -725,7 +737,6 @@ namespace BattleSystem
                                 //destroy prefab enemy
                                 //destroy prefab enemy
                                 EnemyTeam[2] = null;
-                                Destroy(enemyClass3.gameObject);
                                 e3 = 3;
                             }
                             else
@@ -768,7 +779,6 @@ namespace BattleSystem
                                 //destroy prefab enemy
                                 //destroy prefab enemy
                                 EnemyTeam[3] = null;
-                                Destroy(enemyClass4.gameObject);
                                 e4 = 4;
                             }
                             else
@@ -816,7 +826,6 @@ namespace BattleSystem
                                 enemyHud.gameObject.SetActive(false);
                                 //destroy prefab enemy
                                 EnemyTeam[0] = null;
-                                Destroy(enemyClass.gameObject);
                                 e1 = 1;
                             }
                             else
@@ -858,7 +867,6 @@ namespace BattleSystem
                                 enemyHud2.gameObject.SetActive(false);
                                 //destroy prefab enemy
                                 EnemyTeam[1] = null;
-                                Destroy(enemyClass2.gameObject);
                                 e2 = 2;
                             }
                             else
@@ -900,7 +908,6 @@ namespace BattleSystem
                                 enemyHud3.gameObject.SetActive(false);
                                 //destroy prefab enemy
                                 EnemyTeam[2] = null;
-                                Destroy(enemyClass3.gameObject);
                                 e3 = 3;
                             }
                             else
@@ -942,7 +949,6 @@ namespace BattleSystem
                                 enemyHud4.gameObject.SetActive(false);
                                 //destroy prefab enemy
                                 EnemyTeam[3] = null;
-                                Destroy(enemyClass4.gameObject);
                                 e4 = 4;
                             }
                             else
@@ -990,7 +996,6 @@ namespace BattleSystem
                                 enemyHud.gameObject.SetActive(false);
                                 //destroy prefab enemy
                                 EnemyTeam[0] = null;
-                                Destroy(enemyClass.gameObject);
                                 e1 = 1;
                             }
                             else
@@ -1032,7 +1037,6 @@ namespace BattleSystem
                                 enemyHud2.gameObject.SetActive(false);
                                 //destroy prefab enemy
                                 EnemyTeam[1] = null;
-                                Destroy(enemyClass2.gameObject);
                                 e2 = 2;
                             }
                             else
@@ -1074,7 +1078,6 @@ namespace BattleSystem
                                 enemyHud3.gameObject.SetActive(false);
                                 //destroy prefab enemy
                                 EnemyTeam[2] = null;
-                                Destroy(enemyClass3.gameObject);
                                 e3 = 3;
                             }
                             else
@@ -1116,7 +1119,6 @@ namespace BattleSystem
                                 enemyHud4.gameObject.SetActive(false);
                                 //destroy prefab enemy
                                 EnemyTeam[3] = null;
-                                Destroy(enemyClass4.gameObject);
                                 e4 = 4;
                             }
                             else
@@ -1181,11 +1183,21 @@ namespace BattleSystem
                             }
                             playerHud.SetHp(playerClass.currentHp);
                             playerHud.SetSp(playerClass.currentSp);
-                            dialogueText.text = enemyClass.nameP + " atakuje..";
+                            if (isDeadP1)
+                            {
+                                dialogueText.text = playerClass.name + " nie 퓓je";
+                                playerHud.gameObject.SetActive(false);
+                                team.allCharacters[0] = null;
+                                p1 = 1;
+                            }
+                            else
+                            {
+                                dialogueText.text = enemyClass.nameP + " atakuje..";
+                            }
                             yield return new WaitForSeconds(1f);
                             EnemyTeam[0].transform.position = enemyFirstPos.position;
                             enemyClass.GetComponent<SpriteRenderer>().sortingOrder = 2;
-                            if (isDeadP1)
+                            if (ded == true)
                             {
                                 state = BattleState.lost;
                                 EndBattle();
@@ -1210,11 +1222,21 @@ namespace BattleSystem
                             }
                             playerHud2.SetHp(playerClass2.currentHp);
                             playerHud2.SetSp(playerClass2.currentSp);
-                            dialogueText.text = enemyClass.nameP + " atakuje..";
+                            if (isDeadP2)
+                            {
+                                dialogueText.text = playerClass2.name + " nie 퓓je";
+                                playerHud2.gameObject.SetActive(false);
+                                team.allCharacters[1] = null;
+                                p2 = 2;
+                            }
+                            else
+                            {
+                                dialogueText.text = enemyClass.nameP + " atakuje..";
+                            }
                             yield return new WaitForSeconds(1f);
                             EnemyTeam[0].transform.position = enemyFirstPos.position;
                             enemyClass.GetComponent<SpriteRenderer>().sortingOrder = 2;
-                            if (isDeadP2)
+                            if (ded == true)
                             {
                                 state = BattleState.lost;
                                 EndBattle();
@@ -1239,11 +1261,21 @@ namespace BattleSystem
                             }
                             playerHud3.SetHp(playerClass3.currentHp);
                             playerHud3.SetSp(playerClass3.currentSp);
-                            dialogueText.text = enemyClass.nameP + " atakuje..";
+                            if (isDeadP3)
+                            {
+                                dialogueText.text = playerClass3.name + " nie 퓓je";
+                                playerHud3.gameObject.SetActive(false);
+                                team.allCharacters[2] = null;
+                                p3 = 3;
+                            }
+                            else
+                            {
+                                dialogueText.text = enemyClass.nameP + " atakuje..";
+                            }
                             yield return new WaitForSeconds(1f);
                             EnemyTeam[0].transform.position = enemyFirstPos.position;
                             enemyClass.GetComponent<SpriteRenderer>().sortingOrder = 2;
-                            if (isDeadP3)
+                            if (ded == true)
                             {
                                 state = BattleState.lost;
                                 EndBattle();
@@ -1268,11 +1300,21 @@ namespace BattleSystem
                             }
                             playerHud4.SetHp(playerClass4.currentHp);
                             playerHud4.SetSp(playerClass4.currentSp);
-                            dialogueText.text = enemyClass.nameP + " atakuje..";
+                            if (isDeadP4)
+                            {
+                                dialogueText.text = playerClass4.name + " nie 퓓je";
+                                playerHud4.gameObject.SetActive(false);
+                                team.allCharacters[3] = null;
+                                p4 = 4;
+                            }
+                            else
+                            {
+                                dialogueText.text = enemyClass.nameP + " atakuje..";
+                            }
                             yield return new WaitForSeconds(1f);
                             EnemyTeam[0].transform.position = enemyFirstPos.position;
                             enemyClass.GetComponent<SpriteRenderer>().sortingOrder = 2;
-                            if (isDeadP4)
+                            if (ded == true)
                             {
                                 state = BattleState.lost;
                                 EndBattle();
@@ -1303,11 +1345,21 @@ namespace BattleSystem
                             }
                             playerHud.SetHp(playerClass.currentHp);
                             playerHud.SetSp(playerClass.currentSp);
-                            dialogueText.text = enemyClass2.nameP + " atakuje..";
+                            if (isDeadP1)
+                            {
+                                dialogueText.text = playerClass.name + " nie 퓓je";
+                                playerHud.gameObject.SetActive(false);
+                                team.allCharacters[0] = null;
+                                p1 = 1;
+                            }
+                            else
+                            {
+                                dialogueText.text = enemyClass2.nameP + " atakuje..";
+                            }
                             yield return new WaitForSeconds(1f);
                             EnemyTeam[1].transform.position = enemyTwoPos.position;
                             enemyClass2.GetComponent<SpriteRenderer>().sortingOrder = 2;
-                            if (isDeadP1)
+                            if (ded == true)
                             {
                                 state = BattleState.lost;
                                 EndBattle();
@@ -1332,11 +1384,21 @@ namespace BattleSystem
                             }
                             playerHud2.SetHp(playerClass2.currentHp);
                             playerHud2.SetSp(playerClass2.currentSp);
-                            dialogueText.text = enemyClass2.nameP + " atakuje..";
+                            if (isDeadP2)
+                            {
+                                dialogueText.text = playerClass2.name + " nie 퓓je";
+                                playerHud2.gameObject.SetActive(false);
+                                team.allCharacters[1] = null;
+                                p2 = 2;
+                            }
+                            else
+                            {
+                                dialogueText.text = enemyClass2.nameP + " atakuje..";
+                            }
                             yield return new WaitForSeconds(1f);
                             EnemyTeam[1].transform.position = enemyTwoPos.position;
                             enemyClass2.GetComponent<SpriteRenderer>().sortingOrder = 2;
-                            if (isDeadP2)
+                            if (ded == true)
                             {
                                 state = BattleState.lost;
                                 EndBattle();
@@ -1361,11 +1423,21 @@ namespace BattleSystem
                             }
                             playerHud3.SetHp(playerClass3.currentHp);
                             playerHud3.SetSp(playerClass3.currentSp);
-                            dialogueText.text = enemyClass2.nameP + " atakuje..";
+                            if (isDeadP3)
+                            {
+                                dialogueText.text = playerClass3.name + " nie 퓓je";
+                                playerHud3.gameObject.SetActive(false);
+                                team.allCharacters[2] = null;
+                                p3 = 3;
+                            }
+                            else
+                            {
+                                dialogueText.text = enemyClass2.nameP + " atakuje..";
+                            }
                             yield return new WaitForSeconds(1f);
                             EnemyTeam[1].transform.position = enemyTwoPos.position;
                             enemyClass2.GetComponent<SpriteRenderer>().sortingOrder = 2;
-                            if (isDeadP3)
+                            if (ded == true)
                             {
                                 state = BattleState.lost;
                                 EndBattle();
@@ -1390,11 +1462,21 @@ namespace BattleSystem
                             }
                             playerHud4.SetHp(playerClass4.currentHp);
                             playerHud4.SetSp(playerClass4.currentSp);
-                            dialogueText.text = enemyClass2.nameP + " atakuje..";
+                            if (isDeadP4)
+                            {
+                                dialogueText.text = playerClass4.name + " nie 퓓je";
+                                playerHud4.gameObject.SetActive(false);
+                                team.allCharacters[3] = null;
+                                p4 = 4;
+                            }
+                            else
+                            {
+                                dialogueText.text = enemyClass2.nameP + " atakuje..";
+                            }
                             yield return new WaitForSeconds(1f);
                             EnemyTeam[1].transform.position = enemyTwoPos.position;
                             enemyClass2.GetComponent<SpriteRenderer>().sortingOrder = 2;
-                            if (isDeadP4)
+                            if (ded == true)
                             {
                                 state = BattleState.lost;
                                 EndBattle();
@@ -1425,11 +1507,21 @@ namespace BattleSystem
                             }
                             playerHud.SetHp(playerClass.currentHp);
                             playerHud.SetSp(playerClass.currentSp);
-                            dialogueText.text = enemyClass3.nameP + " atakuje..";
+                            if (isDeadP1)
+                            {
+                                dialogueText.text = playerClass.name + " nie 퓓je";
+                                playerHud.gameObject.SetActive(false);
+                                team.allCharacters[0] = null;
+                                p1 = 1;
+                            }
+                            else
+                            {
+                                dialogueText.text = enemyClass3.nameP + " atakuje..";
+                            }
                             yield return new WaitForSeconds(1f);
                             EnemyTeam[2].transform.position = enemyThreePos.position;
                             enemyClass3.GetComponent<SpriteRenderer>().sortingOrder = 2;
-                            if (isDeadP1)
+                            if (ded == true)
                             {
                                 state = BattleState.lost;
                                 EndBattle();
@@ -1454,11 +1546,21 @@ namespace BattleSystem
                             }
                             playerHud2.SetHp(playerClass2.currentHp);
                             playerHud2.SetSp(playerClass2.currentSp);
-                            dialogueText.text = enemyClass3.nameP + " atakuje..";
+                            if (isDeadP2)
+                            {
+                                dialogueText.text = playerClass2.name + " nie 퓓je";
+                                playerHud2.gameObject.SetActive(false);
+                                team.allCharacters[1] = null;
+                                p2 = 2;
+                            }
+                            else
+                            {
+                                dialogueText.text = enemyClass3.nameP + " atakuje..";
+                            }
                             yield return new WaitForSeconds(1f);
                             EnemyTeam[2].transform.position = enemyThreePos.position;
                             enemyClass3.GetComponent<SpriteRenderer>().sortingOrder = 2;
-                            if (isDeadP2)
+                            if (ded == true)
                             {
                                 state = BattleState.lost;
                                 EndBattle();
@@ -1483,11 +1585,21 @@ namespace BattleSystem
                             }
                             playerHud3.SetHp(playerClass3.currentHp);
                             playerHud3.SetSp(playerClass3.currentSp);
-                            dialogueText.text = enemyClass3.nameP + " atakuje..";
+                            if (isDeadP3)
+                            {
+                                dialogueText.text = playerClass3.name + " nie 퓓je";
+                                playerHud3.gameObject.SetActive(false);
+                                team.allCharacters[2] = null;
+                                p3 = 3;
+                            }
+                            else
+                            {
+                                dialogueText.text = enemyClass3.nameP + " atakuje..";
+                            }
                             yield return new WaitForSeconds(1f);
                             EnemyTeam[2].transform.position = enemyThreePos.position;
                             enemyClass3.GetComponent<SpriteRenderer>().sortingOrder = 2;
-                            if (isDeadP3)
+                            if (ded == true)
                             {
                                 state = BattleState.lost;
                                 EndBattle();
@@ -1512,11 +1624,21 @@ namespace BattleSystem
                             }
                             playerHud4.SetHp(playerClass4.currentHp);
                             playerHud4.SetSp(playerClass4.currentSp);
-                            dialogueText.text = enemyClass3.nameP + " atakuje..";
+                            if (isDeadP4)
+                            {
+                                dialogueText.text = playerClass4.name + " nie 퓓je";
+                                playerHud4.gameObject.SetActive(false);
+                                team.allCharacters[3] = null;
+                                p4 = 4;
+                            }
+                            else
+                            {
+                                dialogueText.text = enemyClass3.nameP + " atakuje..";
+                            }
                             yield return new WaitForSeconds(1f);
                             EnemyTeam[2].transform.position = enemyThreePos.position;
                             enemyClass3.GetComponent<SpriteRenderer>().sortingOrder = 2;
-                            if (isDeadP4)
+                            if (ded == true)
                             {
                                 state = BattleState.lost;
                                 EndBattle();
@@ -1547,11 +1669,21 @@ namespace BattleSystem
                             }
                             playerHud.SetHp(playerClass.currentHp);
                             playerHud.SetSp(playerClass.currentSp);
-                            dialogueText.text = enemyClass4.nameP + " atakuje..";
+                            if (isDeadP1)
+                            {
+                                dialogueText.text = playerClass.name + " nie 퓓je";
+                                playerHud.gameObject.SetActive(false);
+                                team.allCharacters[0] = null;
+                                p1 = 1;
+                            }
+                            else
+                            {
+                                dialogueText.text = enemyClass4.nameP + " atakuje..";
+                            }
                             yield return new WaitForSeconds(1f);
                             EnemyTeam[3].transform.position = enemyFourPos.position;
                             enemyClass4.GetComponent<SpriteRenderer>().sortingOrder = 2;
-                            if (isDeadP1)
+                            if (ded == true)
                             {
                                 state = BattleState.lost;
                                 EndBattle();
@@ -1576,11 +1708,21 @@ namespace BattleSystem
                             }
                             playerHud2.SetHp(playerClass2.currentHp);
                             playerHud2.SetSp(playerClass2.currentSp);
-                            dialogueText.text = enemyClass4.nameP + " atakuje..";
+                            if (isDeadP2)
+                            {
+                                dialogueText.text = playerClass2.name + " nie 퓓je";
+                                playerHud2.gameObject.SetActive(false);
+                                team.allCharacters[1] = null;
+                                p2 = 2;
+                            }
+                            else
+                            {
+                                dialogueText.text = enemyClass4.nameP + " atakuje..";
+                            }
                             yield return new WaitForSeconds(1f);
                             EnemyTeam[3].transform.position = enemyFourPos.position;
                             enemyClass4.GetComponent<SpriteRenderer>().sortingOrder = 2;
-                            if (isDeadP2)
+                            if (ded == true)
                             {
                                 state = BattleState.lost;
                                 EndBattle();
@@ -1605,11 +1747,21 @@ namespace BattleSystem
                             }
                             playerHud3.SetHp(playerClass3.currentHp);
                             playerHud3.SetSp(playerClass3.currentSp);
-                            dialogueText.text = enemyClass4.nameP + " atakuje..";
+                            if (isDeadP3)
+                            {
+                                dialogueText.text = playerClass3.name + " nie 퓓je";
+                                playerHud3.gameObject.SetActive(false);
+                                team.allCharacters[2] = null;
+                                p3 = 3;
+                            }
+                            else
+                            {
+                                dialogueText.text = enemyClass4.nameP + " atakuje..";
+                            }
                             yield return new WaitForSeconds(1f);
                             EnemyTeam[3].transform.position = enemyFourPos.position;
                             enemyClass4.GetComponent<SpriteRenderer>().sortingOrder = 2;
-                            if (isDeadP3)
+                            if (ded == true)
                             {
                                 state = BattleState.lost;
                                 EndBattle();
@@ -1634,11 +1786,21 @@ namespace BattleSystem
                             }
                             playerHud4.SetHp(playerClass4.currentHp);
                             playerHud4.SetSp(playerClass4.currentSp);
-                            dialogueText.text = enemyClass4.nameP + " atakuje..";
+                            if (isDeadP4)
+                            {
+                                dialogueText.text = playerClass4.name + " nie 퓓je";
+                                playerHud4.gameObject.SetActive(false);
+                                team.allCharacters[3] = null;
+                                p4 = 4;
+                            }
+                            else
+                            {
+                                dialogueText.text = enemyClass4.nameP + " atakuje..";
+                            }
                             yield return new WaitForSeconds(1f);
                             EnemyTeam[3].transform.position = enemyFourPos.position;
                             enemyClass4.GetComponent<SpriteRenderer>().sortingOrder = 2;
-                            if (isDeadP4)
+                            if (ded == true)
                             {
                                 state = BattleState.lost;
                                 EndBattle();
