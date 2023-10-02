@@ -76,6 +76,10 @@ namespace BattleSystem
             e2 = 0;
             e3 = 0;
             e4 = 0;
+            p1 = 0;
+            p2 = 0;
+            p3 = 0;
+            p4 = 0;
             playersNum = team.playernum;
             enemyNum = enemyback.enemynum;
             EnemyTeam[0] = enemyback.GetComponent<Converter>().EnemyTeam[0];
@@ -274,7 +278,7 @@ namespace BattleSystem
         {
             foreach (GameObject element in team.allCharacters)
             {
-                if (turnP > playersNum)
+                if (turnP > team.playernum)
                 {
                     turnP = 1;
                 }
@@ -291,7 +295,7 @@ namespace BattleSystem
         public void PlayerTurn()
         {
             dialogueText.text = "Twoja tura: ";
-            //playersNum = Random.Range(1,3);
+            turnP += 1;
             ChangePlayer();
             //automatyczny target
             if (e1 == 0)
@@ -370,7 +374,7 @@ namespace BattleSystem
             }
             yield return new WaitForSeconds(1f);
 
-            switch (playersNum)
+            switch (turnP)
             {
                 case 1:
                     foreach (var obj in playerClass.skills)
@@ -393,7 +397,7 @@ namespace BattleSystem
             {
                 return;
             }
-            switch (playersNum)
+            switch (turnP)
             {
                 case 1:
                     if (playerClass.currentSp >= 10 && playerClass.currentHp < playerClass.health)
@@ -403,6 +407,7 @@ namespace BattleSystem
                     }
                     else
                     {
+                        dialogueText.text = "Nie jesteœ ranny";
                         emptymana.Play();
                         StartCoroutine(czekajNaCol2());
                     }
@@ -415,6 +420,7 @@ namespace BattleSystem
                     }
                     else
                     {
+                        dialogueText.text = "Nie jesteœ ranny";
                         emptymana.Play();
                         StartCoroutine(czekajNaCol2());
                     }
@@ -423,7 +429,7 @@ namespace BattleSystem
         }
         IEnumerator PlayerHeal()
         {
-            switch (playersNum)
+            switch (turnP)
             {
                 case 1:
                     playerClass.Heal(5, 10);

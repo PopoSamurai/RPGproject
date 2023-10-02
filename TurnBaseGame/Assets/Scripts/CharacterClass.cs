@@ -102,7 +102,6 @@ namespace BattleSystem
         {
             currentSp -= mana;
             currentHp += amount;
-            HealS.GetComponent<AudioSource>().Play();
             if (currentHp > health)
             {
                 currentHp = health;

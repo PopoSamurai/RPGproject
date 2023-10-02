@@ -30,7 +30,7 @@ namespace BattleSystem
             if (other.gameObject.tag == "Player")
             {
                 enemyback.Savepos = other.transform.position;
-                enemyback.spawnPoint = 2;
+                //enemyback.spawnPoint = 2;
                 enemyback.GetComponent<Converter>().EnemyTeam[0] = EnemyTeam[0];
                 enemyback.GetComponent<Converter>().EnemyTeam[1] = EnemyTeam[1];
                 enemyback.GetComponent<Converter>().EnemyTeam[2] = EnemyTeam[2];
