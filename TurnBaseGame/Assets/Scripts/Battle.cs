@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
 using static UnityEditor.Rendering.FilterWindow;
+using UnityEngine.SceneManagement;
 
 namespace BattleSystem
 {
@@ -68,6 +69,7 @@ namespace BattleSystem
         //dedFix
         int e1, e2, e3, e4;
         int p1, p2, p3, p4;
+   
         void Start()
         {
             e1 = 0;
@@ -93,6 +95,7 @@ namespace BattleSystem
                 if (EnemyTeam[0] == null && EnemyTeam[1] == null && EnemyTeam[2] == null && EnemyTeam[3] == null)
                 {
                     win = true;
+                    StartCoroutine(GoBack());
                 }
             }
 
@@ -101,8 +104,23 @@ namespace BattleSystem
                 if (team.allCharacters[0] == null && team.allCharacters[1] == null && team.allCharacters[2] == null && team.allCharacters[3] == null)
                 {
                     ded = true;
+                    StartCoroutine(DedScreen());
                 }
             }
+        }
+        IEnumerator GoBack()
+        {
+            win = false;
+            yield return new WaitForSeconds(3f);
+            enemyback.GetComponent<Converter>().spawnPoint = 2;
+            SceneManager.LoadScene("Cave");
+        }
+        IEnumerator DedScreen()
+        {
+            ded = false;
+            yield return new WaitForSeconds(3f);
+            enemyback.GetComponent<Converter>().spawnPoint = 1;
+            SceneManager.LoadScene("Village");
         }
         public void TeammateLoad()
         {
@@ -264,6 +282,10 @@ namespace BattleSystem
                 {
                     turnP++;
                 }
+                if (team.allCharacters[0] == null && team.allCharacters[1] == null && team.allCharacters[2] == null && team.allCharacters[3] == null)
+                {
+                    ded = true;
+                }
             }
         }
         public void PlayerTurn()
@@ -304,6 +326,20 @@ namespace BattleSystem
                         Instantiate(obj, GameObject.FindGameObjectWithTag("Canvas").transform);
                     }
                     playerHud2.color.SetActive(true);
+                    break;
+                case 3:
+                    foreach (var obj in playerClass3.skills)
+                    {
+                        Instantiate(obj, GameObject.FindGameObjectWithTag("Canvas").transform);
+                    }
+                    playerHud3.color.SetActive(true);
+                    break;
+                case 4:
+                    foreach (var obj in playerClass4.skills)
+                    {
+                        Instantiate(obj, GameObject.FindGameObjectWithTag("Canvas").transform);
+                    }
+                    playerHud4.color.SetActive(true);
                     break;
             }
         }
@@ -1156,6 +1192,10 @@ namespace BattleSystem
                 {
                     turnE++;
                 }
+                if (EnemyTeam[0] == null && EnemyTeam[1] == null && EnemyTeam[2] == null && EnemyTeam[3] == null)
+                {
+                    win = true;
+                }
             }
         }
         public IEnumerator EnemyTour()
@@ -1824,6 +1864,37 @@ namespace BattleSystem
                 {
                     GameObject.Destroy(child.gameObject);
                 }
+                switch (turnP)
+                {
+                    case 1:
+                        foreach (var obj in playerClass.skills)
+                        {
+                            Instantiate(obj, GameObject.FindGameObjectWithTag("Canvas").transform).SetActive(false);
+                        }
+                        playerHud.color.SetActive(true);
+                        break;
+                    case 2:
+                        foreach (var obj in playerClass2.skills)
+                        {
+                            Instantiate(obj, GameObject.FindGameObjectWithTag("Canvas").transform).SetActive(false);
+                        }
+                        playerHud2.color.SetActive(true);
+                        break;
+                    case 3:
+                        foreach (var obj in playerClass3.skills)
+                        {
+                            Instantiate(obj, GameObject.FindGameObjectWithTag("Canvas").transform).SetActive(false);
+                        }
+                        playerHud3.color.SetActive(true);
+                        break;
+                    case 4:
+                        foreach (var obj in playerClass4.skills)
+                        {
+                            Instantiate(obj, GameObject.FindGameObjectWithTag("Canvas").transform).SetActive(false);
+                        }
+                        playerHud4.color.SetActive(true);
+                        break;
+                }
             }
             else if(state == BattleState.lost)
             {
@@ -1831,6 +1902,37 @@ namespace BattleSystem
                 foreach (Transform child in GameObject.FindGameObjectWithTag("Canvas").transform)
                 {
                     GameObject.Destroy(child.gameObject);
+                }
+                switch (turnP)
+                {
+                    case 1:
+                        foreach (var obj in playerClass.skills)
+                        {
+                            Instantiate(obj, GameObject.FindGameObjectWithTag("Canvas").transform).SetActive(false);
+                        }
+                        playerHud.color.SetActive(true);
+                        break;
+                    case 2:
+                        foreach (var obj in playerClass2.skills)
+                        {
+                            Instantiate(obj, GameObject.FindGameObjectWithTag("Canvas").transform).SetActive(false);
+                        }
+                        playerHud2.color.SetActive(true);
+                        break;
+                    case 3:
+                        foreach (var obj in playerClass3.skills)
+                        {
+                            Instantiate(obj, GameObject.FindGameObjectWithTag("Canvas").transform).SetActive(false);
+                        }
+                        playerHud3.color.SetActive(true);
+                        break;
+                    case 4:
+                        foreach (var obj in playerClass4.skills)
+                        {
+                            Instantiate(obj, GameObject.FindGameObjectWithTag("Canvas").transform).SetActive(false);
+                        }
+                        playerHud4.color.SetActive(true);
+                        break;
                 }
             }
         }

@@ -7,6 +7,7 @@ public class Converter : MonoBehaviour
     public GameObject[] EnemyTeam;
     public int enemynum = 0;
     public int spawnPoint = 0;
+    public Vector3 Savepos;
     private void Start()
     {
         enemynum = 0;

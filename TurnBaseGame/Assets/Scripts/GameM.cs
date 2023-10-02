@@ -17,6 +17,7 @@ namespace BattleSystem
         private void Start()
         {
             player = GameObject.FindGameObjectWithTag("Player");
+
             switch (spawner.GetComponent<Converter>().spawnPoint)
             {
                 case 0:
@@ -25,6 +26,10 @@ namespace BattleSystem
                     break;
                 case 1:
                     startPos = spawn[1].position;
+                    player.transform.position = startPos;
+                    break;
+                case 2:
+                    spawner.Savepos = startPos;
                     player.transform.position = startPos;
                     break;
             }
