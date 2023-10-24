@@ -108,13 +108,15 @@ public class Movement : MonoBehaviour
         //odwrót
         if (facingRight && dir < 0 && isAttack == false || cursor.transform.position.x < this.transform.position.x && isAttack == true)
         {
-            CreateDust();
+            if (isGround)
+                CreateDust();
             transform.localScale = new Vector3(-1, 1, 1);
             facingRight = false;
         }
         else if (!facingRight && dir > 0 && isAttack == false || cursor.transform.position.x > this.transform.position.x && isAttack == true)
         {
-            CreateDust();
+            if (isGround)
+                CreateDust();
             transform.localScale = new Vector3(1, 1, 1);
             facingRight = true;
         }
@@ -132,6 +134,7 @@ public class Movement : MonoBehaviour
     {
         if (isGround)
         {
+            CreateDust();
             multipleJumps = true;
             availableJumps--;
 
