@@ -8,7 +8,6 @@ public class MapChange : MonoBehaviour
 {
     public Transform[] points;
     public Teammates team;
-
     void Start()
     {
         if (team.allCharacters[0] != null)

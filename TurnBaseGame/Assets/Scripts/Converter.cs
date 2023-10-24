@@ -2,18 +2,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Converter : MonoBehaviour
+namespace BattleSystem
 {
-    public GameObject[] EnemyTeam;
-    public int enemynum = 0;
-    public int spawnPoint = 0;
-    public Vector3 Savepos;
-    private void Start()
+    public class Converter : MonoBehaviour
     {
-        enemynum = 0;
-        Destroy(EnemyTeam[0]);
-        Destroy(EnemyTeam[1]);
-        Destroy(EnemyTeam[2]);
-        Destroy(EnemyTeam[3]);
+        public GameObject[] EnemyTeam;
+        public int enemynum = 0;
+        public int spawnPoint = 0;
+        private void Start()
+        {
+            enemynum = 0;
+            Destroy(EnemyTeam[0]);
+            Destroy(EnemyTeam[1]);
+            Destroy(EnemyTeam[2]);
+            Destroy(EnemyTeam[3]);
+        }
     }
 }

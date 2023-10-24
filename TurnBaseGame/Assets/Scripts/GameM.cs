@@ -14,6 +14,7 @@ namespace BattleSystem
         public Converter spawner;
         private GameObject player;
         public Vector3 startPos;
+        public SavePlayer save;
         private void Start()
         {
             player = GameObject.FindGameObjectWithTag("Player");
@@ -29,7 +30,7 @@ namespace BattleSystem
                     player.transform.position = startPos;
                     break;
                 case 2:
-                    spawner.Savepos = startPos;
+                    startPos = save.savePos;
                     player.transform.position = startPos;
                     break;
             }

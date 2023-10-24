@@ -6448,6 +6448,14 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 581768178852590446, guid: 0af07a7729d2b1e46abc7d792cf99774, type: 3}
+      propertyPath: save
+      value: 
+      objectReference: {fileID: 6000543177933860051, guid: ff2d4b0dae2f6b24090db67e097fc27f, type: 3}
+    - target: {fileID: 581768178852590446, guid: 0af07a7729d2b1e46abc7d792cf99774, type: 3}
+      propertyPath: spawn.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 581768178852590446, guid: 0af07a7729d2b1e46abc7d792cf99774, type: 3}
       propertyPath: spawn.Array.data[0]
       value: 
       objectReference: {fileID: 485127769}
@@ -6455,6 +6463,18 @@ PrefabInstance:
       propertyPath: spawn.Array.data[1]
       value: 
       objectReference: {fileID: 485127769}
+    - target: {fileID: 581768178852590446, guid: 0af07a7729d2b1e46abc7d792cf99774, type: 3}
+      propertyPath: spawn.Array.data[2]
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 581768178852590446, guid: 0af07a7729d2b1e46abc7d792cf99774, type: 3}
+      propertyPath: triggers1.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 581768178852590446, guid: 0af07a7729d2b1e46abc7d792cf99774, type: 3}
+      propertyPath: triggers1.Array.data[0]
+      value: 
+      objectReference: {fileID: 1439031590}
     - target: {fileID: 3095283754005440466, guid: 0af07a7729d2b1e46abc7d792cf99774, type: 3}
       propertyPath: m_Name
       value: GameManager
@@ -9846,7 +9866,7 @@ Transform:
   m_GameObject: {fileID: 485127768}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -30.868605, y: -1.3692676, z: -0.044023745}
+  m_LocalPosition: {x: -31.75, y: -0.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -17231,6 +17251,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1438427529}
   m_CullTransparentMesh: 1
+--- !u!1 &1439031590 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 400905036030015296, guid: 806082d08cdd1ba4e8e0b428bca73104, type: 3}
+  m_PrefabInstance: {fileID: 1563066153}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1454125699
 GameObject:
   m_ObjectHideFlags: 0
@@ -18040,21 +18065,29 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3777659463926067749, guid: 806082d08cdd1ba4e8e0b428bca73104, type: 3}
+      propertyPath: save
+      value: 
+      objectReference: {fileID: 6000543177933860051, guid: ff2d4b0dae2f6b24090db67e097fc27f, type: 3}
+    - target: {fileID: 3777659463926067749, guid: 806082d08cdd1ba4e8e0b428bca73104, type: 3}
       propertyPath: skip
       value: 
       objectReference: {fileID: 985541727}
     - target: {fileID: 3777659463926067749, guid: 806082d08cdd1ba4e8e0b428bca73104, type: 3}
+      propertyPath: Savepos
+      value: 
+      objectReference: {fileID: 6000543177933860051, guid: ff2d4b0dae2f6b24090db67e097fc27f, type: 3}
+    - target: {fileID: 3777659463926067749, guid: 806082d08cdd1ba4e8e0b428bca73104, type: 3}
       propertyPath: EnemyTeam.Array.data[0]
       value: 
-      objectReference: {fileID: 9128114971439193346, guid: ec034d52399ae3e48983e634baf185a4, type: 3}
+      objectReference: {fileID: 9035452152017455905, guid: db2e9f855ce55af4385dcf0b47e50e38, type: 3}
     - target: {fileID: 3777659463926067749, guid: 806082d08cdd1ba4e8e0b428bca73104, type: 3}
       propertyPath: EnemyTeam.Array.data[1]
       value: 
-      objectReference: {fileID: 9128114971439193346, guid: ec034d52399ae3e48983e634baf185a4, type: 3}
+      objectReference: {fileID: 0}
     - target: {fileID: 3777659463926067749, guid: 806082d08cdd1ba4e8e0b428bca73104, type: 3}
       propertyPath: EnemyTeam.Array.data[2]
       value: 
-      objectReference: {fileID: 9035452152017455905, guid: db2e9f855ce55af4385dcf0b47e50e38, type: 3}
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

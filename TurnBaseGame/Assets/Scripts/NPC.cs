@@ -6,7 +6,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace interactOn
+namespace BattleSystem
 {
     public enum InteractObject
     {

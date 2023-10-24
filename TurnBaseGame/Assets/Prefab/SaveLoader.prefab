@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &6540449432821045926
+--- !u!1 &7036773685594733397
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,46 +8,41 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 2315679987406011796}
-  - component: {fileID: 3492922390178424820}
+  - component: {fileID: 2588739166441450440}
+  - component: {fileID: 6000543177933860051}
   m_Layer: 0
-  m_Name: Converter
+  m_Name: SaveLoader
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &2315679987406011796
+--- !u!4 &2588739166441450440
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6540449432821045926}
+  m_GameObject: {fileID: 7036773685594733397}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.8673454, y: -2.4049335, z: 22.996075}
+  m_LocalPosition: {x: -30.195984, y: 0.47742087, z: 0.101285815}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3492922390178424820
+--- !u!114 &6000543177933860051
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6540449432821045926}
+  m_GameObject: {fileID: 7036773685594733397}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2a9051775481d8b4387046c1275c5b81, type: 3}
+  m_Script: {fileID: 11500000, guid: c0aa9964c3fcfa540afa923e983f18fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  EnemyTeam:
-  - {fileID: 9035452152017455905, guid: db2e9f855ce55af4385dcf0b47e50e38, type: 3}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  enemynum: 1
-  spawnPoint: 0
+  lasPos: {x: 0, y: 0, z: 0}
+  triggers1: []
