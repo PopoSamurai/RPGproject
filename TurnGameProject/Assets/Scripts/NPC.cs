@@ -1,8 +1,10 @@
 using BattleSystem;
+using interactOn;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -22,16 +24,17 @@ namespace BattleSystem
         //
         GameObject player;
         public bool set = false;
-        public CameraFollow cam;
-        public GameObject skip;
-        public Transform inhouse;
-        public Collider2D house;
         public GameObject dialogueWin;
+        public Text nameText;
         public Text dialogText;
         public GameObject upgradeWin;
         public int next = 0;
         public DialogueSystem dialogEvent;
         public int index;
+        public GameObject icons;
+
+        public GameObject[] transformPoints;
+        public GameObject todestroy;
         private void Start()
         {
             player = GameObject.FindGameObjectWithTag("Player");
@@ -45,7 +48,9 @@ namespace BattleSystem
             else
             {
                 dialogueWin.SetActive(false);
+                icons.SetActive(true);
                 upgradeWin.SetActive(true);
+                player.GetComponent<Movement>().move = false;
             }
         }
         private void Update()
@@ -55,7 +60,9 @@ namespace BattleSystem
                 case 1:
                     if (Input.GetKeyDown(KeyCode.E))
                     {
+                        icons.SetActive(false);
                         dialogueWin.SetActive(true);
+                        nameText.text = dialogEvent.nameNPC;
                         dialogText.text = dialogEvent.lines[index];
                         if (Input.GetKeyDown(KeyCode.E))
                         {
@@ -79,6 +86,8 @@ namespace BattleSystem
                 set = true;
                 sound.Play();
                 InteractTag.SetActive(true);
+                Instantiate(InteractTag, transformPoints[0].transform);
+                todestroy = GameObject.FindGameObjectWithTag("Interact");
                 objectID = 1;
             }
             if (other.CompareTag("Player") && objectMap == InteractObject.shop)
@@ -86,6 +95,8 @@ namespace BattleSystem
                 set = true;
                 sound.Play();
                 InteractTag.SetActive(true);
+                Instantiate(InteractTag, transformPoints[0].transform);
+                todestroy = GameObject.FindGameObjectWithTag("Interact");
                 objectID = 2;
             }
         }
@@ -93,7 +104,7 @@ namespace BattleSystem
         {
             if (other.CompareTag("Player"))
             {
-                InteractTag.SetActive(false);
+                Destroy(todestroy);
                 set = false;
                 dialogueWin.SetActive(false);
                 index = 0;
