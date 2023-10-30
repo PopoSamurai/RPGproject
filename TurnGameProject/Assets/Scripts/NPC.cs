@@ -3,6 +3,7 @@ using interactOn;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Xml.Linq;
 using Unity.VisualScripting;
 using UnityEditor.Rendering;
 using UnityEngine;
@@ -35,6 +36,11 @@ namespace BattleSystem
 
         public GameObject[] transformPoints;
         public GameObject todestroy;
+
+        public Transform textPos;
+        public GameObject prefabText;
+        public string[] txtExit;
+        int number = 0;
         private void Start()
         {
             player = GameObject.FindGameObjectWithTag("Player");
@@ -74,7 +80,9 @@ namespace BattleSystem
                 case 2:
                     if (Input.GetKeyDown(KeyCode.E))
                     {
-                        Debug.Log("shop");
+                        icons.SetActive(true);
+                        upgradeWin.SetActive(true);
+                        player.GetComponent<Movement>().move = false;
                     }
                     break;
             }
@@ -102,13 +110,20 @@ namespace BattleSystem
         }
         private void OnTriggerExit2D(Collider2D other)
         {
+            number++;
+            if (number >= 4)
+                number = 0;
+
             if (other.CompareTag("Player"))
             {
+                prefabText.GetComponent<Text>().text = txtExit[number];
+                Instantiate(prefabText, textPos);
                 Destroy(todestroy);
                 set = false;
                 dialogueWin.SetActive(false);
                 index = 0;
                 objectID = 0;
+
             }
         }
     }
