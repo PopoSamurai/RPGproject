@@ -41,9 +41,14 @@ namespace BattleSystem
         public GameObject prefabText;
         public string[] txtExit;
         int number = 0;
+        //
+        public Vector3 startPos;
+        private GameObject cam;
         private void Start()
         {
+            cam = GameObject.FindGameObjectWithTag("MainCamera");
             player = GameObject.FindGameObjectWithTag("Player");
+            startPos = this.transform.localScale;
         }
         void NextLine()
         {
@@ -53,10 +58,10 @@ namespace BattleSystem
             }
             else
             {
+                cam.GetComponent<CameraFollow>().set = 2;
                 dialogueWin.SetActive(false);
                 icons.SetActive(true);
                 upgradeWin.SetActive(true);
-                player.GetComponent<Movement>().move = false;
             }
         }
         private void Update()
@@ -66,10 +71,13 @@ namespace BattleSystem
                 case 1:
                     if (Input.GetKeyDown(KeyCode.E))
                     {
+                        Destroy(todestroy);
+                        cam.GetComponent<CameraFollow>().set = 1;
                         icons.SetActive(false);
                         dialogueWin.SetActive(true);
                         nameText.text = dialogEvent.nameNPC;
                         dialogText.text = dialogEvent.lines[index];
+                        player.GetComponent<Movement>().move = false;
                         if (Input.GetKeyDown(KeyCode.E))
                         {
                             dialogText.text = dialogEvent.lines[index];
@@ -80,6 +88,7 @@ namespace BattleSystem
                 case 2:
                     if (Input.GetKeyDown(KeyCode.E))
                     {
+                        seePlayer();
                         icons.SetActive(true);
                         upgradeWin.SetActive(true);
                         player.GetComponent<Movement>().move = false;
@@ -87,10 +96,20 @@ namespace BattleSystem
                     break;
             }
         }
+        public void seePlayer()
+        {
+            if (player.transform.localScale.x == 1)
+            {
+                transform.localScale = new Vector3(-1, 1, 1);
+            }
+            else
+                transform.localScale = new Vector3(1, 1, 1);
+        }
         private void OnTriggerEnter2D(Collider2D other)
         {
             if (other.CompareTag("Player") && objectMap == InteractObject.npc)
             {
+                seePlayer();
                 set = true;
                 sound.Play();
                 InteractTag.SetActive(true);
@@ -123,8 +142,14 @@ namespace BattleSystem
                 dialogueWin.SetActive(false);
                 index = 0;
                 objectID = 0;
-
+                cam.GetComponent<CameraFollow>().set = 0;
             }
+            StartCoroutine(powrot());
+        }
+        IEnumerator powrot()
+        {
+            yield return new WaitForSeconds(2f);
+            transform.localScale = startPos;
         }
     }
 }

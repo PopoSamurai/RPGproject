@@ -15,12 +15,14 @@ namespace BattleSystem
         public Vector3 CaveminVal, CavemaxVal;
         public int inHouse = 0;
         public GameObject water;
+        public int set = 0;
         private void FixedUpdate()
         {
             switch (inHouse)
             {
                 //house
                 case 0:
+                    water.transform.position = new Vector2(this.transform.position.x, -6.54f);
                     water.SetActive(true);
                     Follow();
                     break;
@@ -36,6 +38,17 @@ namespace BattleSystem
                 case 3:
                     break;
 
+            }
+        }
+        private void Update()
+        {
+            if(set == 1)
+            {
+                interactOn();
+            }
+            else if(set == 2)
+            {
+                interactOff();
             }
         }
 
@@ -60,6 +73,24 @@ namespace BattleSystem
                 );
             Vector3 smoothPos = Vector3.Lerp(transform.position, boundPos, smooth * Time.fixedDeltaTime);
             transform.position = smoothPos;
+        }
+
+        public void interactOn()
+        {
+            GetComponent<Camera>().orthographicSize = GetComponent<Camera>().orthographicSize - 1 * Time.deltaTime * 7; 
+
+            if (GetComponent<Camera>().orthographicSize < 5)
+            {
+                GetComponent<Camera>().orthographicSize = 5;
+            }
+        }
+        public void interactOff()
+        {
+            GetComponent<Camera>().orthographicSize = GetComponent<Camera>().orthographicSize + 1 * Time.deltaTime * 7;
+            if (GetComponent<Camera>().orthographicSize > 8)
+            {
+                GetComponent<Camera>().orthographicSize = 8;
+            }
         }
     }
 }
