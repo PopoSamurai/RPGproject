@@ -71,6 +71,7 @@ namespace BattleSystem
                 case 1:
                     if (Input.GetKeyDown(KeyCode.E))
                     {
+                        seePlayer();
                         Destroy(todestroy);
                         cam.GetComponent<CameraFollow>().set = 1;
                         icons.SetActive(false);
@@ -103,13 +104,14 @@ namespace BattleSystem
                 transform.localScale = new Vector3(-1, 1, 1);
             }
             else
+            {
                 transform.localScale = new Vector3(1, 1, 1);
+            }
         }
         private void OnTriggerEnter2D(Collider2D other)
         {
             if (other.CompareTag("Player") && objectMap == InteractObject.npc)
             {
-                seePlayer();
                 set = true;
                 sound.Play();
                 InteractTag.SetActive(true);
