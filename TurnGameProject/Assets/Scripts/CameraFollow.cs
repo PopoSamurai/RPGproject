@@ -36,6 +36,8 @@ namespace BattleSystem
                     FollowCave();
                     break;
                 case 3:
+                    water.SetActive(true);
+                    transform.position = new Vector3(-87.25f, 3.08f, -10);
                     break;
 
             }

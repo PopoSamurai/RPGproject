@@ -7,7 +7,7 @@ public enum InteractObjectToMove
 {
     house,
     cave,
-    backCave
+    forest
 }
 public class MoveRooms : MonoBehaviour
 {
@@ -23,6 +23,7 @@ public class MoveRooms : MonoBehaviour
     public bool inHouse = false;
     public GameObject cave;
     public GameObject village;
+    public GameObject forest;
 
     public GameObject[] transformPoints;
     void Start()
@@ -60,6 +61,22 @@ public class MoveRooms : MonoBehaviour
                     village.SetActive(true);
                     cave.SetActive(false);
                     StartCoroutine(czekaj3());
+                }
+                break;
+            case 5:
+                if (set == true && Input.GetKeyDown(KeyCode.E))
+                {
+                    village.SetActive(false);
+                    forest.SetActive(true);
+                    StartCoroutine(czekaj4());
+                }
+                break;
+            case 6:
+                if (set == true && Input.GetKeyDown(KeyCode.E))
+                {
+                    village.SetActive(true);
+                    forest.SetActive(false);
+                    StartCoroutine(czekaj5());
                 }
                 break;
         }
@@ -112,6 +129,30 @@ public class MoveRooms : MonoBehaviour
         skip.SetActive(false);
         player.GetComponent<Movement>().move = true;
     }
+    IEnumerator czekaj4()
+    {
+        player.GetComponent<Movement>().move = false;
+        skip.SetActive(true);
+        yield return new WaitForSeconds(1f);
+        cam.inHouse = 3;
+        player.transform.position = transformPoints[1].transform.position;
+        set = false;
+        yield return new WaitForSeconds(1f);
+        skip.SetActive(false);
+        player.GetComponent<Movement>().move = true;
+    }
+    IEnumerator czekaj5()
+    {
+        player.GetComponent<Movement>().move = false;
+        skip.SetActive(true);
+        yield return new WaitForSeconds(1f);
+        cam.inHouse = 0;
+        player.transform.position = transformPoints[1].transform.position;
+        set = false;
+        yield return new WaitForSeconds(1f);
+        skip.SetActive(false);
+        player.GetComponent<Movement>().move = true;
+    }
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player") && objectMap == InteractObjectToMove.house)
@@ -144,6 +185,22 @@ public class MoveRooms : MonoBehaviour
             else
             {
                 objectID = 4;
+            }
+        }
+        if (other.CompareTag("Player") && objectMap == InteractObjectToMove.forest)
+        {
+            set = true;
+            sound.Play();
+            InteractTag.SetActive(true);
+            Instantiate(InteractTag, transformPoints[0].transform);
+            todestroy = GameObject.FindGameObjectWithTag("Interact");
+            if (inHouse == false)
+            {
+                objectID = 5;
+            }
+            else
+            {
+                objectID = 6;
             }
         }
     }
