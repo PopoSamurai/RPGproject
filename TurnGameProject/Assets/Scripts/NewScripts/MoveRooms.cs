@@ -12,7 +12,7 @@ public enum InteractObjectToMove
 public class MoveRooms : MonoBehaviour
 {
     public InteractObjectToMove objectMap;
-    public int objectID = 0;
+    public int objectID = 1;
     public GameObject InteractTag;
     public AudioSource sound;
     GameObject player;
@@ -24,6 +24,7 @@ public class MoveRooms : MonoBehaviour
     public GameObject cave;
     public GameObject village;
     public GameObject forest;
+    public int tpNumber;
 
     public GameObject[] transformPoints;
     void Start()
@@ -44,39 +45,17 @@ public class MoveRooms : MonoBehaviour
             case 2:
                 if (set == true && Input.GetKeyDown(KeyCode.E))
                 {
-                    StartCoroutine(czekaj1());
+                    village.SetActive(false);
+                    cave.SetActive(true);
+                    StartCoroutine(czekaj());
                 }
                 break;
             case 3:
                 if (set == true && Input.GetKeyDown(KeyCode.E))
                 {
-                    village.SetActive(false);
-                    cave.SetActive(true);
-                    StartCoroutine(czekaj2());
-                }
-                break;
-            case 4:
-                if (set == true && Input.GetKeyDown(KeyCode.E))
-                {
                     village.SetActive(true);
                     cave.SetActive(false);
-                    StartCoroutine(czekaj3());
-                }
-                break;
-            case 5:
-                if (set == true && Input.GetKeyDown(KeyCode.E))
-                {
-                    village.SetActive(false);
-                    forest.SetActive(true);
-                    StartCoroutine(czekaj4());
-                }
-                break;
-            case 6:
-                if (set == true && Input.GetKeyDown(KeyCode.E))
-                {
-                    village.SetActive(true);
-                    forest.SetActive(false);
-                    StartCoroutine(czekaj5());
+                    StartCoroutine(czekaj());
                 }
                 break;
         }
@@ -85,68 +64,14 @@ public class MoveRooms : MonoBehaviour
     {
         player.GetComponent<Movement>().move = false;
         skip.SetActive(true);
+        if(objectMap == InteractObjectToMove.cave && inHouse == false)
+        {
+            player.GetComponent<Animator>().SetBool("battle", true);
+        }
+        else
+            player.GetComponent<Animator>().SetBool("battle", false);
         yield return new WaitForSeconds(1f);
-        cam.inHouse = 1;
-        player.transform.position = transformPoints[1].transform.position;
-        set = false;
-        yield return new WaitForSeconds(1f);
-        skip.SetActive(false);
-        player.GetComponent<Movement>().move = true;
-    }
-    IEnumerator czekaj1()
-    {
-        player.GetComponent<Movement>().move = false;
-        skip.SetActive(true);
-        yield return new WaitForSeconds(1f);
-        cam.inHouse = 0;
-        player.transform.position = transformPoints[1].transform.position;
-        set = false;
-        yield return new WaitForSeconds(1f);
-        skip.SetActive(false);
-        player.GetComponent<Movement>().move = true;
-    }
-    IEnumerator czekaj2()
-    {
-        player.GetComponent<Movement>().move = false;
-        skip.SetActive(true);
-        yield return new WaitForSeconds(1f);
-        cam.inHouse = 2;
-        player.transform.position = transformPoints[1].transform.position;
-        set = false;
-        yield return new WaitForSeconds(1f);
-        skip.SetActive(false);
-        player.GetComponent<Movement>().move = true;
-    }
-    IEnumerator czekaj3()
-    {
-        player.GetComponent<Movement>().move = false;
-        skip.SetActive(true);
-        yield return new WaitForSeconds(1f);
-        cam.inHouse = 0;
-        player.transform.position = transformPoints[1].transform.position;
-        set = false;
-        yield return new WaitForSeconds(1f);
-        skip.SetActive(false);
-        player.GetComponent<Movement>().move = true;
-    }
-    IEnumerator czekaj4()
-    {
-        player.GetComponent<Movement>().move = false;
-        skip.SetActive(true);
-        yield return new WaitForSeconds(1f);
-        cam.inHouse = 3;
-        player.transform.position = transformPoints[1].transform.position;
-        set = false;
-        yield return new WaitForSeconds(1f);
-        skip.SetActive(false);
-        player.GetComponent<Movement>().move = true;
-    }
-    IEnumerator czekaj5()
-    {
-        player.GetComponent<Movement>().move = false;
-        skip.SetActive(true);
-        yield return new WaitForSeconds(1f);
-        cam.inHouse = 0;
+        cam.inHouse = tpNumber;
         player.transform.position = transformPoints[1].transform.position;
         set = false;
         yield return new WaitForSeconds(1f);
@@ -162,14 +87,7 @@ public class MoveRooms : MonoBehaviour
             InteractTag.SetActive(true);
             Instantiate(InteractTag, transformPoints[0].transform);
             todestroy = GameObject.FindGameObjectWithTag("Interact");
-            if (inHouse == false)
-            {
-                objectID = 1;
-            }
-            else
-            {
-                objectID = 2;
-            }
+            objectID = 1;
         }
         if (other.CompareTag("Player") && objectMap == InteractObjectToMove.cave)
         {
@@ -180,27 +98,28 @@ public class MoveRooms : MonoBehaviour
             todestroy = GameObject.FindGameObjectWithTag("Interact");
             if (inHouse == false)
             {
-                objectID = 3;
+                objectID = 2;
             }
             else
             {
-                objectID = 4;
+                objectID = 3;
             }
         }
         if (other.CompareTag("Player") && objectMap == InteractObjectToMove.forest)
         {
             set = true;
             sound.Play();
-            InteractTag.SetActive(true);
-            Instantiate(InteractTag, transformPoints[0].transform);
-            todestroy = GameObject.FindGameObjectWithTag("Interact");
             if (inHouse == false)
             {
-                objectID = 5;
+                village.SetActive(false);
+                forest.SetActive(true);
+                StartCoroutine(czekaj());
             }
             else
             {
-                objectID = 6;
+                village.SetActive(true);
+                forest.SetActive(false);
+                StartCoroutine(czekaj());
             }
         }
     }
