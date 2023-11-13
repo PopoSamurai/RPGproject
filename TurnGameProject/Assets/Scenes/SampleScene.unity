@@ -432,7 +432,7 @@ Transform:
   m_GameObject: {fileID: 34880525}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -45.38, y: 1.2598386, z: 0}
+  m_LocalPosition: {x: 5.619999, y: 1.2598386, z: 0}
   m_LocalScale: {x: -1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -11672,6 +11672,7 @@ GameObject:
   - component: {fileID: 485160291}
   - component: {fileID: 485160290}
   - component: {fileID: 485160289}
+  - component: {fileID: 485160292}
   m_Layer: 0
   m_Name: Inn
   m_TagString: Untagged
@@ -11825,6 +11826,8 @@ MonoBehaviour:
   - Kufel Ale !
   - "Wznie\u015Bmy toast !"
   - Ha Ha Ha !
+  baseMat: {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  outlineMat: {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   startPos: {x: 0, y: 0, z: 0}
 --- !u!61 &485160291
 BoxCollider2D:
@@ -11871,6 +11874,58 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1.2714806, y: 0.7782252}
   m_EdgeRadius: 0
+--- !u!212 &485160292
+SpriteRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 485160287}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_Sprite: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 1, y: 1}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 0
+  m_MaskInteraction: 0
+  m_SpriteSortPoint: 0
 --- !u!1 &485441172
 GameObject:
   m_ObjectHideFlags: 0
@@ -13568,7 +13623,7 @@ Transform:
   m_GameObject: {fileID: 651622560}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -14.074799, y: 1.318, z: -0.19626224}
+  m_LocalPosition: {x: -14.074799, y: 1.318, z: 0}
   m_LocalScale: {x: -1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -13706,6 +13761,8 @@ MonoBehaviour:
   - Zadbaj o zdrowie !
   - "Najni\u017Csze ceny !"
   - Czas na ciebie
+  baseMat: {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  outlineMat: {fileID: 2100000, guid: 6d56b5634503db44c99ba2b08df6bf69, type: 2}
   startPos: {x: 0, y: 0, z: 0}
 --- !u!61 &651622564
 BoxCollider2D:
@@ -13814,7 +13871,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: -1
-  m_Sprite: {fileID: 419973372, guid: 7cbac5fd91aa67a4a8bc0a4b40c81395, type: 3}
+  m_Sprite: {fileID: 886766406, guid: 89fe4fc09bedb9a4ca7302240ae9f4ce, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -37321,7 +37378,7 @@ Transform:
   m_GameObject: {fileID: 996668607}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 34.4252, y: -1.3590156, z: -0.19626224}
+  m_LocalPosition: {x: 34.4252, y: -1.3590156, z: 0}
   m_LocalScale: {x: 1.1, y: 1.1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -37459,6 +37516,8 @@ MonoBehaviour:
   - "Powodzenia  w podr\xF3\u017Cy!"
   - Jeszce 2h i fjrant.
   - "Szukamy czego\u015B?"
+  baseMat: {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  outlineMat: {fileID: 2100000, guid: fec11e5cb2fde2741b876b7d40dabbb0, type: 2}
   startPos: {x: 0, y: 0, z: 0}
 --- !u!61 &996668611
 BoxCollider2D:
@@ -37567,7 +37626,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 1
-  m_Sprite: {fileID: 607142701, guid: 7cbac5fd91aa67a4a8bc0a4b40c81395, type: 3}
+  m_Sprite: {fileID: 692188028, guid: 0c2d8100fa0d6d34ca5609c7880c5247, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -38465,7 +38524,7 @@ Transform:
   m_GameObject: {fileID: 1135197228}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.9252014, y: -1.115, z: -0.19626224}
+  m_LocalPosition: {x: 0.9252014, y: -1.115, z: 0}
   m_LocalScale: {x: -1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -38534,7 +38593,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: -1
-  m_Sprite: {fileID: 702300262, guid: 7cbac5fd91aa67a4a8bc0a4b40c81395, type: 3}
+  m_Sprite: {fileID: -1059724490, guid: 8dfb0b6d77fbdf945918851a29f892c5, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -38676,6 +38735,8 @@ MonoBehaviour:
   - Powodzenia !
   - "Najlepsza stal i sk\xF3ra !"
   - Nie znajdziesz lepszego kowala !
+  baseMat: {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  outlineMat: {fileID: 2100000, guid: 1cf0d6f46987f5446a0cab6c64e787ad, type: 2}
   startPos: {x: 0, y: 0, z: 0}
 --- !u!61 &1135197234
 BoxCollider2D:
@@ -44680,7 +44741,7 @@ Transform:
   m_GameObject: {fileID: 1509230681}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -36.5, y: 0, z: 0}
+  m_LocalPosition: {x: -36.5, y: -0.21, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -45225,7 +45286,7 @@ Transform:
   m_GameObject: {fileID: 1578691786}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -48, y: 0, z: 0}
+  m_LocalPosition: {x: -48, y: -0.21, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -46222,7 +46283,7 @@ Transform:
   m_GameObject: {fileID: 1672744090}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 43.08, y: -1.343, z: -0.19626224}
+  m_LocalPosition: {x: 43.08, y: -1.343, z: 0}
   m_LocalScale: {x: 1.1, y: 1.1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -46360,6 +46421,8 @@ MonoBehaviour:
   - "Niech Pan b\u0119dzie z tob\u0105."
   - "B\u0142ogos\u0142awi\u0119 ci\u0119"
   - Bywaj
+  baseMat: {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  outlineMat: {fileID: 2100000, guid: de8b79e758664db40a4efbba28ed20bb, type: 2}
   startPos: {x: 0, y: 0, z: 0}
 --- !u!61 &1672744094
 BoxCollider2D:
@@ -46468,7 +46531,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 1
-  m_Sprite: {fileID: 43538903, guid: 7cbac5fd91aa67a4a8bc0a4b40c81395, type: 3}
+  m_Sprite: {fileID: 1504143523, guid: 8300dcd78aa28bc4582c1ffcbfa59a22, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

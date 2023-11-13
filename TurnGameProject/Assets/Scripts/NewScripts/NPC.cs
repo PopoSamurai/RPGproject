@@ -42,13 +42,19 @@ namespace BattleSystem
         public string[] txtExit;
         int number = 0;
         //
+        public Material baseMat;
+        public Material outlineMat;
+        //
         public Vector3 startPos;
         private GameObject cam;
+        SpriteRenderer sr;
         private void Start()
         {
+            sr = GetComponent<SpriteRenderer>();
             cam = GameObject.FindGameObjectWithTag("MainCamera");
             player = GameObject.FindGameObjectWithTag("Player");
             startPos = this.transform.localScale;
+            sr.material = baseMat;
         }
         void NextLine()
         {
@@ -110,6 +116,7 @@ namespace BattleSystem
         }
         private void OnTriggerEnter2D(Collider2D other)
         {
+            sr.material = outlineMat;
             if (other.CompareTag("Player") && objectMap == InteractObject.npc)
             {
                 set = true;
@@ -137,6 +144,7 @@ namespace BattleSystem
 
             if (other.CompareTag("Player"))
             {
+                sr.material = baseMat;
                 prefabText.GetComponent<Text>().text = txtExit[number];
                 Instantiate(prefabText, textPos);
                 Destroy(todestroy);
