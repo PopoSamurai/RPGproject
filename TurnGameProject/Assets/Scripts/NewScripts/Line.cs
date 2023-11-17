@@ -5,7 +5,6 @@ using UnityEngine;
 public class Line : MonoBehaviour
 {
     public Transform cubeBottom;
-    public Transform cubeFix;
     public Transform cubeTop;
     LineRenderer lr;
 
