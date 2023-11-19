@@ -25,11 +25,13 @@ public class MoveRooms : MonoBehaviour
     public GameObject village;
     public GameObject forest;
     public int tpNumber;
+    GameObject musicManager;
 
     public GameObject[] transformPoints;
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player");
+        musicManager = GameObject.FindGameObjectWithTag("Music");
     }
 
     void Update()
@@ -64,12 +66,18 @@ public class MoveRooms : MonoBehaviour
     {
         player.GetComponent<Movement>().move = false;
         skip.SetActive(true);
-        if(objectMap == InteractObjectToMove.cave && inHouse == false)
+        if (objectMap == InteractObjectToMove.cave && inHouse == false)
         {
+            musicManager.GetComponent<AudioSource>().clip = musicManager.GetComponent<MusicManager>().music[1];
+            musicManager.GetComponent<AudioSource>().Play();
             player.GetComponent<Animator>().SetBool("battle", true);
         }
-        else
+        else if(objectMap == InteractObjectToMove.cave && inHouse == true)
+        {
+            musicManager.GetComponent<AudioSource>().clip = musicManager.GetComponent<MusicManager>().music[0];
+            musicManager.GetComponent<AudioSource>().Play();
             player.GetComponent<Animator>().SetBool("battle", false);
+        }
         yield return new WaitForSeconds(1f);
         cam.inHouse = tpNumber;
         player.transform.position = transformPoints[1].transform.position;
@@ -111,12 +119,16 @@ public class MoveRooms : MonoBehaviour
             sound.Play();
             if (inHouse == false)
             {
+                musicManager.GetComponent<AudioSource>().clip = musicManager.GetComponent<MusicManager>().music[2];
+                musicManager.GetComponent<AudioSource>().Play();
                 village.SetActive(false);
                 forest.SetActive(true);
                 StartCoroutine(czekaj());
             }
             else
             {
+                musicManager.GetComponent<AudioSource>().clip = musicManager.GetComponent<MusicManager>().music[0];
+                musicManager.GetComponent<AudioSource>().Play();
                 village.SetActive(true);
                 forest.SetActive(false);
                 StartCoroutine(czekaj());
