@@ -11,6 +11,7 @@ namespace BattleSystem
         public GameObject caveWin;
         private GameObject player;
         GameObject musicManager;
+        public GameObject gui;
 
         void Start()
         {
@@ -32,6 +33,7 @@ namespace BattleSystem
                 caveWin.SetActive(false);
                 musicManager.GetComponent<AudioSource>().clip = musicManager.GetComponent<MusicManager>().music[3];
                 musicManager.GetComponent<AudioSource>().Play();
+                gui.SetActive(false);
             }
         }
     }
