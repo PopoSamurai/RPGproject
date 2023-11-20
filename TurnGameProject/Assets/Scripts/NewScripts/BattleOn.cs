@@ -9,9 +9,10 @@ namespace BattleSystem
     {
         public GameObject battleWindow;
         public GameObject caveWin;
-        private GameObject player;
+        GameObject player;
         GameObject musicManager;
         public GameObject gui;
+        public GameObject skip;
 
         void Start()
         {
@@ -29,12 +30,20 @@ namespace BattleSystem
             if (other.CompareTag("Player"))
             {
                 player.GetComponent<Movement>().MoveOff();
-                battleWindow.SetActive(true);
                 caveWin.SetActive(false);
                 musicManager.GetComponent<AudioSource>().clip = musicManager.GetComponent<MusicManager>().music[3];
                 musicManager.GetComponent<AudioSource>().Play();
-                gui.SetActive(false);
+                StartCoroutine(czekajna());
             }
+        }
+        public IEnumerator czekajna()
+        {
+            skip.SetActive(true);
+            yield return new WaitForSeconds(1f);
+            skip.SetActive(false);
+            gui.SetActive(false);
+            battleWindow.SetActive(true);
+            Destroy(this.gameObject);
         }
     }
 }
