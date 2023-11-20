@@ -1014,7 +1014,7 @@ GameObject:
   m_Component:
   - component: {fileID: 41976666}
   - component: {fileID: 41976667}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: Light 2D
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1162,7 +1162,7 @@ GameObject:
   m_Component:
   - component: {fileID: 59752392}
   - component: {fileID: 59752391}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: Global Volume
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2082,7 +2082,7 @@ GameObject:
   m_Component:
   - component: {fileID: 105903343}
   - component: {fileID: 105903346}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: P4
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -2127,7 +2127,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 108742401}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: SpawnPoint
   m_TagString: Untagged
   m_Icon: {fileID: -5442936267250999957, guid: 0000000000000000d000000000000000, type: 0}
@@ -2603,7 +2603,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   battleWindow: {fileID: 785138723}
-  caveWin: {fileID: 2072960492}
+  caveWin: {fileID: 293145803}
   gui: {fileID: 1704244533}
 --- !u!4 &169842258
 Transform:
@@ -10812,7 +10812,7 @@ GameObject:
   m_Component:
   - component: {fileID: 222557077}
   - component: {fileID: 222557080}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: E4
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -12161,7 +12161,7 @@ GameObject:
   m_Component:
   - component: {fileID: 342538122}
   - component: {fileID: 342538125}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: E3
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -12784,7 +12784,7 @@ GameObject:
   - component: {fileID: 373079654}
   - component: {fileID: 373079653}
   - component: {fileID: 373079652}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: Trigger
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -13187,7 +13187,7 @@ GameObject:
   - component: {fileID: 395911378}
   - component: {fileID: 395911377}
   - component: {fileID: 395911376}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: Battle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14464,7 +14464,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 481491881}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: SpawnPoint
   m_TagString: Untagged
   m_Icon: {fileID: 7422848464349959988, guid: 0000000000000000d000000000000000, type: 0}
@@ -14840,7 +14840,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 492333531}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: SpawnPoint
   m_TagString: Untagged
   m_Icon: {fileID: 7422848464349959988, guid: 0000000000000000d000000000000000, type: 0}
@@ -15156,7 +15156,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 215
+    m_Bits: 213
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -15295,7 +15295,7 @@ GameObject:
   - component: {fileID: 532679924}
   - component: {fileID: 532679926}
   - component: {fileID: 532679925}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: leaf
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15774,7 +15774,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 557053936}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: Enemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19110,7 +19110,7 @@ GameObject:
   - component: {fileID: 749993289}
   - component: {fileID: 749993291}
   - component: {fileID: 749993290}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: leaf
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19622,7 +19622,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 785138724}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: Battle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19644,6 +19644,7 @@ Transform:
   m_Children:
   - {fileID: 395911379}
   - {fileID: 2145839673}
+  - {fileID: 1941892555}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &806598993
@@ -26248,7 +26249,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 215
+    m_Bits: 2
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -26270,7 +26271,7 @@ GameObject:
   m_Component:
   - component: {fileID: 863923528}
   - component: {fileID: 863923531}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: E1
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -42196,7 +42197,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 947779400}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: SpawnPoint
   m_TagString: Untagged
   m_Icon: {fileID: 7422848464349959988, guid: 0000000000000000d000000000000000, type: 0}
@@ -45015,7 +45016,7 @@ GameObject:
   - component: {fileID: 1176223043}
   - component: {fileID: 1176223042}
   - component: {fileID: 1176223041}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: Trigger
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -46242,7 +46243,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1254607684}
   - component: {fileID: 1254607687}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: P1
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -46292,7 +46293,7 @@ GameObject:
   - component: {fileID: 1260576954}
   - component: {fileID: 1260576953}
   - component: {fileID: 1260576952}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: Trigger
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -47290,7 +47291,7 @@ GameObject:
   - component: {fileID: 1319773293}
   - component: {fileID: 1319773295}
   - component: {fileID: 1319773294}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: leaf
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -53556,7 +53557,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1532240788}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: SpawnPoint
   m_TagString: Untagged
   m_Icon: {fileID: -5442936267250999957, guid: 0000000000000000d000000000000000, type: 0}
@@ -54471,7 +54472,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1613028032}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: SpawnPoint
   m_TagString: Untagged
   m_Icon: {fileID: 7422848464349959988, guid: 0000000000000000d000000000000000, type: 0}
@@ -54796,7 +54797,7 @@ GameObject:
   - component: {fileID: 1623428452}
   - component: {fileID: 1623428451}
   - component: {fileID: 1623428450}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: ExitButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -55164,7 +55165,7 @@ GameObject:
   - component: {fileID: 1652090244}
   - component: {fileID: 1652090246}
   - component: {fileID: 1652090245}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: BattleOn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -55926,7 +55927,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1669589458}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: Team
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -56605,7 +56606,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1691989661}
   - component: {fileID: 1691989664}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: P2
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -56652,7 +56653,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1696828263}
   - component: {fileID: 1696828266}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: P3
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -56895,7 +56896,6 @@ RectTransform:
   - {fileID: 1470905990}
   - {fileID: 63771812}
   - {fileID: 1578087344}
-  - {fileID: 1941892555}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -57157,7 +57157,7 @@ GameObject:
   - component: {fileID: 1752293855}
   - component: {fileID: 1752293854}
   - component: {fileID: 1752293853}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: Sprite (1)
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -57253,7 +57253,7 @@ GameObject:
   - component: {fileID: 1763382516}
   - component: {fileID: 1763382518}
   - component: {fileID: 1763382517}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: bg (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -58077,7 +58077,7 @@ GameObject:
   - component: {fileID: 1811068295}
   - component: {fileID: 1811068294}
   - component: {fileID: 1811068293}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: Sprite
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -58933,7 +58933,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1879757415}
   - component: {fileID: 1879757418}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: E2
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -59875,11 +59875,11 @@ Transform:
   m_GameObject: {fileID: 1941892552}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -73.33323, y: -80, z: -5333.333}
-  m_LocalScale: {x: 66.666664, y: 66.666664, z: 66.666664}
+  m_LocalPosition: {x: -365.77603, y: -27.95619, z: 5.8416567}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1704244537}
+  m_Father: {fileID: 785138724}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1949991976
 PrefabInstance:
@@ -63906,7 +63906,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2038558703}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: BG
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -64303,11 +64303,6 @@ MonoBehaviour:
   - {x: 0.5, y: -0.5, z: 0}
   - {x: 0.5, y: 0.5, z: 0}
   - {x: -0.5, y: 0.5, z: 0}
---- !u!1 &2072960492 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2303341873282663682, guid: 3aaf6e4c9772137438686ce86ac92f42, type: 3}
-  m_PrefabInstance: {fileID: 9036511383620759138}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2073653716
 GameObject:
   m_ObjectHideFlags: 0
@@ -64320,7 +64315,7 @@ GameObject:
   - component: {fileID: 2073653720}
   - component: {fileID: 2073653719}
   - component: {fileID: 2073653718}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: Sprite (2)
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -64862,7 +64857,7 @@ GameObject:
   - component: {fileID: 2101401933}
   - component: {fileID: 2101401935}
   - component: {fileID: 2101401934}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: bg
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -65120,7 +65115,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2111746270}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: SpawnPoint
   m_TagString: Untagged
   m_Icon: {fileID: -5442936267250999957, guid: 0000000000000000d000000000000000, type: 0}
@@ -65159,7 +65154,7 @@ GameObject:
   - component: {fileID: 2118792153}
   - component: {fileID: 2118792152}
   - component: {fileID: 2118792151}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: Trigger
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -65333,7 +65328,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2122317103}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: SpawnPoint
   m_TagString: Untagged
   m_Icon: {fileID: -5442936267250999957, guid: 0000000000000000d000000000000000, type: 0}
@@ -65452,7 +65447,7 @@ GameObject:
   - component: {fileID: 2134220544}
   - component: {fileID: 2134220546}
   - component: {fileID: 2134220545}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Text (Legacy)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -65934,7 +65929,7 @@ GameObject:
   - component: {fileID: 1313134990815513843}
   - component: {fileID: 7533056832074889044}
   - component: {fileID: 3888047682839571496}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: Sprite
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -66056,7 +66051,7 @@ GameObject:
   - component: {fileID: 2051133930114396498}
   - component: {fileID: 6365160135392035901}
   - component: {fileID: 2453144363952694729}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: Sprite
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -66341,7 +66336,7 @@ GameObject:
   - component: {fileID: 4762992247834634375}
   - component: {fileID: 514487720844628922}
   - component: {fileID: 3383946540795247942}
-  m_Layer: 0
+  m_Layer: 1
   m_Name: Sprite
   m_TagString: Player
   m_Icon: {fileID: 0}
