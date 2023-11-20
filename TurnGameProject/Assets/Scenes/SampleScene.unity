@@ -2603,7 +2603,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   battleWindow: {fileID: 785138723}
-  caveWin: {fileID: 1238021637}
+  caveWin: {fileID: 2072960492}
   gui: {fileID: 1704244533}
 --- !u!4 &169842258
 Transform:
@@ -64303,6 +64303,11 @@ MonoBehaviour:
   - {x: 0.5, y: -0.5, z: 0}
   - {x: 0.5, y: 0.5, z: 0}
   - {x: -0.5, y: 0.5, z: 0}
+--- !u!1 &2072960492 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2303341873282663682, guid: 3aaf6e4c9772137438686ce86ac92f42, type: 3}
+  m_PrefabInstance: {fileID: 9036511383620759138}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2073653716
 GameObject:
   m_ObjectHideFlags: 0
