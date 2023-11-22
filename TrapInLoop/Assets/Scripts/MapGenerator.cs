@@ -21,7 +21,6 @@ public class MapGenerator : MonoBehaviour
     public MapState state;
     public float speed = 1f;
     GameObject gameM;
-    //enemy
     public int randInt = 0;
     void Start()
     {
@@ -90,24 +89,27 @@ public class MapGenerator : MonoBehaviour
         if (rooms[number].GetComponent<Biome>().biom == BiomeName.forest)
         {
             Debug.Log("Walka");
+            randInt = Random.Range(0, rooms[number].GetComponent<Biome>().enemies.Count());
+            gameM.GetComponent<GameManager>().enemy = rooms[number].GetComponent<Biome>().enemies[randInt];
             state = MapState.battleTurn;
-            StartCoroutine(battleTurn());
+            gameM.GetComponent<GameManager>().battleOn();
         }
         if (rooms[number].GetComponent<Biome>().biom == BiomeName.dungeon)
         {
             Debug.Log("Walka");
+            randInt = Random.Range(0, rooms[number].GetComponent<Biome>().enemies.Count());
+            gameM.GetComponent<GameManager>().enemy = rooms[number].GetComponent<Biome>().enemies[randInt];
             state = MapState.battleTurn;
-            StartCoroutine(battleTurn());
+            gameM.GetComponent<GameManager>().battleOn();
         }
     }
-    public IEnumerator battleTurn()
+    public void battleTurn()
     {
-        yield return new WaitForSeconds(speed);
-        gameM.GetComponent<GameManager>().battleOn();
+        gameM.GetComponent<GameManager>().StartBattle();
         rooms[number].GetComponent<Biome>().ResetCol();
-        //number += 1;
-        //fix = false;
-        //state = MapState.start;
-        //GeneratorOn();
+        number += 1;
+        fix = false;
+        state = MapState.start;
+        GeneratorOn();
     }
 }

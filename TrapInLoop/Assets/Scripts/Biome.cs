@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,7 +12,8 @@ public class Biome : MonoBehaviour
 {
     public BiomeName biom;
     public Color baseColor;
-    Image img;
+    Image img;    
+    //enemy
     public Enemy[] enemies;
     void Start()
     {
