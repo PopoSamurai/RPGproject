@@ -5,13 +5,14 @@ using UnityEngine.UI;
 
 public enum BiomeName
 {
-    Empty,Start, forest, dungeon
+    Empty, Start, forest, dungeon
 }
 public class Biome : MonoBehaviour
 {
     public BiomeName biom;
     public Color baseColor;
     Image img;
+    public Enemy[] enemies;
     void Start()
     {
         img = GetComponent<Image>();

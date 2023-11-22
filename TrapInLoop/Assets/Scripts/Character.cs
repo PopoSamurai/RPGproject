@@ -2,17 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Character : MonoBehaviour
+public enum CharClass
+{ 
+    warrior,
+    mage,
+    archer
+}
+[CreateAssetMenu(fileName = "New Player", menuName = "Class/Player")]
+public class Character : ScriptableObject
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public string PlayerName;
+    public int classID;
+    [Header("Statistics")]
+    public int Strength, Luck, Speed, Vitality, Defence, Intelligence, Wisdom, Charisma;
 }

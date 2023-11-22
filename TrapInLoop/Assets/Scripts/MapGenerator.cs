@@ -4,13 +4,11 @@ using System.Linq;
 using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.UI;
-public enum BattleState
+public enum MapState
 {
     start,
-    playerTurn,
-    enemyTurn,
-    won,
-    lost,
+    roomCheck,
+    battleTurn,
 }
 public class MapGenerator : MonoBehaviour
 {
@@ -20,15 +18,19 @@ public class MapGenerator : MonoBehaviour
     public bool fix = false;
     public Text loop;
     public int loopNum = 1;
-    public BattleState state;
+    public MapState state;
     public float speed = 1f;
+    GameObject gameM;
+    //enemy
+    public int randInt = 0;
     void Start()
     {
+        gameM = GameObject.FindGameObjectWithTag("GameM");
         loop.text = "Loop: " + loopNum;
     }
     private void Update()
     {
-        state = BattleState.start;
+        state = MapState.start;
         GeneratorOn();
     }
     //pause
@@ -52,8 +54,8 @@ public class MapGenerator : MonoBehaviour
                 {
                     fix = true;
                     rooms[number].color = start;
-                    state = BattleState.playerTurn;
-                    PlayerTurn();
+                    state = MapState.roomCheck;
+                    roomCheck();
                 }
             }
             else
@@ -70,10 +72,10 @@ public class MapGenerator : MonoBehaviour
         yield return new WaitForSeconds(speed);
         number += 1;
         fix = false;
-        state = BattleState.start;
+        state = MapState.start;
         GeneratorOn();
     }
-    public void PlayerTurn()
+    public void roomCheck()
     {
         if (rooms[number].GetComponent<Biome>().biom == BiomeName.Start)
         {
@@ -88,24 +90,24 @@ public class MapGenerator : MonoBehaviour
         if (rooms[number].GetComponent<Biome>().biom == BiomeName.forest)
         {
             Debug.Log("Walka");
-            state = BattleState.enemyTurn;
-            StartCoroutine(EnemyTour());
+            state = MapState.battleTurn;
+            StartCoroutine(battleTurn());
         }
         if (rooms[number].GetComponent<Biome>().biom == BiomeName.dungeon)
         {
             Debug.Log("Walka");
-            state = BattleState.enemyTurn;
-            StartCoroutine(EnemyTour());
+            state = MapState.battleTurn;
+            StartCoroutine(battleTurn());
         }
     }
-    public IEnumerator EnemyTour()
+    public IEnumerator battleTurn()
     {
         yield return new WaitForSeconds(speed);
+        gameM.GetComponent<GameManager>().battleOn();
         rooms[number].GetComponent<Biome>().ResetCol();
-        yield return new WaitForSeconds(speed);
-        number += 1;
-        fix = false;
-        state = BattleState.start;
-        GeneratorOn();
+        //number += 1;
+        //fix = false;
+        //state = MapState.start;
+        //GeneratorOn();
     }
 }
