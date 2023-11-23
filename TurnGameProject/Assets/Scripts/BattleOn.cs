@@ -13,17 +13,13 @@ namespace BattleSystem
         GameObject musicManager;
         public GameObject gui;
         public GameObject skip;
-
+        GameObject walka;
         void Start()
         {
+            walka = GameObject.FindGameObjectWithTag("GameM");
             player = GameObject.FindGameObjectWithTag("Player");
             musicManager = GameObject.FindGameObjectWithTag("Music");
             battleWindow.SetActive(false);
-        }
-
-        void Update()
-        {
-
         }
         private void OnTriggerEnter2D(Collider2D other)
         {
@@ -43,6 +39,7 @@ namespace BattleSystem
             skip.SetActive(false);
             gui.SetActive(false);
             battleWindow.SetActive(true);
+            walka.GetComponent<Fight>().battleOn();
             Destroy(this.gameObject);
         }
     }
