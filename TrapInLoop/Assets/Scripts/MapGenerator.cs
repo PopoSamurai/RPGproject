@@ -78,17 +78,17 @@ public class MapGenerator : MonoBehaviour
     {
         if (rooms[number].GetComponent<Biome>().biom == BiomeName.Start)
         {
-            Debug.Log("Spawn");
+            gameM.GetComponent<GameManager>().InfoTxt.text = "Spawn";
             StartCoroutine(stetupBattle());
         }
         if (rooms[number].GetComponent<Biome>().biom == BiomeName.Empty)
         {
-            Debug.Log("Pusto");
+            gameM.GetComponent<GameManager>().InfoTxt.text = "Pusto";
             StartCoroutine(stetupBattle());
         }
         if (rooms[number].GetComponent<Biome>().biom == BiomeName.forest)
         {
-            Debug.Log("Walka");
+            gameM.GetComponent<GameManager>().InfoTxt.text = "Walka";
             randInt = Random.Range(0, rooms[number].GetComponent<Biome>().enemies.Count());
             gameM.GetComponent<GameManager>().enemy = rooms[number].GetComponent<Biome>().enemies[randInt];
             state = MapState.battleTurn;
@@ -96,7 +96,7 @@ public class MapGenerator : MonoBehaviour
         }
         if (rooms[number].GetComponent<Biome>().biom == BiomeName.dungeon)
         {
-            Debug.Log("Walka");
+            gameM.GetComponent<GameManager>().InfoTxt.text = "Walka";
             randInt = Random.Range(0, rooms[number].GetComponent<Biome>().enemies.Count());
             gameM.GetComponent<GameManager>().enemy = rooms[number].GetComponent<Biome>().enemies[randInt];
             state = MapState.battleTurn;

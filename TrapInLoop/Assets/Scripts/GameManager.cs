@@ -27,10 +27,12 @@ public class GameManager : MonoBehaviour
     public int currentHealthE;
     public GameObject gamePanel;
     public Image playerSprite, enemySprite;
+    public Text InfoTxt;
     //
     public Material defaultMat, flash;
     void Start()
-    {        
+    {
+        InfoTxt.text = "";
         //pobiera od gracza
         STR = player.Strength;
         LCK = player.Luck;
@@ -74,7 +76,7 @@ public class GameManager : MonoBehaviour
     }
     public void getHitPlayer()
     {
-        Debug.Log("Wróg atakuje");
+        InfoTxt.text = "Wróg atakuje";
         StartCoroutine(lightPlayer());
         currentHealth -= enemy.Strength;
         if (currentHealth > 0)
@@ -102,7 +104,7 @@ public class GameManager : MonoBehaviour
     }
     public void getHitEnemy()
     {
-        Debug.Log("Gracz atakuje");
+        InfoTxt.text = "Gracz atakuje";
         StartCoroutine(lightEnemy());
         currentHealthE -= STR;
         if (currentHealthE > 0)
@@ -129,24 +131,24 @@ public class GameManager : MonoBehaviour
     }
     public IEnumerator PlayerTurn()
     {
-        Debug.Log("twoja tura");
+        InfoTxt.text = "twoja tura";
         yield return new WaitForSeconds(2f);
-        Debug.Log("Atakujesz");
+        InfoTxt.text = "Atakujesz";
         yield return new WaitForSeconds(1f);
         getHitEnemy();
     }
     public IEnumerator EnemyTurn()
     {
-        Debug.Log("tura wroga");
+        InfoTxt.text = "tura wroga";
         yield return new WaitForSeconds(2f);
-        Debug.Log("Otrzymujesz obra¿enia");
+        InfoTxt.text = "Otrzymujesz obra¿enia";
         yield return new WaitForSeconds(1f);
         getHitPlayer();
     }
     public IEnumerator Win()
     {
         yield return new WaitForSeconds(2f);
-        Debug.Log("wygrana");
+        InfoTxt.text = "wygrana";
         enemy = null;
         generator.battleTurn();
         gamePanel.SetActive(false);
@@ -155,7 +157,7 @@ public class GameManager : MonoBehaviour
     public IEnumerator Lost()
     {
         yield return new WaitForSeconds(2f);
-        Debug.Log("przegrana");
+        InfoTxt.text = "przegrana";
         enemy = null;
         //okno konca
         gamePanel.SetActive(false);
