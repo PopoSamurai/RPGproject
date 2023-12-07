@@ -19,8 +19,8 @@ public class GameManager : MonoBehaviour
     int STR, LCK, SPD, VIT, DEF, INT, WIS, CHA;
     [SerializeField]Text[] staty;
     public MapGenerator generator;
-    public Scrollbar hpBar;
-    public Scrollbar hpBarE;
+    public Slider hpBar;
+    public Slider hpBarE;
     public Text hpInt;
     public Text hpIntE;
     public int currentHealth;
@@ -63,12 +63,14 @@ public class GameManager : MonoBehaviour
         else
         {
             //enemy
-            hpBarE.size = currentHealthE;
-            hpIntE.text = currentHealthE + "/" +enemy.Vitality;
+            hpBarE.maxValue = enemy.Vitality;
+            hpIntE.text = currentHealthE + "/" + enemy.Vitality;
+            hpBarE.value = currentHealthE;
         }
         //player
-        hpBar.size = currentHealth;
+        hpBar.maxValue = VIT;
         hpInt.text = currentHealth + "/" + VIT;
+        hpBar.value = currentHealth;
     }
     public void getHitPlayer()
     {
