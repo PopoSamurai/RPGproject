@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -30,6 +31,10 @@ public class GameManager : MonoBehaviour
     public Text InfoTxt;
     //
     public Material defaultMat, flash;
+    //
+    private Inventory inventory;
+    public Item[] itemy;
+    public int randEq;
     void Start()
     {
         InfoTxt.text = "";
@@ -55,6 +60,7 @@ public class GameManager : MonoBehaviour
         enemySprite.material = defaultMat;
         gamePanel.SetActive(false);
         currentHealth = VIT;
+        inventory = GameObject.FindGameObjectWithTag("EQ").GetComponent<Inventory>();
     }
     private void Update()
     {
@@ -73,6 +79,37 @@ public class GameManager : MonoBehaviour
         hpBar.maxValue = VIT;
         hpInt.text = currentHealth + "/" + VIT;
         hpBar.value = currentHealth;
+
+        if(Input.GetKeyDown(KeyCode.A))
+        {
+            randEq = Random.Range(0, itemy.Count());
+
+            for (int i = 0; i < inventory.slots.Length; i++)
+            {
+                if (inventory.isFull[inventory.slots.Length - 1] == true)
+                {
+                    for (int j = 0; j < inventory.slots.Length - 1; j++)
+                    {
+                        if (inventory.slots[inventory.slots.Length - 1])
+                        {
+                            inventory.slots[inventory.slots.Length - 1].GetComponent<Image>().sprite = itemy[randEq].Icon;
+                        }
+                        inventory.slots[j].GetComponent<Image>().sprite = inventory.slots[j + 1].GetComponent<Image>().sprite;
+                        //inventory.slots[j] = inventory.slots[j + 1];
+                        Debug.Log("auuu");
+                    }
+                    i--;
+                }
+                if (inventory.isFull[i] == false)
+                {
+                    //Debug.Log("item dodany");
+                    inventory.slots[i].GetComponent<Image>().color = Color.white;
+                    inventory.slots[i].GetComponent<Image>().sprite = itemy[randEq].Icon;
+                    inventory.isFull[i] = true;
+                    break;
+                }
+            }
+        }
     }
     public void getHitPlayer()
     {
@@ -149,6 +186,7 @@ public class GameManager : MonoBehaviour
     {
         yield return new WaitForSeconds(2f);
         InfoTxt.text = "wygrana";
+        //
         enemy = null;
         generator.battleTurn();
         gamePanel.SetActive(false);
