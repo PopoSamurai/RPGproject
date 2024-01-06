@@ -133,6 +133,7 @@ GameObject:
   m_Component:
   - component: {fileID: 61089405}
   - component: {fileID: 61089404}
+  - component: {fileID: 61089406}
   m_Layer: 0
   m_Name: Mage
   m_TagString: Untagged
@@ -181,7 +182,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 2
-  m_Sprite: {fileID: 1971407819, guid: ecdd911f3a5e1774e82cf83c138de6af, type: 3}
+  m_Sprite: {fileID: -1248859465, guid: 3d8bbe1ce98ecf84e93b1d2e1cfd92d0, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -207,6 +208,27 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!95 &61089406
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 61089403}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: f274747dd1e537d45b496df152f838a0, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &87983705
 GameObject:
   m_ObjectHideFlags: 0
@@ -2806,7 +2828,6 @@ GameObject:
   m_Component:
   - component: {fileID: 549460524}
   - component: {fileID: 549460521}
-  - component: {fileID: 549460523}
   - component: {fileID: 549460522}
   m_Layer: 0
   m_Name: UICamera
@@ -2910,14 +2931,6 @@ MonoBehaviour:
     mipBias: 0
     varianceClampScale: 0.9
     contrastAdaptiveSharpening: 0
---- !u!81 &549460523
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 549460520}
-  m_Enabled: 1
 --- !u!4 &549460524
 Transform:
   m_ObjectHideFlags: 0
@@ -4256,6 +4269,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1421075826}
   - component: {fileID: 1421075825}
+  - component: {fileID: 1421075827}
   m_Layer: 0
   m_Name: War
   m_TagString: Untagged
@@ -4304,7 +4318,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 2
-  m_Sprite: {fileID: 1848979420, guid: ecdd911f3a5e1774e82cf83c138de6af, type: 3}
+  m_Sprite: {fileID: 2048997759, guid: 3d8bbe1ce98ecf84e93b1d2e1cfd92d0, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -4330,6 +4344,27 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!95 &1421075827
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1421075824}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 1c714ea2e43610c44a42bcf0677b1517, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1531513984
 GameObject:
   m_ObjectHideFlags: 0
@@ -4678,6 +4713,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1841539670}
   - component: {fileID: 1841539669}
+  - component: {fileID: 1841539671}
   m_Layer: 0
   m_Name: Archer
   m_TagString: Untagged
@@ -4726,7 +4762,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 2
-  m_Sprite: {fileID: -1531621655, guid: ecdd911f3a5e1774e82cf83c138de6af, type: 3}
+  m_Sprite: {fileID: -539378527, guid: 3d8bbe1ce98ecf84e93b1d2e1cfd92d0, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -4752,6 +4788,27 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!95 &1841539671
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1841539668}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: e0960d8b13a0b5045b7b22e01953d4f5, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1850578407
 GameObject:
   m_ObjectHideFlags: 0
