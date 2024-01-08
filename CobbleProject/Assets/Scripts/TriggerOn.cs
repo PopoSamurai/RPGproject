@@ -14,7 +14,7 @@ public class TriggerOn : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player") && coin.color == other.GetComponent<move>().id)
+        if (coin.color == other.GetComponent<move>().id)
         {
             score.GetComponent<GameManage>().score += 1;
             score.GetComponent<GameManage>().UpdateScore();

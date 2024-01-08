@@ -216,6 +216,7 @@ GameObject:
   - component: {fileID: 107486227}
   - component: {fileID: 107486225}
   - component: {fileID: 107486231}
+  - component: {fileID: 107486232}
   m_Layer: 0
   m_Name: TicTac 2
   m_TagString: Player
@@ -252,7 +253,7 @@ CapsuleCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 107486224}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 16b5b169fa559fe48986d5440260e2ff, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -353,6 +354,33 @@ MonoBehaviour:
   gameManage: {fileID: 460996159}
   number: 0
   id: 1
+--- !u!54 &107486232
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 107486224}
+  serializedVersion: 4
+  m_Mass: 10
+  m_Drag: 10
+  m_AngularDrag: 1
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 112
+  m_CollisionDetection: 0
 --- !u!1 &128566232
 GameObject:
   m_ObjectHideFlags: 0
@@ -1458,7 +1486,7 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.5
+  m_Radius: 2
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
@@ -1521,7 +1549,7 @@ Transform:
   m_GameObject: {fileID: 813105201}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.19, y: 1.07, z: -7.55}
+  m_LocalPosition: {x: 5.19, y: 0.72, z: -7.55}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2200,6 +2228,7 @@ GameObject:
   - component: {fileID: 1194147372}
   - component: {fileID: 1194147370}
   - component: {fileID: 1194147376}
+  - component: {fileID: 1194147377}
   m_Layer: 0
   m_Name: TicTac 3
   m_TagString: Player
@@ -2236,7 +2265,7 @@ CapsuleCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1194147369}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 16b5b169fa559fe48986d5440260e2ff, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -2337,6 +2366,33 @@ MonoBehaviour:
   gameManage: {fileID: 460996159}
   number: 0
   id: 2
+--- !u!54 &1194147377
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1194147369}
+  serializedVersion: 4
+  m_Mass: 10
+  m_Drag: 10
+  m_AngularDrag: 1
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 112
+  m_CollisionDetection: 0
 --- !u!1 &1203553630
 GameObject:
   m_ObjectHideFlags: 0
@@ -2586,6 +2642,7 @@ GameObject:
   - component: {fileID: 1438608465}
   - component: {fileID: 1438608462}
   - component: {fileID: 1438608469}
+  - component: {fileID: 1438608470}
   m_Layer: 0
   m_Name: TicTac
   m_TagString: Player
@@ -2622,7 +2679,7 @@ CapsuleCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1438608461}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 16b5b169fa559fe48986d5440260e2ff, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -2723,6 +2780,33 @@ MonoBehaviour:
   gameManage: {fileID: 460996159}
   number: 0
   id: 0
+--- !u!54 &1438608470
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1438608461}
+  serializedVersion: 4
+  m_Mass: 10
+  m_Drag: 10
+  m_AngularDrag: 1
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 112
+  m_CollisionDetection: 0
 --- !u!1 &1486548896
 GameObject:
   m_ObjectHideFlags: 0
@@ -3498,7 +3582,7 @@ Transform:
   m_GameObject: {fileID: 1588668185}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -7.8, y: 1.07, z: 4.023105}
+  m_LocalPosition: {x: -7.8, y: 0.72, z: 4.023105}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3766,7 +3850,7 @@ Transform:
   m_GameObject: {fileID: 1644846951}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4.1, y: 1.07, z: 4.64}
+  m_LocalPosition: {x: 4.1, y: 0.72, z: 4.64}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
