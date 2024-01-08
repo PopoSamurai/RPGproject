@@ -11,12 +11,13 @@ public class move : MonoBehaviour
     float radius = 3f;
     public GameManage gameManage;
     public int number;
+    public int id;
     void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
         predkosc = Random.Range(2f, 8f);
-        zwrotnosc = Random.Range(0.5f, 5f);
-        wytrzymalosc = Random.Range(0.5f, 5f);
+        zwrotnosc = Random.Range(2f, 8f);
+        wytrzymalosc = Random.Range(2f, 8f);
         agent.speed = predkosc;
     }
 
