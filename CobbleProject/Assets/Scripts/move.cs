@@ -12,6 +12,7 @@ public class move : MonoBehaviour
     public GameManage gameManage;
     public int number;
     public int id;
+    private Vector3 movePos;
     void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -27,7 +28,7 @@ public class move : MonoBehaviour
         if (activePlayer == false)
         {
             number = gameManage.playerNum;
-            Vector3 movePos = gameManage.players[number].transform.position;
+            movePos = gameManage.players[number].transform.position;
             movePos = Vector3.MoveTowards(movePos, transform.position, radius);
             agent.SetDestination(movePos);
         }
