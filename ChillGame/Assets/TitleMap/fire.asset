@@ -10,14 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 13b75c95f34a00d4e8c04f76b73312e6, type: 3}
-  m_Name: flower1c
+  m_Name: fire
   m_EditorClassIdentifier: 
   m_AnimatedSprites:
-  - {fileID: -1026818985, guid: 383856155507c7e498eae4e5c82140b1, type: 3}
-  - {fileID: -599618991, guid: 383856155507c7e498eae4e5c82140b1, type: 3}
-  - {fileID: 220404221, guid: 383856155507c7e498eae4e5c82140b1, type: 3}
-  m_MinSpeed: 2
-  m_MaxSpeed: 2
+  - {fileID: 1687677289, guid: 72c20158da9cf9e419dedd11fb21bb1d, type: 3}
+  - {fileID: -352780706, guid: 72c20158da9cf9e419dedd11fb21bb1d, type: 3}
+  - {fileID: -590021237, guid: 72c20158da9cf9e419dedd11fb21bb1d, type: 3}
+  - {fileID: -272104607, guid: 72c20158da9cf9e419dedd11fb21bb1d, type: 3}
+  - {fileID: -1148727976, guid: 72c20158da9cf9e419dedd11fb21bb1d, type: 3}
+  m_MinSpeed: 10
+  m_MaxSpeed: 10
   m_AnimationStartTime: 1
   m_AnimationStartFrame: 1
   m_TileColliderType: 0
