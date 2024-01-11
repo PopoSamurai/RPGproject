@@ -27,10 +27,7 @@ public class move : MonoBehaviour
         SetTargetPos();
         if (activePlayer == false)
         {
-            number = gameManage.playerNum;
-            movePos = gameManage.players[number].transform.position;
-            movePos = Vector3.MoveTowards(movePos, transform.position, radius);
-            agent.SetDestination(movePos);
+            StopTargetPos();
         }
     }
     public void SetTargetPos()
@@ -43,5 +40,12 @@ public class move : MonoBehaviour
                 agent.SetDestination(hitInfo.point);
             }
         }
+    }
+    public void StopTargetPos()
+    {
+        number = gameManage.playerNum;
+        movePos = gameManage.players[number].transform.position;
+        movePos = Vector3.MoveTowards(movePos, transform.position, radius);
+        agent.SetDestination(movePos);
     }
 }
