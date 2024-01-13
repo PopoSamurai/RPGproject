@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: water2
-  m_Shader: {fileID: -6465566751694194690, guid: 659b7ee70dd7c1240b2145fcbe7c3ac8, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: cc0c64fb43e4f1b42a62f8e54b9aa056, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -17,7 +17,7 @@ Material:
   m_LightmapFlags: 2
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 2450
+  m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
   m_LockedProperties: 
@@ -25,6 +25,14 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 0a5419308ff2fd94e8466c6cd86096cb, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Texture2D:
+        m_Texture: {fileID: 8400000, guid: d51ac50138d69bb4bb84bc50913273a9, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Texture2D_1:
         m_Texture: {fileID: 2800000, guid: 0a5419308ff2fd94e8466c6cd86096cb, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -49,6 +57,7 @@ Material:
     - _CastShadows: 1
     - _Cull: 0
     - _DstBlend: 10
+    - _Float: 0.2
     - _QueueControl: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
@@ -58,8 +67,11 @@ Material:
     - _ZTest: 4
     - _ZWrite: 0
     - _ZWriteControl: 0
+    - _strength: 1
     m_Colors:
     - _Color: {r: 2.458773, g: 2.6822977, b: 3.5624266, a: 1}
+    - _WaterTex: {r: 0, g: 0, b: 0, a: 0}
+    - _waterColor: {r: 0.34905657, g: 0.34905657, b: 0.34905657, a: 1}
   m_BuildTextureStacks: []
 --- !u!114 &9213970442487310208
 MonoBehaviour:
