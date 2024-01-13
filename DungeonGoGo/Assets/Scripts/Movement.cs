@@ -24,6 +24,7 @@ namespace Dungeongo
         public bool playerIsRange = false;
         AmmoChest ammoBox;
         public GameObject health;
+        public bool move = true;
         void Start()
         {
             sr = GetComponent<SpriteRenderer>();
@@ -36,26 +37,28 @@ namespace Dungeongo
         {
             point = GameObject.FindGameObjectWithTag("Aim");
             health = GameObject.FindGameObjectWithTag("HpBar");
-
-            Vector3 targ = point.transform.position;
-            targ.z = 0f;
-
-            Vector3 objectPos = transform.position;
-            targ.x = targ.x - objectPos.x;
-            targ.y = targ.y - objectPos.y;
-
-            change = Vector3.zero;
-            change.x = Input.GetAxisRaw("Horizontal");
-            change.y = Input.GetAxisRaw("Vertical");
-            anim.SetFloat("floatX", targ.x);
-            anim.SetFloat("floatY", targ.y);
-            updateAnimationAndMove();
-
-            if(Input.GetKeyDown(KeyCode.Space) && canDash == true && sta.staminaCost > 0)
+            if (move == true)
             {
-                Physics.IgnoreLayerCollision(8, 6, true);
-                Physics2D.IgnoreLayerCollision(8, 6, true);
-                StartCoroutine(Dash());
+                Vector3 targ = point.transform.position;
+                targ.z = 0f;
+
+                Vector3 objectPos = transform.position;
+                targ.x = targ.x - objectPos.x;
+                targ.y = targ.y - objectPos.y;
+
+                change = Vector3.zero;
+                change.x = Input.GetAxisRaw("Horizontal");
+                change.y = Input.GetAxisRaw("Vertical");
+                anim.SetFloat("floatX", targ.x);
+                anim.SetFloat("floatY", targ.y);
+                updateAnimationAndMove();
+
+                if (Input.GetKeyDown(KeyCode.Space) && canDash == true && sta.staminaCost > 0)
+                {
+                    Physics.IgnoreLayerCollision(8, 6, true);
+                    Physics2D.IgnoreLayerCollision(8, 6, true);
+                    StartCoroutine(Dash());
+                }
             }
         }
         public IEnumerator czekajNa()
@@ -113,7 +116,7 @@ namespace Dungeongo
 
         public void MoveCharacter()
         {
-            rb.MovePosition(transform.position + change.normalized * speed * Time.deltaTime);
+            rb.MovePosition(transform.position + change.normalized * speed * Time.fixedDeltaTime);
             //dust.Stop();
         }
 
