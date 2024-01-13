@@ -24,6 +24,13 @@ public class Movement : MonoBehaviour
     public GameObject Arrow;
     Vector3 BashDir;
     float BashTimeReset;
+    //dash
+    bool canDash = true;
+    bool isDashing = false;
+    float dashingPower = 24f;
+    float dashingTime = 0.2f;
+    float dashingCooldown = 0.5f;
+    [SerializeField] private TrailRenderer tr;
     void Start()
     {
         BashTimeReset = BashTime;
@@ -33,6 +40,11 @@ public class Movement : MonoBehaviour
 
     void Update()
     {
+        if(isDashing)
+        {
+            return;
+        }
+
         direction = Input.GetAxis("Horizontal") * speed;
         if(direction > 0)
         {
@@ -42,13 +54,35 @@ public class Movement : MonoBehaviour
         {
             transform.eulerAngles = new Vector3(0, 180, 0);
         }
+        if (Input.GetKeyDown(KeyCode.LeftShift) && canDash)
+        {
+            StartCoroutine(Dash());
+        }
         Jump();
         Bash();
+    }
+    IEnumerator Dash()
+    {
+        canDash = false;
+        isDashing = true;
+        float originalGravity = rb.gravityScale;
+        rb.gravityScale = 0f;
+        rb.velocity = new Vector2(transform.localScale.x * dashingPower, 0f);
+        tr.emitting = true;
+        yield return new WaitForSeconds(dashingTime);
+        tr.emitting = false;
+        rb.gravityScale = originalGravity;
+        isDashing = false;
+        yield return new WaitForSeconds(dashingCooldown);
+        canDash = true;
     }
     private void FixedUpdate()
     {
         if(IsBashing == false)
         rb.velocity = new Vector2(direction * Time.fixedDeltaTime, rb.velocity.y);
+
+        if (isDashing)
+            return;
     }
     void Jump()
     {
