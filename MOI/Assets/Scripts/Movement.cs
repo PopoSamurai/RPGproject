@@ -27,10 +27,16 @@ public class Movement : MonoBehaviour
     //dash
     bool canDash = true;
     bool isDashing = false;
-    float dashingPower = 24f;
+    public float dashingPower = 24f;
     float dashingTime = 0.2f;
     float dashingCooldown = 0.5f;
     [SerializeField] private TrailRenderer tr;
+    //hold
+    public float holdJump;
+    public float holder = 0f;
+    float maxJump = 1.5f;
+    public GameObject loadEffect;
+    public bool isMove = true;
     void Start()
     {
         BashTimeReset = BashTime;
@@ -40,26 +46,60 @@ public class Movement : MonoBehaviour
 
     void Update()
     {
-        if(isDashing)
+        if (isMove == true)
         {
-            return;
-        }
+            if (isDashing)
+            {
+                return;
+            }
+            if (IsBashing == false)
+                rb.velocity = new Vector2(direction * Time.fixedDeltaTime, rb.velocity.y);
 
-        direction = Input.GetAxis("Horizontal") * speed;
-        if(direction > 0)
+            direction = Input.GetAxis("Horizontal") * speed;
+            if (direction > 0)
+            {
+                transform.eulerAngles = new Vector3(0, 0, 0);
+            }
+            else
+            {
+                transform.eulerAngles = new Vector3(0, 180, 0);
+            }
+            if (Input.GetKeyDown(KeyCode.LeftShift) && canDash)
+            {
+                StartCoroutine(Dash());
+            }
+            Bash();
+            Jump();
+        }
+        if (Input.GetButton("KeyS") && !isGrounded())
         {
-            transform.eulerAngles = new Vector3(0, 0, 0);
+            rb.velocity = Vector2.zero;
+            rb.velocity = Vector2.down * 40f;
+        }
+        if (Input.GetButton("KeyW") && isGrounded())
+        {
+            rb.velocity = Vector2.zero;
+            isMove = false;
+            addToon.SetActive(false);
+            loadEffect.SetActive(true);
+            if(holder < maxJump)
+            holder += Time.deltaTime;
+            holdJump = holder;
         }
         else
         {
-            transform.eulerAngles = new Vector3(0, 180, 0);
+            isMove = true;
+            addToon.SetActive(true);
+            loadEffect.SetActive(false);
+            rb.AddForce(transform.up * holdJump * 250);
+            StartCoroutine(waitHolder());
         }
-        if (Input.GetKeyDown(KeyCode.LeftShift) && canDash)
-        {
-            StartCoroutine(Dash());
-        }
-        Jump();
-        Bash();
+    }
+    IEnumerator waitHolder()
+    {
+        yield return new WaitForSeconds(0.2f);
+        holdJump = 0f;
+        holder = 0f;
     }
     IEnumerator Dash()
     {
@@ -67,7 +107,10 @@ public class Movement : MonoBehaviour
         isDashing = true;
         float originalGravity = rb.gravityScale;
         rb.gravityScale = 0f;
-        rb.velocity = new Vector2(transform.localScale.x * dashingPower, 0f);
+        if(direction > 1)
+            rb.velocity = Vector2.right * dashingPower;
+        else
+            rb.velocity = Vector2.left * dashingPower;
         tr.emitting = true;
         yield return new WaitForSeconds(dashingTime);
         tr.emitting = false;
@@ -75,14 +118,6 @@ public class Movement : MonoBehaviour
         isDashing = false;
         yield return new WaitForSeconds(dashingCooldown);
         canDash = true;
-    }
-    private void FixedUpdate()
-    {
-        if(IsBashing == false)
-        rb.velocity = new Vector2(direction * Time.fixedDeltaTime, rb.velocity.y);
-
-        if (isDashing)
-            return;
     }
     void Jump()
     {
@@ -124,7 +159,7 @@ public class Movement : MonoBehaviour
                 Arrow.transform.position = BashAbleObj.transform.transform.position;
                 IsChosingDir = true;
             }
-            else if(IsChosingDir && Input.GetKeyUp(KeyCode.Mouse1))
+            else if(IsChosingDir && Input.GetKeyUp(KeyCode.Mouse1) || Input.GetKeyDown(KeyCode.LeftShift))
             {
                 addToon.SetActive(true);
                 Time.timeScale = 1f;
