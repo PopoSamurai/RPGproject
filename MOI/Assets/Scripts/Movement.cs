@@ -41,7 +41,7 @@ public class Movement : MonoBehaviour
     {
         BashTimeReset = BashTime;
         rb = GetComponent<Rigidbody2D>();
-        coll = GetComponent<BoxCollider2D>();
+        coll = GetComponent<CapsuleCollider2D>();
     }
 
     void Update()
@@ -58,11 +58,11 @@ public class Movement : MonoBehaviour
             direction = Input.GetAxis("Horizontal") * speed;
             if (direction > 0)
             {
-                transform.eulerAngles = new Vector3(0, 0, 0);
+                transform.eulerAngles = new Vector3(0, 180, 0);
             }
             else
             {
-                transform.eulerAngles = new Vector3(0, 180, 0);
+                transform.eulerAngles = new Vector3(0, 0, 0);
             }
             if (Input.GetKeyDown(KeyCode.LeftShift) && canDash)
             {
