@@ -103,6 +103,7 @@ public class Fight : MonoBehaviour
     //heal
     public void HealButton()
     {
+        Debug.Log("heal");
         if (state != BattleState.playerTurn)
         {
             return;
