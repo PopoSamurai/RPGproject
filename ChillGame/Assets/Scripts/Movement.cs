@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Movement : MonoBehaviour
@@ -8,7 +10,7 @@ public class Movement : MonoBehaviour
     Rigidbody2D rb;
     Animator anim;
     public float speed;
-    public Vector3 change;
+    Vector3 change;
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -39,5 +41,20 @@ public class Movement : MonoBehaviour
     public void MoveCharacter()
     {
         rb.MovePosition(transform.position + change.normalized * speed * Time.fixedDeltaTime);
+    }
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        if (other.collider.CompareTag("NPC"))
+        {
+            other.gameObject.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeAll;
+        }
+    }
+    private void OnCollisionExit2D(Collision2D other)
+    {
+        if (other.collider.CompareTag("NPC"))
+        {
+            other.gameObject.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.None;
+            other.gameObject.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeRotation;
+        }
     }
 }
