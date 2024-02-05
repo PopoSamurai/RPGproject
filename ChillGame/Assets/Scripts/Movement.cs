@@ -1,8 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class Movement : MonoBehaviour
@@ -11,6 +6,7 @@ public class Movement : MonoBehaviour
     Animator anim;
     public float speed;
     Vector3 change;
+    public static bool move = true;
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -19,10 +15,13 @@ public class Movement : MonoBehaviour
 
     void Update()
     {
-        change = Vector3.zero;
-        change.x = Input.GetAxisRaw("Horizontal");
-        change.y = Input.GetAxisRaw("Vertical");
-        updateAnimationAndMove();
+        if (move)
+        {
+            change = Vector3.zero;
+            change.x = Input.GetAxisRaw("Horizontal");
+            change.y = Input.GetAxisRaw("Vertical");
+            updateAnimationAndMove();
+        }
     }
     void updateAnimationAndMove()
     {
@@ -56,5 +55,5 @@ public class Movement : MonoBehaviour
             other.gameObject.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.None;
             other.gameObject.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeRotation;
         }
-    }
+    }   
 }

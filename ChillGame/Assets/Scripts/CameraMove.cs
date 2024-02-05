@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class CameraMove : MonoBehaviour
@@ -10,7 +8,7 @@ public class CameraMove : MonoBehaviour
     public Vector2 minPos;
     void Start()
     {
-        player = GameObject.FindGameObjectWithTag("Player");
+        player = GameObject.Find("Player");
     }
 
     void LateUpdate()
