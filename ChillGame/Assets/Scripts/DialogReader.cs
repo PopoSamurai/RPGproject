@@ -1,22 +1,22 @@
+using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class DialogReader : MonoBehaviour
 {
-    public Dialog currentDialog, end;
+    public Dialog currentDialog;
 
     [Header("UI Elements")]
     public Image Player, effectP;
     public Image NPC, effectN;
     public Text dialogText, nameText;
     public Button NextButton;
-    public float typingSpeed = 0.05f;
-    //
     public GameObject dialogBox;
-
     private void Start()
     {
         NextButton.onClick.AddListener(HandleContinueClick);
+        UpdateUI();
     }
     public void ActivePlayer()
     {
@@ -40,7 +40,6 @@ public class DialogReader : MonoBehaviour
     public void StartDialog(Dialog dialog)
     {
         currentDialog = dialog;
-        UpdateUI();
     }
     public void UpdateUI()
     {
@@ -50,8 +49,19 @@ public class DialogReader : MonoBehaviour
         effectP.sprite = currentDialog.playerEffect;
         NPC.sprite = currentDialog.NPCSprite;
         effectN.sprite = currentDialog.npcEffect;
-        dialogText.text = currentDialog.message;
+        StartCoroutine(DisplayText(currentDialog.message));
         ActivePlayer();
+    }
+    IEnumerator DisplayText(string line)
+    {
+        dialogText.text = "";
+        foreach (char letter in line.ToCharArray())
+        {
+            NextButton.gameObject.SetActive(false);
+            dialogText.text += letter;
+            yield return new WaitForSeconds(0.05f);
+            NextButton.gameObject.SetActive(true);
+        }
     }
     void HandleContinueClick()
     {
@@ -67,14 +77,6 @@ public class DialogReader : MonoBehaviour
     }
     public void EndDialog()
     {
-        currentDialog = end.endDialog;
-        Player.sprite = end.characterSprite;
-        effectP.sprite = end.playerEffect;
-        NPC.sprite = end.NPCSprite;
-        effectN.sprite = end.npcEffect;
-        dialogText.text = end.message;
-        ActivePlayer();
-
         dialogBox.SetActive(false);
         Movement.move = true;
     }

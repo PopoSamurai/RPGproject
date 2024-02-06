@@ -6,34 +6,37 @@ public class NPC : MonoBehaviour
     public bool dialogOn = false;
     public Material baseMat, outLine;
     SpriteRenderer sr;
-    GameObject reader;
+    public DialogReader reader;
     public Dialog dialog, endDialog;
-    public bool dialogOff;
+    public bool finalDialog = false;
+
     void Start()
     {
-        dialogOff = true;
+        finalDialog = false;
         sr = GetComponent<SpriteRenderer>();
-        reader = GameObject.FindGameObjectWithTag("UI");
     }
-
     void Update()
     {
-        if(dialogOn && Input.GetKeyDown(KeyCode.E))
+        if (dialogOn && Input.GetKeyDown(KeyCode.E))
         {
             reader.GetComponent<DialogReader>().UpdateUI();
             dialogBox.SetActive(true);
             Movement.move = false;
-            dialogOff = false;
+            dialogOn = false;
         }
     }
     private void OnTriggerEnter2D(Collider2D other)
     {
         if(other.CompareTag("Player"))
         {
-            if(dialogOff)
+            if (reader.dialogText.text != null && !finalDialog)
             {
-                reader.GetComponent<DialogReader>().currentDialog = dialog;
-                reader.GetComponent<DialogReader>().end = endDialog;
+                reader.StartDialog(dialog);
+                finalDialog = true;
+            }
+            else
+            {
+                reader.StartDialog(endDialog);
             }
             sr.material = outLine;
             dialogOn = true;

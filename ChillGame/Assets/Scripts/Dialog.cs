@@ -9,6 +9,6 @@ public class Dialog : ScriptableObject
     public Sprite NPCSprite, npcEffect;
     public string NamePlayer, NameNPC;
     public string message;
-    public Dialog nextMessage, endDialog;
+    public Dialog nextMessage;
     public int activePlayer = 0;
 }

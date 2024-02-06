@@ -16679,7 +16679,7 @@ Tilemap:
       - {fileID: 775007955, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
       - {fileID: 1257007304, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
       - {fileID: 127976999, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
-      m_AnimationSpeed: 3
+      m_AnimationSpeed: 3.0000002
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: 6, y: -2, z: 0}
@@ -17457,7 +17457,7 @@ Tilemap:
       - {fileID: 775007955, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
       - {fileID: 1257007304, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
       - {fileID: 127976999, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
-      m_AnimationSpeed: 3.0000002
+      m_AnimationSpeed: 3
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: 0, y: 9, z: 0}
@@ -20338,9 +20338,10 @@ MonoBehaviour:
   dialogOn: 0
   baseMat: {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   outLine: {fileID: 2100000, guid: 8d7f86c5437f60149aac1759c3a227f9, type: 2}
+  reader: {fileID: 1647801276}
   dialog: {fileID: 11400000, guid: d685c110d7d4bce499698c28c3b09fa6, type: 2}
   endDialog: {fileID: 11400000, guid: a7c970a44b897ea438f698927c5f6693, type: 2}
-  dialogOff: 0
+  finishDialog: 0
 --- !u!61 &1152246336
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -20621,7 +20622,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 7074cd042aff58d48bc099b0e7b0874f, type: 3}
+    m_Font: {fileID: 12800000, guid: 0e92032a532a5a44696dd915d5e34b30, type: 3}
     m_FontSize: 45
     m_FontStyle: 0
     m_BestFit: 1
@@ -31118,7 +31119,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 7074cd042aff58d48bc099b0e7b0874f, type: 3}
+    m_Font: {fileID: 12800000, guid: 0e92032a532a5a44696dd915d5e34b30, type: 3}
     m_FontSize: 50
     m_FontStyle: 0
     m_BestFit: 0
@@ -31763,7 +31764,7 @@ Tilemap:
       - {fileID: 775007955, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
       - {fileID: 1257007304, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
       - {fileID: 127976999, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
-      m_AnimationSpeed: 3
+      m_AnimationSpeed: 3.0000002
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: 10, y: -2, z: 0}
@@ -31799,7 +31800,7 @@ Tilemap:
       - {fileID: 775007955, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
       - {fileID: 1257007304, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
       - {fileID: 127976999, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
-      m_AnimationSpeed: 3
+      m_AnimationSpeed: 3.0000002
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: -12, y: 2, z: 0}
@@ -31847,7 +31848,7 @@ Tilemap:
       - {fileID: -1459257132, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
       - {fileID: 1489076958, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
       - {fileID: -610345083, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
-      m_AnimationSpeed: 3.0000002
+      m_AnimationSpeed: 3
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: -10, y: 4, z: 0}
@@ -32316,9 +32317,10 @@ MonoBehaviour:
   dialogOn: 0
   baseMat: {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   outLine: {fileID: 2100000, guid: 8d7f86c5437f60149aac1759c3a227f9, type: 2}
+  reader: {fileID: 1647801276}
   dialog: {fileID: 11400000, guid: dce8b0c48a7878e4b9c855fbcaa44d20, type: 2}
   endDialog: {fileID: 11400000, guid: 631f9faf12f42784e8fd4731c3ed350b, type: 2}
-  dialogOff: 0
+  finishDialog: 0
 --- !u!1 &1647801271
 GameObject:
   m_ObjectHideFlags: 0
@@ -32435,7 +32437,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentDialog: {fileID: 0}
-  end: {fileID: 0}
   Player: {fileID: 4834718}
   effectP: {fileID: 2018256322}
   NPC: {fileID: 54406648}
@@ -32443,8 +32444,8 @@ MonoBehaviour:
   dialogText: {fileID: 1191678403}
   nameText: {fileID: 1462156557}
   NextButton: {fileID: 2104304028}
-  typingSpeed: 0.05
   dialogBox: {fileID: 2070669913}
+  finish: 0
 --- !u!1 &1738874262
 GameObject:
   m_ObjectHideFlags: 0
