@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a2c2ddc95cb97c4fb04069f5250f62d, type: 3}
+  m_Name: Dialog5
+  m_EditorClassIdentifier: 
+  characterSprite: {fileID: 379755316, guid: e1ea14adef626ec4b8c886722323e96e, type: 3}
+  playerEffect: {fileID: 3508988, guid: e174fa58fc9fd404faa78c94f5465679, type: 3}
+  NPCSprite: {fileID: 1653296196, guid: 0dd85d5ae4dfcf64dbf1f63cc753067d, type: 3}
+  npcEffect: {fileID: 1081848975, guid: e174fa58fc9fd404faa78c94f5465679, type: 3}
+  NamePlayer: Haru
+  NameNPC: Lena
+  message: "Czyli.. \u015Bledzi\u0142e\u015B mnie."
+  nextMessage: {fileID: 11400000, guid: d3b74c93bd91615438f2e77aea7a391c, type: 2}
+  endDialog: {fileID: 0}
+  activePlayer: 1

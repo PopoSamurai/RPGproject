@@ -1,12 +1,14 @@
 using System.Collections.Generic;
-using UnityEngine.UI;
 using UnityEngine;
+using UnityEngine.UI;
 
 [CreateAssetMenu(fileName = "New Dialog", menuName = "Dialof/Create New Dialog")]
 public class Dialog : ScriptableObject
 {
-    public Sprite[] characterSprite;
-    public Sprite[] NPCSprite;
+    public Sprite characterSprite, playerEffect;
+    public Sprite NPCSprite, npcEffect;
     public string NamePlayer, NameNPC;
-    public List<string> messages = new List<string>();
+    public string message;
+    public Dialog nextMessage, endDialog;
+    public int activePlayer = 0;
 }
