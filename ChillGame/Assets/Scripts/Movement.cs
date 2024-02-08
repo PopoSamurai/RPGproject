@@ -16,9 +16,41 @@ public class Movement : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
     }
+    public void ActionFix()
+    {
+        move = true;
+    }
+    public void ActionOn()
+    {
+        move = false;
+    }
 
     void Update()
     {
+        if (Input.GetKey(KeyCode.Mouse0))
+        {
+            switch (action)
+            {
+                case Actions.Empty:
+                    anim.SetTrigger("grab");
+                    break;
+                case Actions.Fishing:
+                    anim.SetTrigger("fish");
+                    break;
+                case Actions.Seeds:
+                    anim.SetTrigger("seed");
+                    break;
+                case Actions.Water:
+                    anim.SetTrigger("water");
+                    break;
+                case Actions.Crop:
+                    anim.SetTrigger("crop");
+                    break;
+                case Actions.Fight:
+                    anim.SetTrigger("fight");
+                    break;
+            }
+        }
         if (move)
         {
             change = Vector3.zero;
