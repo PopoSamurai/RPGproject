@@ -13,6 +13,9 @@ public class DialogReader : MonoBehaviour
     public Text dialogText, nameText;
     public Button NextButton;
     public GameObject dialogBox;
+    public GameObject buttons;
+    public GameObject[] shopWin;
+    public bool shopOpen = false;
     private void Start()
     {
         NextButton.onClick.AddListener(HandleContinueClick);
@@ -40,6 +43,7 @@ public class DialogReader : MonoBehaviour
     public void StartDialog(Dialog dialog)
     {
         currentDialog = dialog;
+        buttons.SetActive(false);
     }
     public void UpdateUI()
     {
@@ -75,9 +79,21 @@ public class DialogReader : MonoBehaviour
             EndDialog();
         }
     }
+    public void openShop()
+    {
+        Movement.move = false;
+        shopWin[0].SetActive(true);
+        shopWin[1].SetActive(true);
+        shopWin[2].SetActive(false);
+    }
     public void EndDialog()
     {
         dialogBox.SetActive(false);
         Movement.move = true;
+        buttons.SetActive(true);
+        if (shopOpen)
+        {
+            openShop();
+        }
     }
 }

@@ -9,7 +9,7 @@ public class NPC : MonoBehaviour
     public DialogReader reader;
     public Dialog dialog, endDialog;
     public bool finalDialog = false;
-
+    public bool shop = false;
     void Start()
     {
         finalDialog = false;
@@ -19,6 +19,12 @@ public class NPC : MonoBehaviour
     {
         if (dialogOn && Input.GetKeyDown(KeyCode.E))
         {
+            if(shop == true)
+            {
+                reader.shopOpen = true;
+            }
+            else
+                reader.shopOpen = false;
             reader.GetComponent<DialogReader>().UpdateUI();
             dialogBox.SetActive(true);
             Movement.move = false;
