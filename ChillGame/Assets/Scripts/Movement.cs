@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
-
 public enum Actions { Empty, Fishing, Seeds, Water, Crop, Fight}
 public class Movement : MonoBehaviour
 {
@@ -11,6 +10,8 @@ public class Movement : MonoBehaviour
     Vector3 change;
     public static bool move = true;
     public GameObject ActionUI;
+    public bool actionButton = false;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -19,6 +20,7 @@ public class Movement : MonoBehaviour
     public void ActionFix()
     {
         move = true;
+        actionButton = false;
     }
     public void ActionOn()
     {
@@ -27,7 +29,7 @@ public class Movement : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKey(KeyCode.Mouse0))
+        if(actionButton)
         {
             switch (action)
             {
@@ -51,14 +53,19 @@ public class Movement : MonoBehaviour
                     break;
             }
         }
+
         if (move)
         {
+            if (Input.GetKey(KeyCode.Mouse0) && !EventSystem.current.IsPointerOverGameObject())
+            {
+                actionButton = true;
+            }
             change = Vector3.zero;
             change.x = Input.GetAxisRaw("Horizontal");
             change.y = Input.GetAxisRaw("Vertical");
             updateAnimationAndMove();
         }
-        if(Input.GetKeyDown(KeyCode.Mouse2))
+        if(Input.GetKeyDown(KeyCode.Mouse2) && !actionButton)
         {
             ActionUI.SetActive(true);
         }
