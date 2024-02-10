@@ -9,9 +9,11 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
     [HideInInspector] public Item item;
     [HideInInspector] public int count = 1;
-    [HideInInspector] public Transform parentAfterDrag;
+    public Transform parentAfterDrag;
+    public Transform firstPos;
     public void InitializeItem(Item newItem)
     {
+        firstPos = transform.parent;
         item = newItem;
         image.sprite = newItem.icon;
         RefreshCount();
@@ -24,6 +26,7 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     }
     public void OnBeginDrag(PointerEventData eventData)
     {
+        firstPos = transform.parent;
         image.raycastTarget = false;
         parentAfterDrag = transform.parent;
         transform.SetParent(transform.root);
