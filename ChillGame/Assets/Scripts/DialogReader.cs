@@ -43,12 +43,11 @@ public class DialogReader : MonoBehaviour
     public void StartDialog(Dialog dialog)
     {
         currentDialog = dialog;
-        buttons.SetActive(false);
     }
     public void UpdateUI()
     {
         if (currentDialog == null) return;
-
+        buttons.SetActive(false);
         Player.sprite = currentDialog.characterSprite;
         effectP.sprite = currentDialog.playerEffect;
         NPC.sprite = currentDialog.NPCSprite;

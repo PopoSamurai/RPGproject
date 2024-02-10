@@ -19,7 +19,8 @@ public class NPC : MonoBehaviour
     {
         if (dialogOn && Input.GetKeyDown(KeyCode.E))
         {
-            if(shop == true)
+            finalDialog = true;
+            if (shop == true)
             {
                 reader.shopOpen = true;
             }
@@ -38,7 +39,6 @@ public class NPC : MonoBehaviour
             if (reader.dialogText.text != null && !finalDialog)
             {
                 reader.StartDialog(dialog);
-                finalDialog = true;
             }
             else
             {

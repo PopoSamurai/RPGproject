@@ -64,10 +64,37 @@ public class Movement : MonoBehaviour
             change.x = Input.GetAxisRaw("Horizontal");
             change.y = Input.GetAxisRaw("Vertical");
             updateAnimationAndMove();
-        }
-        if(Input.GetKeyDown(KeyCode.Mouse2) && !actionButton)
-        {
-            ActionUI.SetActive(true);
+
+            if (Input.GetKeyDown(KeyCode.Mouse2) && !actionButton)
+            {
+                ActionUI.SetActive(true);
+            }
+
+            //actions
+            if(Input.GetKeyDown(KeyCode.Alpha1))
+            {
+                Empty();
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha2))
+            {
+                Fishing();
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha3))
+            {
+                Seeds();
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha4))
+            {
+                Water();
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha5))
+            {
+                Crop();
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha6))
+            {
+                Attack();
+            }
         }
     }
     void updateAnimationAndMove()
