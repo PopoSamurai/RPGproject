@@ -11,7 +11,6 @@ public class Movement : MonoBehaviour
     public static bool move = true;
     public GameObject ActionUI;
     public bool actionButton = false;
-
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();

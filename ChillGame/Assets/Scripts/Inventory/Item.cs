@@ -6,24 +6,16 @@ public class Item : ScriptableObject
 {
     public TileBase tile;
     public Sprite icon;
-    public ItemType type;
-    public ActionType action;
+    public ItemType itemtype;
     public Vector2Int range = new Vector2Int(5, 4);
     public bool isStack = true;
     public enum ItemType
     {
-        Tool,
-        Eat
-    }
-    public enum ActionType
-    {
+        None,
+        Sword,
         water,
+        fishRod,
         seed,
-        crop,
-        attack,
-        fish,
-        mine,
-        dig,
-        cropTree
+        crop
     }
 }

@@ -16655,7 +16655,7 @@ Tilemap:
       - {fileID: 775007955, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
       - {fileID: 1257007304, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
       - {fileID: 127976999, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
-      m_AnimationSpeed: 3.0000002
+      m_AnimationSpeed: 3
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: 9, y: -4, z: 0}
@@ -16787,7 +16787,7 @@ Tilemap:
       - {fileID: -1459257132, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
       - {fileID: 1489076958, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
       - {fileID: -610345083, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
-      m_AnimationSpeed: 3
+      m_AnimationSpeed: 3.0000002
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: -10, y: 6, z: 0}
@@ -16811,7 +16811,7 @@ Tilemap:
       - {fileID: 775007955, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
       - {fileID: 1257007304, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
       - {fileID: 127976999, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
-      m_AnimationSpeed: 3
+      m_AnimationSpeed: 3.0000002
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: 3, y: 7, z: 0}
@@ -17608,7 +17608,7 @@ Tilemap:
       - {fileID: 775007955, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
       - {fileID: 1257007304, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
       - {fileID: 127976999, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
-      m_AnimationSpeed: 3.0000002
+      m_AnimationSpeed: 3
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: 8, y: -1, z: 0}
@@ -17632,7 +17632,7 @@ Tilemap:
       - {fileID: -1459257132, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
       - {fileID: 1489076958, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
       - {fileID: -610345083, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
-      m_AnimationSpeed: 3
+      m_AnimationSpeed: 3.0000002
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: 10, y: -1, z: 0}
@@ -17644,7 +17644,7 @@ Tilemap:
       - {fileID: -1459257132, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
       - {fileID: 1489076958, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
       - {fileID: -610345083, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
-      m_AnimationSpeed: 3.0000002
+      m_AnimationSpeed: 3
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: -14, y: 3, z: 0}
@@ -17680,7 +17680,7 @@ Tilemap:
       - {fileID: -1459257132, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
       - {fileID: 1489076958, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
       - {fileID: -610345083, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
-      m_AnimationSpeed: 3.0000002
+      m_AnimationSpeed: 3
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: -11, y: 5, z: 0}
@@ -17752,7 +17752,7 @@ Tilemap:
       - {fileID: 775007955, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
       - {fileID: 1257007304, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
       - {fileID: 127976999, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
-      m_AnimationSpeed: 3
+      m_AnimationSpeed: 3.0000002
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: 3, y: 9, z: 0}
@@ -18098,6 +18098,7 @@ GameObject:
   - component: {fileID: 214634561}
   - component: {fileID: 214634560}
   - component: {fileID: 214634562}
+  - component: {fileID: 214634563}
   m_Layer: 5
   m_Name: Slot
   m_TagString: Untagged
@@ -18219,6 +18220,20 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &214634563
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 214634558}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f43c0e0e94dfe340901021bd033e490, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spriteIco: {fileID: 112444558}
+  slot: {fileID: 1286560765}
 --- !u!1 &244913815
 GameObject:
   m_ObjectHideFlags: 0
@@ -18362,7 +18377,23 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2835144440865083350, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
       propertyPath: m_Name
-      value: Slot
+      value: SwordSlot
+      objectReference: {fileID: 0}
+    - target: {fileID: 6150806387066984613, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
+      propertyPath: eq
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6150806387066984613, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
+      propertyPath: type
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6150806387066984613, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
+      propertyPath: eqSlot
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6150806387066984613, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
+      propertyPath: slotType
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 6786601218537505926, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
       propertyPath: m_Pivot.x
@@ -19680,6 +19711,7 @@ GameObject:
   - component: {fileID: 526718832}
   - component: {fileID: 526718831}
   - component: {fileID: 526718833}
+  - component: {fileID: 526718834}
   m_Layer: 5
   m_Name: Slot
   m_TagString: Untagged
@@ -19801,6 +19833,20 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &526718834
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 526718829}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f43c0e0e94dfe340901021bd033e490, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spriteIco: {fileID: 1274782926}
+  slot: {fileID: 1697057024}
 --- !u!224 &550410175 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6786601218537505926, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
@@ -20474,7 +20520,23 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2835144440865083350, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
       propertyPath: m_Name
-      value: Slot
+      value: FishSlot
+      objectReference: {fileID: 0}
+    - target: {fileID: 6150806387066984613, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
+      propertyPath: eq
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6150806387066984613, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
+      propertyPath: type
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6150806387066984613, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
+      propertyPath: eqSlot
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6150806387066984613, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
+      propertyPath: slotType
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6786601218537505926, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
       propertyPath: m_Pivot.x
@@ -23808,7 +23870,23 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2835144440865083350, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
       propertyPath: m_Name
-      value: Slot
+      value: WaterSlot
+      objectReference: {fileID: 0}
+    - target: {fileID: 6150806387066984613, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
+      propertyPath: eq
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6150806387066984613, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
+      propertyPath: type
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6150806387066984613, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
+      propertyPath: eqSlot
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6150806387066984613, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
+      propertyPath: slotType
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 6786601218537505926, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
       propertyPath: m_Pivot.x
@@ -24120,7 +24198,23 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2835144440865083350, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
       propertyPath: m_Name
-      value: Slot
+      value: SeedSlot
+      objectReference: {fileID: 0}
+    - target: {fileID: 6150806387066984613, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
+      propertyPath: eq
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6150806387066984613, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
+      propertyPath: type
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 6150806387066984613, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
+      propertyPath: eqSlot
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6150806387066984613, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
+      propertyPath: slotType
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6786601218537505926, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
       propertyPath: m_Pivot.x
@@ -25944,7 +26038,23 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2835144440865083350, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
       propertyPath: m_Name
-      value: Slot
+      value: CropSlot
+      objectReference: {fileID: 0}
+    - target: {fileID: 6150806387066984613, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
+      propertyPath: eq
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6150806387066984613, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
+      propertyPath: type
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6150806387066984613, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
+      propertyPath: eqSlot
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6150806387066984613, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
+      propertyPath: slotType
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6786601218537505926, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
       propertyPath: m_Pivot.x
@@ -36367,6 +36477,7 @@ GameObject:
   - component: {fileID: 1400147341}
   - component: {fileID: 1400147340}
   - component: {fileID: 1400147342}
+  - component: {fileID: 1400147343}
   m_Layer: 5
   m_Name: Slot
   m_TagString: Untagged
@@ -36488,6 +36599,20 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &1400147343
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1400147338}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f43c0e0e94dfe340901021bd033e490, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spriteIco: {fileID: 1604015740}
+  slot: {fileID: 1810151217}
 --- !u!1001 &1421054095
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -37767,7 +37892,7 @@ Tilemap:
       - {fileID: -1459257132, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
       - {fileID: 1489076958, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
       - {fileID: -610345083, guid: 2898c98f6b318184696b0e445df3aee3, type: 3}
-      m_AnimationSpeed: 3.0000002
+      m_AnimationSpeed: 3
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: -10, y: 4, z: 0}
@@ -39136,6 +39261,7 @@ GameObject:
   - component: {fileID: 1576674083}
   - component: {fileID: 1576674082}
   - component: {fileID: 1576674084}
+  - component: {fileID: 1576674085}
   m_Layer: 5
   m_Name: Slot
   m_TagString: Untagged
@@ -39257,6 +39383,20 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &1576674085
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1576674080}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f43c0e0e94dfe340901021bd033e490, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spriteIco: {fileID: 1810308235}
+  slot: {fileID: 1567007480}
 --- !u!1 &1583183699
 GameObject:
   m_ObjectHideFlags: 0
@@ -40085,7 +40225,23 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2835144440865083350, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
       propertyPath: m_Name
-      value: Slot
+      value: SwordSlot
+      objectReference: {fileID: 0}
+    - target: {fileID: 6150806387066984613, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
+      propertyPath: eq
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6150806387066984613, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
+      propertyPath: type
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6150806387066984613, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
+      propertyPath: eqSlot
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6150806387066984613, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
+      propertyPath: slotType
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6786601218537505926, guid: 94c25e49f6df8e048a3e59ae5edb4b0c, type: 3}
       propertyPath: m_Pivot.x
@@ -46174,6 +46330,7 @@ GameObject:
   - component: {fileID: 1831304294}
   - component: {fileID: 1831304293}
   - component: {fileID: 1831304295}
+  - component: {fileID: 1831304296}
   m_Layer: 5
   m_Name: Slot
   m_TagString: Untagged
@@ -46295,6 +46452,20 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &1831304296
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1831304291}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f43c0e0e94dfe340901021bd033e490, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spriteIco: {fileID: 440973951}
+  slot: {fileID: 2125741471}
 --- !u!1 &1833583433
 GameObject:
   m_ObjectHideFlags: 0
