@@ -8,11 +8,19 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     public Text countText;
 
     [HideInInspector] public Item item;
-    [HideInInspector] public int count = 1;
-    public Transform parentAfterDrag;
-    public Transform firstPos;
+    public int count = 1;
+    [HideInInspector] public Transform parentAfterDrag;
+    [HideInInspector] public Transform firstPos;
     public void InitializeItem(Item newItem)
     {
+        firstPos = transform.parent;
+        item = newItem;
+        image.sprite = newItem.icon;
+        RefreshCount();
+    }
+    public void SepareteItems(Item newItem)
+    {
+        count -= 1;
         firstPos = transform.parent;
         item = newItem;
         image.sprite = newItem.icon;
@@ -26,10 +34,26 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     }
     public void OnBeginDrag(PointerEventData eventData)
     {
-        firstPos = transform.parent;
-        image.raycastTarget = false;
-        parentAfterDrag = transform.parent;
-        transform.SetParent(transform.root);
+        if (count >= 1 && Input.GetKey(KeyCode.R))
+        {
+            Debug.Log("separate");
+            SepareteItems(item);
+            firstPos = transform.parent;
+            parentAfterDrag = transform.parent;
+            transform.SetParent(transform.root);
+            GameObject obj = Instantiate(this.gameObject, firstPos);
+            obj.GetComponent<InventoryItem>().count = count;
+            count = 1;
+            RefreshCount();
+            image.raycastTarget = false;
+        }
+        else
+        {
+            firstPos = transform.parent;
+            image.raycastTarget = false;
+            parentAfterDrag = transform.parent;
+            transform.SetParent(transform.root);
+        }
     }
 
     public void OnDrag(PointerEventData eventData)

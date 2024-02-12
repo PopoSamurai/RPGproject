@@ -18,6 +18,7 @@ public class GameManager : MonoBehaviour
         if (Input.GetKey(KeyCode.I))
         {
             panels[0].SetActive(true);
+            panels[1].SetActive(false);
             PauseGame();
         }
     }

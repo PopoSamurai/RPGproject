@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class InventoryManager : MonoBehaviour
 {
-    public int maxStackItem = 64;
+    int maxStackItem = 64;
     public InventorySlot[] inventorySlots;
     public GameObject inventoryItemPrefab;
     public bool AddItem(Item item)
@@ -23,7 +23,7 @@ public class InventoryManager : MonoBehaviour
         {
             InventorySlot slot = inventorySlots[i];
             InventoryItem itemInSlot = slot.GetComponentInChildren<InventoryItem>();
-            if(itemInSlot == null)
+            if (itemInSlot == null)
             {
                 SpawnNewItem(item, slot);
                 return true;
