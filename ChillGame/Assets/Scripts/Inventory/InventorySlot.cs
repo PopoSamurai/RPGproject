@@ -5,7 +5,13 @@ using static UnityEditor.Progress;
 public class InventorySlot : MonoBehaviour, IDropHandler
 {
     public bool eqSlot;
+    public bool shopSlot;
     public SlotType type;
+    GameObject gamem;
+    private void Start()
+    {
+        gamem = GameObject.FindGameObjectWithTag("gamem");
+    }
     public enum SlotType
     {
         None,
@@ -60,6 +66,10 @@ public class InventorySlot : MonoBehaviour, IDropHandler
                 inventoryItem2.parentAfterDrag = inventoryItem.firstPos.transform;
                 inventoryItem2.transform.SetParent(inventoryItem.firstPos.transform);
             }
+        }
+        if(shopSlot == true)
+        {
+            //gamem.GetComponent<InventoryManager>().money
         }
         else
         {

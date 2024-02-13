@@ -10,6 +10,7 @@ public class NPC : MonoBehaviour
     public Dialog dialog, endDialog;
     public bool finalDialog = false;
     public bool shop = false;
+    public Shop shopP;
     void Start()
     {
         finalDialog = false;
@@ -23,6 +24,7 @@ public class NPC : MonoBehaviour
             if (shop == true)
             {
                 reader.shopOpen = true;
+                shopP.OpenShop();
             }
             else
                 reader.shopOpen = false;
@@ -36,6 +38,7 @@ public class NPC : MonoBehaviour
     {
         if(other.CompareTag("Player"))
         {
+            shopP.resetShop();
             if (reader.dialogText.text != null && !finalDialog)
             {
                 reader.StartDialog(dialog);
