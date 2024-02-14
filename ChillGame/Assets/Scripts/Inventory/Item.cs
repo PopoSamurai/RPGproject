@@ -4,6 +4,7 @@ using UnityEngine.Tilemaps;
 [CreateAssetMenu(menuName = "Items/new Item")]
 public class Item : ScriptableObject
 {
+    public string nameItem;
     public TileBase tile;
     public Sprite icon;
     public ItemType itemtype;
