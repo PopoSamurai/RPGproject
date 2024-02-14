@@ -5,6 +5,7 @@ public class InventorySlot : MonoBehaviour, IDropHandler
 {
     public bool eqSlot;
     public bool shopSlot;
+    public bool rushBin = false;
     public SlotType type;
     GameObject gamem;
     private void Start()
@@ -63,17 +64,16 @@ public class InventorySlot : MonoBehaviour, IDropHandler
                 inventoryItem2.transform.SetParent(inventoryItem.firstPos.transform);
             }
         }
-        if (shopSlot == true) //sell
+        //sell
+        else if (shopSlot == true)
         {
             InventoryItem inventoryItem3 = eventData.pointerDrag.GetComponent<InventoryItem>();
+
             if (transform.childCount == 0 && inventoryItem3.parentAfterDrag.transform.GetComponent<InventorySlot>().shopSlot == false)
             {
                 inventoryItem3.parentAfterDrag = transform;
                 gamem.GetComponent<InventoryManager>().money += inventoryItem3.costItem;
-            }
-            else if(transform.childCount == 0 && inventoryItem3.parentAfterDrag.transform.GetComponent<InventorySlot>().shopSlot == true)
-            {
-                inventoryItem3.parentAfterDrag = transform;
+                Debug.Log("buy");
             }
             //not swap
             else if (transform.childCount == 1 && transform.GetChild(0).GetComponent<InventoryItem>().item != eventData.pointerDrag.GetComponent<InventoryItem>().item)
@@ -86,11 +86,23 @@ public class InventorySlot : MonoBehaviour, IDropHandler
                 InventoryItem inventoryItem4 = eventData.pointerDrag.GetComponent<InventoryItem>();
                 InventoryItem inventoryItem2 = transform.GetChild(0).GetComponent<InventoryItem>();
                 inventoryItem3.parentAfterDrag = transform;
-                gamem.GetComponent<InventoryManager>().money += inventoryItem4.costItem;
+                if(inventoryItem4.parentAfterDrag.transform.GetComponent<InventorySlot>().shopSlot == false)
+                {
+                    gamem.GetComponent<InventoryManager>().money += inventoryItem4.costItem;
+                }
                 inventoryItem3.GetComponent<InventoryItem>().count += inventoryItem2.GetComponent<InventoryItem>().count;
                 inventoryItem3.GetComponent<InventoryItem>().RefreshCount();
                 Destroy(inventoryItem2.gameObject);
             }
+            else
+            {
+                inventoryItem3.parentAfterDrag = transform;
+            }
+        }
+        //rushbin
+        else if(rushBin == true)
+        {
+            Destroy(eventData.pointerDrag);
         }
         //buy
         else if(eventData.pointerDrag.GetComponent<InventoryItem>().parentAfterDrag.transform.GetComponent<InventorySlot>().shopSlot == true)

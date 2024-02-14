@@ -10,14 +10,9 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     public int count = 1;
     [HideInInspector] public Transform parentAfterDrag;
     [HideInInspector] public Transform firstPos;
-    public GameObject statWin;
-    GameObject gamem;
+    GameObject subGameObject;
     public int costItem = 0;
-    private void Start()
-    {
-        gamem = GameObject.FindGameObjectWithTag("gamem");
-        statWin.SetActive(false);
-    }
+    Vector3 temp = new Vector3(1.5f, 1.5f, 0);
     public void InitializeItem(Item newItem)
     {
         firstPos = transform.parent;
@@ -76,18 +71,13 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        statWin.SetActive(true);
-        if(gamem.GetComponent<GameManager>().panels[2].activeSelf == true)
-        {
-            statWin.transform.GetChild(0).GetComponent<Text>().text = item.nameItem;
-        }
-        else
-        {
-            statWin.transform.GetChild(0).GetComponent<Text>().text = costItem + "g"; 
-        }
+        subGameObject = Instantiate(Resources.Load("ItemStats", typeof(GameObject))) as GameObject;
+        subGameObject.transform.SetParent(GameObject.FindGameObjectWithTag("Canvas").transform, false);
+        subGameObject.transform.position = eventData.pointerEnter.transform.position + temp;
+        subGameObject.transform.GetChild(0).GetComponent<Text>().text = item.nameItem + '\n' + "<color=green>" + item.itemtype.ToString() + "</color>" + '\n' + '\n' + "<color=yellow>" + costItem + "g" + "</color>";
     }
     public void OnPointerExit(PointerEventData eventData)
     {
-        statWin.SetActive(false);
+        Destroy(subGameObject);
     }
 }
