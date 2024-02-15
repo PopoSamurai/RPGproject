@@ -19,7 +19,7 @@ public class Shop : MonoBehaviour
             InventoryItem itemInSlot = slot.GetComponentInChildren<InventoryItem>();
             if (itemInSlot == null)
             {
-                Debug.Log("chold is null");
+                //null
             }
             else
             {
@@ -32,11 +32,11 @@ public class Shop : MonoBehaviour
         bool result = inventoryManager.AddItem(itemsToPickUp[id]);
         if (result == true)
         {
-            Debug.Log("Item added");
+            //add item
         }
         else
         {
-            Debug.Log("EQ is full");
+            //eq is full
         }
     }
     public void PickUpItem2(int id)
@@ -44,11 +44,11 @@ public class Shop : MonoBehaviour
         bool result = inventoryManager.AddShop(itemsToPickUp[id]);
         if (result == true)
         {
-            Debug.Log("Item added");
+            //add item to shop
         }
         else
         {
-            Debug.Log("EQ is full");
+            //eq is full
         }
     }
 }

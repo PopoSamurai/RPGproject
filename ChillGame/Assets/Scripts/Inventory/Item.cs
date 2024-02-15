@@ -9,7 +9,7 @@ public class Item : ScriptableObject
     public Sprite icon;
     public ItemType itemtype;
     public Vector2Int range = new Vector2Int(5, 4);
-    public bool isStack = true;
+    public bool isStack = false;
     public int costTosell = 0;
     public enum ItemType
     {

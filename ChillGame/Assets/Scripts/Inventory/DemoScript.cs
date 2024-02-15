@@ -10,11 +10,11 @@ public class DemoScript : MonoBehaviour
        bool result = inventoryManager.AddItem(itemsToPickUp[id]);
         if (result == true)
         {
-            Debug.Log("Item added");
+            //add item to eq
         }
         else
         {
-            Debug.Log("EQ is full");
+            //eq is full
         }
     }
 }
