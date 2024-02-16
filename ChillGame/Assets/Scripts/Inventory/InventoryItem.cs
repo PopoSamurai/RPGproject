@@ -74,7 +74,7 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         subGameObject = Instantiate(Resources.Load("ItemStats", typeof(GameObject))) as GameObject;
         subGameObject.transform.SetParent(GameObject.FindGameObjectWithTag("Canvas").transform, false);
         subGameObject.transform.position = eventData.pointerEnter.transform.position + temp;
-        subGameObject.transform.GetChild(0).GetComponent<Text>().text = item.nameItem + '\n' + "<color=green>" + item.itemtype.ToString() + "</color>" + '\n' + '\n' + "<color=yellow>" + costItem + "g" + "</color>";
+        subGameObject.transform.GetChild(0).GetComponent<Text>().text = item.nameItem + '\n' + "<color=green>" + item.type.ToString() + "</color>" + '\n' + '\n' + "<color=yellow>" + costItem + "g" + "</color>";
     }
     public void OnPointerExit(PointerEventData eventData)
     {

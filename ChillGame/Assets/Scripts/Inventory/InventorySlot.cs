@@ -1,26 +1,51 @@
-using UnityEditor.Experimental.GraphView;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
-
-public class InventorySlot : MonoBehaviour, IDropHandler
+public enum SlotType
+{
+    None,
+    Sword,
+    water,
+    fishRod,
+    seed,
+    crop
+}
+public class InventorySlot : MonoBehaviour, IDropHandler, IPointerDownHandler
 {
     public bool eqSlot;
     public bool shopSlot;
     public bool rushBin = false;
     public SlotType type;
     GameObject gamem;
+    //
+    float clicked = 0;
+    float clicktime = 0;
+    float clickdelay = 0.5f;
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        clicked++;
+        if (clicked == 1) clicktime = Time.time;
+
+        if (clicked > 1 && Time.time - clicktime < clickdelay)
+        {
+            clicked = 0;
+            clicktime = 0;
+            //dodaj do slota iseq
+            if (transform.GetComponentInChildren<InventoryItem>().item.tool == true)
+            {
+                Debug.Log("Double CLick: " + this.GetComponent<RectTransform>().name);
+            }
+            else
+            {
+                Debug.Log("Empty");
+            }
+        }
+        else if (clicked > 2 || Time.time - clicktime > 1) clicked = 0;
+    }
     private void Start()
     {
         gamem = GameObject.FindGameObjectWithTag("gamem");
-    }
-    public enum SlotType
-    {
-        None,
-        Sword,
-        water,
-        fishRod,
-        seed,
-        crop
     }
     public void OnDrop(PointerEventData eventData)
     {
@@ -30,7 +55,7 @@ public class InventorySlot : MonoBehaviour, IDropHandler
 
             if (transform.childCount == 0)
             {
-                if ((int)type == (int)item.item.itemtype)
+                if ((int)type == (int)item.item.type)
                 {
                     InventoryItem inventoryItem = eventData.pointerDrag.GetComponent<InventoryItem>();
                     inventoryItem.parentAfterDrag = transform;
@@ -38,7 +63,7 @@ public class InventorySlot : MonoBehaviour, IDropHandler
             }
             else if (transform.childCount == 1 && transform.GetChild(0).GetComponent<InventoryItem>().item != eventData.pointerDrag.GetComponent<InventoryItem>().item)
             {
-                if ((int)type == (int)item.item.itemtype)
+                if ((int)type == (int)item.item.type)
                 {
                     InventoryItem inventoryItem = eventData.pointerDrag.GetComponent<InventoryItem>();
                     InventoryItem inventoryItem2 = transform.GetChild(0).GetComponent<InventoryItem>();

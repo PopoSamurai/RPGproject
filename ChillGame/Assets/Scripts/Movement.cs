@@ -28,7 +28,7 @@ public class Movement : MonoBehaviour
 
     void Update()
     {
-        if(actionButton)
+        if (actionButton)
         {
             switch (action)
             {
@@ -52,7 +52,6 @@ public class Movement : MonoBehaviour
                     break;
             }
         }
-
         if (move)
         {
             if (Input.GetKey(KeyCode.Mouse0) && !EventSystem.current.IsPointerOverGameObject())

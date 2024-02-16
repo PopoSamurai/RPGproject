@@ -7,17 +7,9 @@ public class Item : ScriptableObject
     public string nameItem;
     public TileBase tile;
     public Sprite icon;
-    public ItemType itemtype;
+    public SlotType type;
     public Vector2Int range = new Vector2Int(5, 4);
     public bool isStack = false;
     public int costTosell = 0;
-    public enum ItemType
-    {
-        None,
-        Sword,
-        water,
-        fishRod,
-        seed,
-        crop
-    }
+    public bool tool = false;
 }
