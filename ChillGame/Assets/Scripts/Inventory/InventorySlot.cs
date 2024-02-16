@@ -84,8 +84,6 @@ public class InventorySlot : MonoBehaviour, IDropHandler
             //connect items
             else if (transform.GetComponentInChildren<InventoryItem>().item.isStack == true && transform.GetComponentInChildren<InventoryItem>().count + eventData.pointerDrag.GetComponent<InventoryItem>().count < 65)
             {
-                Debug.Log("connect");
-                //rozdzielanie itemow w sklepie napraw!
                 InventoryItem inventoryItem2 = transform.GetComponentInChildren<InventoryItem>();
                 inventoryItem3.parentAfterDrag = transform;
                 gamem.GetComponent<InventoryManager>().money += inventoryItem3.costItem;
@@ -95,7 +93,6 @@ public class InventorySlot : MonoBehaviour, IDropHandler
             }
             else
             {
-                Debug.Log("else");
                 inventoryItem3.parentAfterDrag = transform;
             }
         }
@@ -106,19 +103,17 @@ public class InventorySlot : MonoBehaviour, IDropHandler
             //buy on free slot
             if (transform.childCount == 0 && gamem.GetComponent<InventoryManager>().money >= inventoryItem.costItem)
             {
-                Debug.Log("7");
                 inventoryItem.parentAfterDrag = transform;
 
                 if (inventoryItem.parentAfterDrag.transform.GetComponent<InventorySlot>().shopSlot == false)
                 {
-                    Debug.Log("aaa");
                     gamem.GetComponent<InventoryManager>().money -= inventoryItem.costItem;
                 }
             }
             //swap items
             else if (transform.childCount == 1 && transform.GetComponentInChildren<InventoryItem>().item != eventData.pointerDrag.GetComponent<InventoryItem>().item)
             {
-                Debug.Log("Its not free slot 6");
+                Debug.Log("Its not free slot");
             }
             //connect items
             else if (eventData.pointerDrag.GetComponentInChildren<InventoryItem>().item.isStack == true)
@@ -127,22 +122,18 @@ public class InventorySlot : MonoBehaviour, IDropHandler
 
                 if (inventoryItem2 == null && transform.GetComponentInParent<InventorySlot>().shopSlot == false && gamem.GetComponent<InventoryManager>().money >= inventoryItem.item.costTosell)
                 {
-                    Debug.Log("1");
                     gamem.GetComponent<InventoryManager>().money -= inventoryItem.item.costTosell;
                     inventoryItem.parentAfterDrag = transform;
                     inventoryItem.RefreshCount();
                 }
                 else if (inventoryItem2 == null && transform.GetComponentInParent<InventorySlot>().shopSlot == true)
                 {
-                    Debug.Log("2");
                     inventoryItem.parentAfterDrag = transform;
                     inventoryItem.RefreshCount();
                 }
                 else if (inventoryItem2 != null && transform.GetComponentInParent<InventorySlot>().shopSlot == false && gamem.GetComponent<InventoryManager>().money >= inventoryItem.item.costTosell)
                 {
-                    //tu
-                    Debug.Log("3");
-                    gamem.GetComponent<InventoryManager>().money -= inventoryItem.item.costTosell;
+                    gamem.GetComponent<InventoryManager>().money -= inventoryItem.costItem;
                     inventoryItem.parentAfterDrag = transform;
                     inventoryItem.count += inventoryItem2.count;
                     inventoryItem.RefreshCount();
@@ -150,31 +141,49 @@ public class InventorySlot : MonoBehaviour, IDropHandler
                 }
                 else if (inventoryItem2 != null && transform.GetComponentInParent<InventorySlot>().shopSlot == true)
                 {
-                    Debug.Log("4");
                     inventoryItem.parentAfterDrag = transform;
                     inventoryItem.count += inventoryItem2.count;
                     inventoryItem.RefreshCount();
                     Destroy(inventoryItem2.gameObject);
                 }
-                else
+                else if(inventoryItem2 == null) //block all
                 {
-                    Debug.Log("You don't have money farmer 2");
+                    InventorySlot slotParent = GetComponent<InventorySlot>();
+                    if(eventData.pointerDrag.GetComponentInChildren<InventoryItem>().count == 1)
+                    {
+                        slotParent = inventoryItem.GetComponent<InventoryItem>().parentAfterDrag.GetComponentInParent<InventorySlot>();
+                        slotParent.GetComponentInChildren<InventoryItem>().count += 1;
+                        slotParent.GetComponentInChildren<InventoryItem>().RefreshCount();
+                        Destroy(inventoryItem.gameObject);
+                        Debug.Log("You don't have money farmer");
+                    }
+                    else
+                    {
+                        Debug.Log("You don't have money farmer");
+                    }
+                }
+                else if (inventoryItem2 != null) //block 1 slot
+                {
+                    InventorySlot slotParent = GetComponent<InventorySlot>();
+                    slotParent = inventoryItem.GetComponent<InventoryItem>().parentAfterDrag.GetComponentInParent<InventorySlot>();
+                    slotParent.GetComponentInChildren<InventoryItem>().count += 1;
+                    slotParent.GetComponentInChildren<InventoryItem>().RefreshCount();
+                    Destroy(inventoryItem.gameObject);
+                    Debug.Log("You don't have money farmer");
                 }
             }
             else if(inventoryItem.parentAfterDrag.transform.GetComponentInChildren<InventorySlot>().shopSlot == true && transform.GetComponentInChildren<InventorySlot>().shopSlot == true)
             {
-                Debug.Log("fix");
                 inventoryItem.parentAfterDrag = transform;
             }
             else
             {
-                Debug.Log("You don't have money farmer 3");
+                Debug.Log("You don't have money farmer");
             }
         }
         //rushbin
         else if(rushBin == true)
         {
-            Debug.Log("rushbin");
             Destroy(eventData.pointerDrag);
         }
         else
@@ -182,14 +191,12 @@ public class InventorySlot : MonoBehaviour, IDropHandler
             //change item position
             if (transform.childCount == 0)
             {
-                Debug.Log("change item pos");
                 InventoryItem inventoryItem = eventData.pointerDrag.GetComponent<InventoryItem>();
                 inventoryItem.parentAfterDrag = transform;
             }
             //swap items
             else if (transform.childCount == 1 && transform.GetComponentInChildren<InventoryItem>().item != eventData.pointerDrag.GetComponent<InventoryItem>().item) // swap items
             {
-                Debug.Log("normal swap");
                 InventoryItem inventoryItem = eventData.pointerDrag.GetComponent<InventoryItem>();
                 InventoryItem inventoryItem2 = transform.GetComponentInChildren<InventoryItem>();
                 inventoryItem.parentAfterDrag = transform;
@@ -199,7 +206,6 @@ public class InventorySlot : MonoBehaviour, IDropHandler
             //connect items
             else if (transform.GetComponentInChildren<InventoryItem>().item.isStack == true && transform.GetComponentInChildren<InventoryItem>().count + eventData.pointerDrag.GetComponent<InventoryItem>().count < 65)
             {
-                Debug.Log("normal connect");
                 InventoryItem inventoryItem = eventData.pointerDrag.GetComponent<InventoryItem>();
                 InventoryItem inventoryItem2 = transform.GetComponentInChildren<InventoryItem>();
                 inventoryItem.parentAfterDrag = transform;
