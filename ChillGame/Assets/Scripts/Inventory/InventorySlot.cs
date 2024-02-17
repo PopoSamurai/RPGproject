@@ -21,7 +21,6 @@ public class InventorySlot : MonoBehaviour, IDropHandler, IPointerDownHandler
     float clicked = 0;
     float clicktime = 0;
     float clickdelay = 0.5f;
-
     public void OnPointerDown(PointerEventData eventData)
     {
         clicked++;
@@ -31,10 +30,23 @@ public class InventorySlot : MonoBehaviour, IDropHandler, IPointerDownHandler
         {
             clicked = 0;
             clicktime = 0;
-            //dodaj do slota iseq
-            if (transform.GetComponentInChildren<InventoryItem>().item.tool == true)
+
+            if (transform.childCount != 0)
             {
-                Debug.Log("Double CLick: " + this.GetComponent<RectTransform>().name);
+                for (int i = 0; i < gamem.GetComponent<InventoryManager>().inventorySlots.Length; i++)
+                {
+                    if (eventData.pointerEnter.GetComponent<InventoryItem>().item.type == gamem.GetComponent<InventoryManager>().inventorySlots[i].GetComponent<InventorySlot>().type && gamem.GetComponent<InventoryManager>().inventorySlots[i].GetComponent<InventorySlot>().transform.childCount == 0)
+                    {
+                        eventData.pointerEnter.GetComponent<InventoryItem>().transform.parent = gamem.GetComponent<InventoryManager>().inventorySlots[i].GetComponent<InventorySlot>().transform;
+                    }
+                    else if (eventData.pointerEnter.GetComponent<InventoryItem>().item.type == gamem.GetComponent<InventoryManager>().inventorySlots[i].GetComponent<InventorySlot>().type && gamem.GetComponent<InventoryManager>().inventorySlots[i].GetComponent<InventorySlot>().transform.childCount == 1)
+                    {
+                        Debug.Log("Slot jest zajêty");
+                        InventoryItem inventoryItem2 = gamem.GetComponent<InventoryManager>().inventorySlots[i].GetComponent<InventorySlot>().transform.GetComponentInChildren<InventoryItem>();
+                        inventoryItem2.transform.parent = eventData.pointerEnter.GetComponent<InventoryItem>().transform.parent;
+                        eventData.pointerEnter.GetComponent<InventoryItem>().transform.parent = gamem.GetComponent<InventoryManager>().inventorySlots[i].GetComponent<InventorySlot>().transform;
+                    }
+                }
             }
             else
             {
