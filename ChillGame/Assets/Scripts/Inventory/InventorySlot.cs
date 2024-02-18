@@ -31,27 +31,7 @@ public class InventorySlot : MonoBehaviour, IDropHandler, IPointerDownHandler
             clicked = 0;
             clicktime = 0;
 
-            if (transform.childCount != 0)
-            {
-                for (int i = 0; i < gamem.GetComponent<InventoryManager>().inventorySlots.Length; i++)
-                {
-                    if (eventData.pointerEnter.GetComponent<InventoryItem>().item.type == gamem.GetComponent<InventoryManager>().inventorySlots[i].GetComponent<InventorySlot>().type && gamem.GetComponent<InventoryManager>().inventorySlots[i].GetComponent<InventorySlot>().transform.childCount == 0)
-                    {
-                        eventData.pointerEnter.GetComponent<InventoryItem>().transform.parent = gamem.GetComponent<InventoryManager>().inventorySlots[i].GetComponent<InventorySlot>().transform;
-                    }
-                    else if (eventData.pointerEnter.GetComponent<InventoryItem>().item.type == gamem.GetComponent<InventoryManager>().inventorySlots[i].GetComponent<InventorySlot>().type && gamem.GetComponent<InventoryManager>().inventorySlots[i].GetComponent<InventorySlot>().transform.childCount == 1)
-                    {
-                        Debug.Log("Slot jest zajêty");
-                        InventoryItem inventoryItem2 = gamem.GetComponent<InventoryManager>().inventorySlots[i].GetComponent<InventorySlot>().transform.GetComponentInChildren<InventoryItem>();
-                        inventoryItem2.transform.parent = eventData.pointerEnter.GetComponent<InventoryItem>().transform.parent;
-                        eventData.pointerEnter.GetComponent<InventoryItem>().transform.parent = gamem.GetComponent<InventoryManager>().inventorySlots[i].GetComponent<InventorySlot>().transform;
-                    }
-                }
-            }
-            else
-            {
-                Debug.Log("Empty");
-            }
+            Debug.Log("Use item");
         }
         else if (clicked > 2 || Time.time - clicktime > 1) clicked = 0;
     }
