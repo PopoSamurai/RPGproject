@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Tilemaps;
 public enum Actions { Empty, Fishing, Seeds, Water, Crop, Fight}
 public class Movement : MonoBehaviour
 {
@@ -57,6 +58,7 @@ public class Movement : MonoBehaviour
             if (Input.GetKey(KeyCode.Mouse0) && !EventSystem.current.IsPointerOverGameObject())
             {
                 actionButton = true;
+                UseTool();
             }
             change = Vector3.zero;
             change.x = Input.GetAxisRaw("Horizontal");
@@ -94,6 +96,10 @@ public class Movement : MonoBehaviour
                 Attack();
             }
         }
+    }
+    private void UseTool()
+    {
+        //Vector2 position = rb.position + this.transform.
     }
     void updateAnimationAndMove()
     {

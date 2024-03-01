@@ -1,0 +1,802 @@
+fileFormatVersion: 2
+guid: 52e96b1918cb6594bb679c542857578a
+TextureImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 12
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 3
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Server
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: uiCartoon_0
+      rect:
+        serializedVersion: 2
+        x: 1323
+        y: 1264
+        width: 125
+        height: 94
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ca447b6af1bc2254c9354f9e6881009d
+      internalID: 419064729
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: uiCartoon_2
+      rect:
+        serializedVersion: 2
+        x: 1487
+        y: 1277
+        width: 87
+        height: 83
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 658289f346b71f041ad995663bfbeaa1
+      internalID: -1129382652
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: uiCartoon_3
+      rect:
+        serializedVersion: 2
+        x: 1601
+        y: 1273
+        width: 102
+        height: 75
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c6825da71a45df04ab7c1da230ef3db6
+      internalID: 660590756
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: uiCartoon_4
+      rect:
+        serializedVersion: 2
+        x: 1749
+        y: 1275
+        width: 96
+        height: 56
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9374f5ad618cf894e804e5804e965f67
+      internalID: -1561303967
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: uiCartoon_6
+      rect:
+        serializedVersion: 2
+        x: 1884
+        y: 1262
+        width: 124
+        height: 109
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 99e9a5b8686aa92438fcfdabcb41f929
+      internalID: 1897579816
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: uiCartoon_8
+      rect:
+        serializedVersion: 2
+        x: 2031
+        y: 1274
+        width: 73
+        height: 76
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 292dae6ae077d814699803df6a341aec
+      internalID: 813613884
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: uiCartoon_12
+      rect:
+        serializedVersion: 2
+        x: 2301
+        y: 1270
+        width: 83
+        height: 84
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0df5cf9382aa947469210c1f04f8bdf6
+      internalID: -2036165066
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: uiCartoon_15
+      rect:
+        serializedVersion: 2
+        x: 2422
+        y: 1291
+        width: 83
+        height: 68
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4800b02032ac2ce4683ce7e23a9afbbd
+      internalID: -678370582
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: uiCartoon_16
+      rect:
+        serializedVersion: 2
+        x: 2157
+        y: 1266
+        width: 122
+        height: 93
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0ade8be68a2fb994eb71f0d89a90af8c
+      internalID: 1090233079
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: uiCartoon_24
+      rect:
+        serializedVersion: 2
+        x: 1910
+        y: 1167
+        width: 70
+        height: 70
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5a92cb95bcbada341ae30226f05d98b6
+      internalID: -958801880
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: uiCartoon_27
+      rect:
+        serializedVersion: 2
+        x: 1961
+        y: 717
+        width: 181
+        height: 317
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2cc1f6c7cbec5104ba295e386fd320f6
+      internalID: 1576491447
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: uiCartoon_28
+      rect:
+        serializedVersion: 2
+        x: 2220
+        y: 717
+        width: 184
+        height: 317
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d4fbfedf2d797ff4eaade3e42e1737fc
+      internalID: 152382591
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: uiCartoon_29
+      rect:
+        serializedVersion: 2
+        x: 1741
+        y: 488
+        width: 489
+        height: 140
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c914373a501009141af82003fe5aafbd
+      internalID: -1289530229
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: uiCartoon_30
+      rect:
+        serializedVersion: 2
+        x: 2270
+        y: 488
+        width: 134
+        height: 177
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 778b49ce104c35b4e9caf41c49b8d3cc
+      internalID: 380904568
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: uiCartoon_31
+      rect:
+        serializedVersion: 2
+        x: 391
+        y: 109
+        width: 137
+        height: 325
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dc3442dad0084d7428ad91387870e765
+      internalID: -513064295
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: uiCartoon_32
+      rect:
+        serializedVersion: 2
+        x: 576
+        y: 293
+        width: 315
+        height: 140
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b145c87098a263642a05fe1edc708b70
+      internalID: -1937592063
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: uiCartoon_33
+      rect:
+        serializedVersion: 2
+        x: 941
+        y: 251
+        width: 71
+        height: 182
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 92afa04ba3a4d6f45bce06a61270c3e2
+      internalID: -1772961025
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: uiCartoon_34
+      rect:
+        serializedVersion: 2
+        x: 1039
+        y: 251
+        width: 70
+        height: 181
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: af141b25ebd110141802a29c434a6f3f
+      internalID: -908398643
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: uiCartoon_35
+      rect:
+        serializedVersion: 2
+        x: 1157
+        y: 249
+        width: 182
+        height: 182
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1da8b94a8c499bf489ac4ef535b514d8
+      internalID: 413861606
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: uiCartoon_36
+      rect:
+        serializedVersion: 2
+        x: 1686
+        y: 117
+        width: 140
+        height: 324
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 998131f472702054782cc1b2978e7ca3
+      internalID: 1869566112
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: uiCartoon_37
+      rect:
+        serializedVersion: 2
+        x: 1871
+        y: 301
+        width: 317
+        height: 140
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 80fea2627f6ba4a40915fd7f046fdb54
+      internalID: -1412886297
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: uiCartoon_38
+      rect:
+        serializedVersion: 2
+        x: 2236
+        y: 259
+        width: 73
+        height: 182
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 62f64c3acbac16c4883df570977d8ab8
+      internalID: 1437366083
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: uiCartoon_39
+      rect:
+        serializedVersion: 2
+        x: 2334
+        y: 259
+        width: 72
+        height: 181
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4dd6331a1d9e570478696a1f0913dfeb
+      internalID: -2041509490
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: uiCartoon_40
+      rect:
+        serializedVersion: 2
+        x: 579
+        y: 72
+        width: 243
+        height: 182
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6e9f2470fcfe52c438844f40fe0a33bc
+      internalID: -1886966279
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: uiCartoon_41
+      rect:
+        serializedVersion: 2
+        x: 925
+        y: 66
+        width: 486
+        height: 139
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a337e3e3dc91c8b4893499c107036234
+      internalID: -1263582241
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: uiCartoon_42
+      rect:
+        serializedVersion: 2
+        x: 1454
+        y: 66
+        width: 131
+        height: 176
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f618606ea3808e4479260718c3673efd
+      internalID: -521094634
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: uiCartoon_43
+      rect:
+        serializedVersion: 2
+        x: 1874
+        y: 79
+        width: 246
+        height: 183
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e1631a4bf7d50d34f9e0baaa7140510b
+      internalID: 1540086117
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: uiCartoon_44
+      rect:
+        serializedVersion: 2
+        x: 2222
+        y: 31
+        width: 184
+        height: 182
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f3a9666a03a69744084c1b69c440d103
+      internalID: -417463625
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: uiCartoon_1
+      rect:
+        serializedVersion: 2
+        x: 360
+        y: 633
+        width: 640
+        height: 555
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7951c8f98cf808d43b47d91dddcc3f8f
+      internalID: -1042895259
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: uiCartoon_5
+      rect:
+        serializedVersion: 2
+        x: 1087
+        y: 627
+        width: 546
+        height: 571
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e2c9979fcfcdcf24f8918948ef3e7923
+      internalID: 529798887
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    nameFileIdTable:
+      uiCartoon_0: 419064729
+      uiCartoon_1: -1042895259
+      uiCartoon_10: 219577230
+      uiCartoon_11: 561138767
+      uiCartoon_12: -2036165066
+      uiCartoon_13: -1241305467
+      uiCartoon_14: -60684231
+      uiCartoon_15: -678370582
+      uiCartoon_16: 1090233079
+      uiCartoon_17: -153524286
+      uiCartoon_18: 464363132
+      uiCartoon_19: -182240221
+      uiCartoon_2: -1129382652
+      uiCartoon_20: -416650033
+      uiCartoon_21: 1151879995
+      uiCartoon_22: -591967512
+      uiCartoon_23: -2036034194
+      uiCartoon_24: -958801880
+      uiCartoon_25: 968987233
+      uiCartoon_26: -670863573
+      uiCartoon_27: 1576491447
+      uiCartoon_28: 152382591
+      uiCartoon_29: -1289530229
+      uiCartoon_3: 660590756
+      uiCartoon_30: 380904568
+      uiCartoon_31: -513064295
+      uiCartoon_32: -1937592063
+      uiCartoon_33: -1772961025
+      uiCartoon_34: -908398643
+      uiCartoon_35: 413861606
+      uiCartoon_36: 1869566112
+      uiCartoon_37: -1412886297
+      uiCartoon_38: 1437366083
+      uiCartoon_39: -2041509490
+      uiCartoon_4: -1561303967
+      uiCartoon_40: -1886966279
+      uiCartoon_41: -1263582241
+      uiCartoon_42: -521094634
+      uiCartoon_43: 1540086117
+      uiCartoon_44: -417463625
+      uiCartoon_5: 529798887
+      uiCartoon_6: 1897579816
+      uiCartoon_7: -39266929
+      uiCartoon_8: 813613884
+      uiCartoon_9: -819468080
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
