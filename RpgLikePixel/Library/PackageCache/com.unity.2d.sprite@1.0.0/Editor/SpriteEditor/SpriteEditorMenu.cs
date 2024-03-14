@@ -1,7 +1,6 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
-using UnityEngine.Experimental.Rendering;
 using UnityEvent = UnityEngine.Event;
 
 namespace UnityEditor.U2D.Sprites
@@ -414,7 +413,7 @@ namespace UnityEditor.U2D.Sprites
         {
             float spacing = 38f;
             var texture = m_TextureDataProvider.GetReadableTexture2D();
-            if (texture != null && GraphicsFormatUtility.IsCompressedFormat(texture.format))
+            if (texture != null && UnityEditor.TextureUtil.IsCompressedTextureFormat(texture.format))
             {
                 EditorGUILayout.LabelField(s_Styles.automaticSlicingHintLabel, s_Styles.notice);
                 spacing -= 31f;
@@ -533,12 +532,17 @@ namespace UnityEditor.U2D.Sprites
 
         private void DetermineGridCellSizeWithCellCount(out Vector2 cellSize)
         {
-            m_TextureDataProvider.GetTextureActualWidthAndHeight(out var width, out var height);
+            int width, height;
+            m_TextureDataProvider.GetTextureActualWidthAndHeight(out width, out height);
             var texture = m_TextureDataProvider.GetReadableTexture2D();
             int maxWidth = texture != null ? width : 4096;
             int maxHeight = texture != null ? height : 4096;
 
-            SpriteEditorUtility.DetermineGridCellSizeWithCellCount(maxWidth, maxHeight, s_Setting.gridSpriteOffset, s_Setting.gridSpritePadding, s_Setting.gridCellCount, out cellSize);
+            cellSize.x = (maxWidth - s_Setting.gridSpriteOffset.x - (s_Setting.gridSpritePadding.x * s_Setting.gridCellCount.x)) / s_Setting.gridCellCount.x;
+            cellSize.y = (maxHeight - s_Setting.gridSpriteOffset.y - (s_Setting.gridSpritePadding.y * s_Setting.gridCellCount.y)) / s_Setting.gridCellCount.y;
+
+            cellSize.x = Mathf.Clamp(cellSize.x, 1, maxWidth);
+            cellSize.y = Mathf.Clamp(cellSize.y, 1, maxHeight);
         }
     }
 }

@@ -60,7 +60,7 @@ namespace UnityEditor.Tilemaps
                 case EventType.DragUpdated:
                     DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
                     List<TileBase> tiles = TileDragAndDrop.GetValidTiles(DragAndDrop.objectReferences);
-                    instance.m_HoverData = TileDragAndDrop.CreateHoverData(null, null, tiles, null, activeGrid.cellLayout);
+                    instance.m_HoverData = TileDragAndDrop.CreateHoverData(null, null, tiles, activeGrid.cellLayout);
                     if (instance.m_HoverData.Count > 0)
                     {
                         Event.current.Use();
@@ -92,17 +92,19 @@ namespace UnityEditor.Tilemaps
                 case EventType.Repaint:
                     if (instance.m_HoverData != null)
                     {
-                        DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+                        Tilemap map = Selection.activeGameObject.GetComponentInParent<Tilemap>();
 
-                        var map = Selection.activeGameObject.GetComponentInParent<Tilemap>();
-                        var hasMap = map != null;
-                        if (hasMap)
-                        {
+                        if (map != null)
                             map.ClearAllEditorPreviewTiles();
-                            foreach (KeyValuePair<Vector2Int, TileDragAndDropHoverData> item in instance.m_HoverData)
+
+                        DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+                        foreach (KeyValuePair<Vector2Int, TileDragAndDropHoverData> item in instance.m_HoverData)
+                        {
+                            Vector3Int gridPos = mouseGridPosition + new Vector3Int(item.Key.x, item.Key.y, 0);
+                            if (item.Value.hoverObject is TileBase)
                             {
-                                var gridPos = mouseGridPosition + new Vector3Int(item.Key.x, item.Key.y, 0);
-                                if (item.Value.hoverObject is TileBase tile)
+                                TileBase tile = item.Value.hoverObject as TileBase;
+                                if (map != null)
                                 {
                                     map.SetEditorPreviewTile(gridPos, tile);
                                 }

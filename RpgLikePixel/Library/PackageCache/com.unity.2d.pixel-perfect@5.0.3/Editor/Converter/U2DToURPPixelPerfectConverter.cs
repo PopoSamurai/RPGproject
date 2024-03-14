@@ -4,7 +4,7 @@ using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
 using U2DPackage = UnityEngine.U2D;
-using URPPackage = UnityEngine.Rendering.Universal;
+using URPPackage = UnityEngine.Experimental.Rendering.Universal;
 
 namespace UnityEditor.Rendering.Universal
 {

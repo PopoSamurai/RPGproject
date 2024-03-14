@@ -49,30 +49,12 @@ namespace UnityEditor.Tilemaps
         [SerializeField]
         private bool m_FloodFillContiguousOnly = true;
 
-        [SerializeField]
-        [HideInInspector]
-        private GridLayout.CellLayout m_LastPickedLayout = GridLayout.CellLayout.Rectangle;
-
-        [SerializeField]
-        [HideInInspector]
-        private GridLayout.CellSwizzle m_LastPickedCellSwizzle = GridLayout.CellSwizzle.XYZ;
-
-        [SerializeField]
-        [HideInInspector]
-        private Vector3 m_LastPickedCellSize = Vector3.one;
-
-        [SerializeField]
-        [HideInInspector]
-        private Vector3 m_LastPickedCellGap = Vector3.zero;
-
         private Vector3Int m_StoredSize;
         private Vector3Int m_StoredPivot;
         private BrushCell[] m_StoredCells;
 
         private static readonly Matrix4x4 s_Clockwise = new Matrix4x4(new Vector4(0f, -1f, 0f, 0f), new Vector4(1f, 0f, 0f, 0f), new Vector4(0f, 0f, 1f, 0f), new Vector4(0f, 0f, 0f, 1f));
         private static readonly Matrix4x4 s_CounterClockwise = new Matrix4x4(new Vector4(0f, 1f, 0f, 0f), new Vector4(-1f, 0f, 0f, 0f), new Vector4(0f, 0f, 1f, 0f), new Vector4(0f, 0f, 0f, 1f));
-        private static readonly Matrix4x4 s_HexagonClockwise = new Matrix4x4(new Vector4(Mathf.Cos(Mathf.Deg2Rad * -60f), Mathf.Sin(Mathf.Deg2Rad *-60f), 0f, 0f), new Vector4(-Mathf.Sin(Mathf.Deg2Rad * -60f), Mathf.Cos(Mathf.Deg2Rad * -60f), 0f, 0f), new Vector4(0f, 0f, 1f, 0f), new Vector4(0f, 0f, 0f, 1f));
-        private static readonly Matrix4x4 s_HexagonCounterClockwise = new Matrix4x4(new Vector4(Mathf.Cos(Mathf.Deg2Rad * 60f), Mathf.Sin(Mathf.Deg2Rad * 60f), 0f, 0f), new Vector4(-Mathf.Sin(Mathf.Deg2Rad * 60f), Mathf.Cos(Mathf.Deg2Rad * 60f), 0f, 0f), new Vector4(0f, 0f, 1f, 0f), new Vector4(0f, 0f, 0f, 1f));
         private static readonly Matrix4x4 s_180Rotate = new Matrix4x4(new Vector4(-1f, 0f, 0f, 0f), new Vector4(0f, -1f, 0f, 0f), new Vector4(0f, 0f, 1f, 0f), new Vector4(0f, 0f, 0f, 1f));
 
         /// <summary>Size of the brush in cells. </summary>
@@ -82,33 +64,17 @@ namespace UnityEditor.Tilemaps
         /// <summary>All the brush cells the brush holds. </summary>
         public BrushCell[] cells { get { return m_Cells; } }
         /// <summary>Number of brush cells in the brush.</summary>
-        public int cellCount { get { return m_Cells?.Length ?? 0; } }
+        public int cellCount { get { return m_Cells != null ? m_Cells.Length : 0; } }
         /// <summary>Whether the brush can change Z Position</summary>
         public bool canChangeZPosition
         {
-            get => m_CanChangeZPosition;
-            set => m_CanChangeZPosition = value;
+            get { return m_CanChangeZPosition; }
+            set { m_CanChangeZPosition = value; }
         }
 
-        /// <summary>
-        /// Cell Layout of the Grid which the GridBrush last picked from.
-        /// </summary>
-        public GridLayout.CellLayout lastPickedCellLayout => m_LastPickedLayout;
-        /// <summary>
-        /// Cell Swizzle of the Grid which the GridBrush last picked from.
-        /// </summary>
-        public GridLayout.CellSwizzle lastPickedCellSwizzle => m_LastPickedCellSwizzle;
-        /// <summary>
-        /// Cell Size of the Grid which the GridBrush last picked from.
-        /// </summary>
-        public Vector3 lastPickedCellSize => m_LastPickedCellSize;
-        /// <summary>
-        /// Cell Gap of the Grid which the GridBrush last picked from.
-        /// </summary>
-        public Vector3 lastPickedCellGap => m_LastPickedCellGap;
 
         /// <summary>
-        /// Default built-in brush for painting or erasing Tiles and/or GameObjects on a Grid.
+        /// Default built-in brush for painting or erasing tiles and/or gameobjects on a grid.
         /// </summary>
         public GridBrush()
         {
@@ -117,20 +83,20 @@ namespace UnityEditor.Tilemaps
         }
 
         /// <summary>Initializes the content of the GridBrush.</summary>
-        /// <param name="newSize">Size of the GridBrush.</param>
-        public void Init(Vector3Int newSize)
+        /// <param name="size">Size of the GridBrush.</param>
+        public void Init(Vector3Int size)
         {
-            Init(newSize, Vector3Int.zero);
+            Init(size, Vector3Int.zero);
             SizeUpdated();
         }
 
         /// <summary>Initializes the content of the GridBrush.</summary>
-        /// <param name="newSize">Size of the GridBrush.</param>
-        /// <param name="newPivot">Pivot point of the GridBrush.</param>
-        public void Init(Vector3Int newSize, Vector3Int newPivot)
+        /// <param name="size">Size of the GridBrush.</param>
+        /// <param name="pivot">Pivot point of the GridBrush.</param>
+        public void Init(Vector3Int size, Vector3Int pivot)
         {
-            m_Size = newSize;
-            m_Pivot = newPivot;
+            m_Size = size;
+            m_Pivot = pivot;
             SizeUpdated();
         }
 
@@ -165,19 +131,19 @@ namespace UnityEditor.Tilemaps
             if (brushTarget == null)
                 return;
 
-            var map = brushTarget.GetComponent<Tilemap>();
+            Tilemap map = brushTarget.GetComponent<Tilemap>();
             if (map == null)
                 return;
 
-            var count = 0;
+            int count = 0;
             var listSize = position.size.x * position.size.y * position.size.z;
             if (m_TileChangeDataList == null || m_TileChangeDataList.Capacity != listSize)
                 m_TileChangeDataList = new List<TileChangeData>(listSize);
             m_TileChangeDataList.Clear();
-            foreach (var location in position.allPositionsWithin)
+            foreach (Vector3Int location in position.allPositionsWithin)
             {
-                var local = location - position.min;
-                var cell = m_Cells[GetCellIndexWrapAround(local.x, local.y, local.z)];
+                Vector3Int local = location - position.min;
+                BrushCell cell = m_Cells[GetCellIndexWrapAround(local.x, local.y, local.z)];
                 if (cell.tile == null)
                     continue;
 
@@ -185,7 +151,7 @@ namespace UnityEditor.Tilemaps
                 m_TileChangeDataList.Add(tcd);
                 count++;
             }
-            // Duplicate empty slots in the list, as ExtractArrayFromList returns full list
+            // Duplicate empty slots in the list, as ExtractArrayFromListT returns full list
             if (0 < count && count < listSize)
             {
                 var tcd = m_TileChangeDataList[count - 1];
@@ -194,7 +160,7 @@ namespace UnityEditor.Tilemaps
                     m_TileChangeDataList.Add(tcd);
                 }
             }
-            var tileChangeData = NoAllocHelpers.ExtractArrayFromList(m_TileChangeDataList);
+            var tileChangeData = NoAllocHelpers.ExtractArrayFromListT(m_TileChangeDataList);
             map.SetTiles(tileChangeData, false);
         }
 
@@ -207,7 +173,7 @@ namespace UnityEditor.Tilemaps
             if (brushTarget == null)
                 return;
 
-            var map = brushTarget.GetComponent<Tilemap>();
+            Tilemap map = brushTarget.GetComponent<Tilemap>();
             if (map == null)
                 return;
 
@@ -216,11 +182,11 @@ namespace UnityEditor.Tilemaps
             if (m_TileChangeDataList == null || m_TileChangeDataList.Capacity != listSize)
                 m_TileChangeDataList = new List<TileChangeData>(listSize);
             m_TileChangeDataList.Clear();
-            foreach (var location in position.allPositionsWithin)
+            foreach (Vector3Int location in position.allPositionsWithin)
             {
                 m_TileChangeDataList.Add(new TileChangeData { position = location, tile = null, transform = identity, color = Color.white });
             }
-            var tileChangeData = NoAllocHelpers.ExtractArrayFromList(m_TileChangeDataList);
+            var tileChangeData = NoAllocHelpers.ExtractArrayFromListT(m_TileChangeDataList);
             map.SetTiles(tileChangeData, false);
         }
 
@@ -236,7 +202,7 @@ namespace UnityEditor.Tilemaps
             if (brushTarget == null)
                 return;
 
-            var map = brushTarget.GetComponent<Tilemap>();
+            Tilemap map = brushTarget.GetComponent<Tilemap>();
             if (map == null)
                 return;
 
@@ -272,30 +238,30 @@ namespace UnityEditor.Tilemaps
                 case GridLayout.CellLayout.IsometricZAsY:
                 case GridLayout.CellLayout.Rectangle:
                 {
-                    var oldSize = m_Size;
-                    var oldCells = m_Cells.Clone() as BrushCell[];
+                    Vector3Int oldSize = m_Size;
+                    BrushCell[] oldCells = m_Cells.Clone() as BrushCell[];
                     size = new Vector3Int(oldSize.y, oldSize.x, oldSize.z);
-                    var oldBounds = new BoundsInt(Vector3Int.zero, oldSize);
+                    BoundsInt oldBounds = new BoundsInt(Vector3Int.zero, oldSize);
 
-                    foreach (var oldPos in oldBounds.allPositionsWithin)
+                    foreach (Vector3Int oldPos in oldBounds.allPositionsWithin)
                     {
-                        var newX = direction == RotationDirection.Clockwise ? oldPos.y : oldSize.y - oldPos.y - 1;
-                        var newY = direction == RotationDirection.Clockwise ? oldSize.x - oldPos.x - 1 : oldPos.x;
-                        var toIndex = GetCellIndex(newX, newY, oldPos.z);
-                        var fromIndex = GetCellIndex(oldPos.x, oldPos.y, oldPos.z, oldSize.x, oldSize.y, oldSize.z);
+                        int newX = direction == RotationDirection.Clockwise ? oldPos.y : oldSize.y - oldPos.y - 1;
+                        int newY = direction == RotationDirection.Clockwise ? oldSize.x - oldPos.x - 1 : oldPos.x;
+                        int toIndex = GetCellIndex(newX, newY, oldPos.z);
+                        int fromIndex = GetCellIndex(oldPos.x, oldPos.y, oldPos.z, oldSize.x, oldSize.y, oldSize.z);
                         m_Cells[toIndex] = oldCells[fromIndex];
                     }
 
-                    var newPivotX = direction == RotationDirection.Clockwise ? pivot.y : oldSize.y - pivot.y - 1;
-                    var newPivotY = direction == RotationDirection.Clockwise ? oldSize.x - pivot.x - 1 : pivot.x;
+                    int newPivotX = direction == RotationDirection.Clockwise ? pivot.y : oldSize.y - pivot.y - 1;
+                    int newPivotY = direction == RotationDirection.Clockwise ? oldSize.x - pivot.x - 1 : pivot.x;
                     pivot = new Vector3Int(newPivotX, newPivotY, pivot.z);
 
-                    var rotation = direction == RotationDirection.Clockwise ? s_Clockwise : s_CounterClockwise;
-                    var counterRotation = direction != RotationDirection.Clockwise ? s_Clockwise : s_CounterClockwise;
+                    Matrix4x4 rotation = direction == RotationDirection.Clockwise ? s_Clockwise : s_CounterClockwise;
+                    Matrix4x4 counterRotation = direction != RotationDirection.Clockwise ? s_Clockwise : s_CounterClockwise;
                     foreach (BrushCell cell in m_Cells)
                     {
-                        var oldMatrix = cell.matrix;
-                        var counter = (oldMatrix.lossyScale.x < 0) ^ (oldMatrix.lossyScale.y < 0);
+                        Matrix4x4 oldMatrix = cell.matrix;
+                        bool counter = (oldMatrix.lossyScale.x < 0) ^ (oldMatrix.lossyScale.y < 0);
                         cell.matrix = oldMatrix * (counter ? counterRotation : rotation);
                     }
                 }
@@ -306,7 +272,7 @@ namespace UnityEditor.Tilemaps
         private static Vector3Int RotateHexagonPosition(RotationDirection direction, Vector3Int position)
         {
             var cube = HexagonToCube(position);
-            var rotatedCube = Vector3Int.zero;
+            Vector3Int rotatedCube = Vector3Int.zero;
             if (RotationDirection.Clockwise == direction)
             {
                 rotatedCube.x = -cube.y;
@@ -324,13 +290,13 @@ namespace UnityEditor.Tilemaps
 
         private void RotateHexagon(RotationDirection direction)
         {
-            var oldCells = m_Cells.Clone() as BrushCell[];
-            var oldPivot = new Vector3Int(pivot.x, pivot.y, pivot.z);
-            var oldSize = new Vector3Int(size.x, size.y, size.z);
-            var minSize = Vector3Int.zero;
-            var maxSize = Vector3Int.zero;
-            var oldBounds = new BoundsInt(Vector3Int.zero, oldSize);
-            foreach (var oldPos in oldBounds.allPositionsWithin)
+            BrushCell[] oldCells = m_Cells.Clone() as BrushCell[];
+            Vector3Int oldPivot = new Vector3Int(pivot.x, pivot.y, pivot.z);
+            Vector3Int oldSize = new Vector3Int(size.x, size.y, size.z);
+            Vector3Int minSize = Vector3Int.zero;
+            Vector3Int maxSize = Vector3Int.zero;
+            BoundsInt oldBounds = new BoundsInt(Vector3Int.zero, oldSize);
+            foreach (Vector3Int oldPos in oldBounds.allPositionsWithin)
             {
                 if (oldCells[GetCellIndex(oldPos.x, oldPos.y, oldPos.z, oldSize.x, oldSize.y, oldSize.z)].tile == null)
                     continue;
@@ -340,30 +306,22 @@ namespace UnityEditor.Tilemaps
                 maxSize.x = Mathf.Max(maxSize.x, pos.x);
                 maxSize.y = Mathf.Max(maxSize.y, pos.y);
             }
-            var newSize = new Vector3Int(1 + maxSize.x - minSize.x, 1 + maxSize.y - minSize.y, oldSize.z);
-            var newPivot = new Vector3Int(-minSize.x, -minSize.y, oldPivot.z);
+            Vector3Int newSize = new Vector3Int(1 + maxSize.x - minSize.x, 1 + maxSize.y - minSize.y, oldSize.z);
+            Vector3Int newPivot = new Vector3Int(-minSize.x, -minSize.y, oldPivot.z);
             UpdateSizeAndPivot(newSize, new Vector3Int(newPivot.x, newPivot.y, newPivot.z));
             foreach (Vector3Int oldPos in oldBounds.allPositionsWithin)
             {
                 if (oldCells[GetCellIndex(oldPos.x, oldPos.y, oldPos.z, oldSize.x, oldSize.y, oldSize.z)].tile == null)
                     continue;
-                var newPos = RotateHexagonPosition(direction, new Vector3Int(oldPos.x, oldPos.y, oldPos.z) - oldPivot) + newPivot;
+                Vector3Int newPos = RotateHexagonPosition(direction, new Vector3Int(oldPos.x, oldPos.y, oldPos.z) - oldPivot) + newPivot;
                 m_Cells[GetCellIndex(newPos.x, newPos.y, newPos.z)] = oldCells[GetCellIndex(oldPos.x, oldPos.y, oldPos.z, oldSize.x, oldSize.y, oldSize.z)];
             }
-
-            Matrix4x4 rotation = direction == RotationDirection.Clockwise ? s_HexagonClockwise : s_HexagonCounterClockwise;
-            Matrix4x4 counterRotation = direction != RotationDirection.Clockwise ? s_HexagonClockwise : s_HexagonCounterClockwise;
-            foreach (BrushCell cell in m_Cells)
-            {
-                Matrix4x4 oldMatrix = cell.matrix;
-                bool counter = (oldMatrix.lossyScale.x < 0) ^ (oldMatrix.lossyScale.y < 0);
-                cell.matrix = oldMatrix * (counter ? counterRotation : rotation);
-            }
+            // Do not rotate hexagon cell matrix, as hexagon cells are not perfect hexagons
         }
 
         private static Vector3Int HexagonToCube(Vector3Int position)
         {
-            var cube = Vector3Int.zero;
+            Vector3Int cube = Vector3Int.zero;
             cube.x = position.x - (position.y - (position.y & 1)) / 2;
             cube.z = position.y;
             cube.y = -cube.x - cube.z;
@@ -372,7 +330,7 @@ namespace UnityEditor.Tilemaps
 
         private static Vector3Int CubeToHexagon(Vector3Int position)
         {
-            var hexagon = Vector3Int.zero;
+            Vector3Int hexagon = Vector3Int.zero;
             hexagon.x = position.x + (position.z - (position.z & 1)) / 2;
             hexagon.y = position.z;
             hexagon.z = 0;
@@ -382,7 +340,7 @@ namespace UnityEditor.Tilemaps
         /// <summary>Flips the brush in the given axis.</summary>
         /// <param name="flip">Axis to flip by.</param>
         /// <param name="layout">Cell Layout for flipping.</param>
-        public override void Flip(FlipAxis flip, GridLayout.CellLayout layout)
+        public override void Flip(FlipAxis flip, Grid.CellLayout layout)
         {
             if (flip == FlipAxis.X)
                 FlipX(layout);
@@ -400,18 +358,13 @@ namespace UnityEditor.Tilemaps
             Reset();
             UpdateSizeAndPivot(new Vector3Int(position.size.x, position.size.y, 1), new Vector3Int(pickStart.x, pickStart.y, 0));
 
-            m_LastPickedLayout = gridLayout.cellLayout;
-            m_LastPickedCellSize = gridLayout.cellSize;
-            m_LastPickedCellGap = gridLayout.cellGap;
-            m_LastPickedCellSwizzle = gridLayout.cellSwizzle;
-
             if (brushTarget == null)
                 return;
 
-            var tilemap = brushTarget.GetComponent<Tilemap>();
-            foreach (var pos in position.allPositionsWithin)
+            Tilemap tilemap = brushTarget.GetComponent<Tilemap>();
+            foreach (Vector3Int pos in position.allPositionsWithin)
             {
-                var brushPosition = new Vector3Int(pos.x - position.x, pos.y - position.y, 0);
+                Vector3Int brushPosition = new Vector3Int(pos.x - position.x, pos.y - position.y, 0);
                 PickCell(pos, brushPosition, tilemap);
             }
         }
@@ -440,7 +393,7 @@ namespace UnityEditor.Tilemaps
             }
             else
             {
-                m_StoredCells = Array.Empty<BrushCell>();
+                m_StoredCells = new BrushCell[0];
             }
         }
 
@@ -500,96 +453,47 @@ namespace UnityEditor.Tilemaps
 
         private void FlipX(GridLayout.CellLayout layout)
         {
-            var oldCells = m_Cells.Clone() as BrushCell[];
-            var oldBounds = new BoundsInt(Vector3Int.zero, m_Size);
+            BrushCell[] oldCells = m_Cells.Clone() as BrushCell[];
+            BoundsInt oldBounds = new BoundsInt(Vector3Int.zero, m_Size);
 
-            foreach (var oldPos in oldBounds.allPositionsWithin)
+            foreach (Vector3Int oldPos in oldBounds.allPositionsWithin)
             {
-                var newX = m_Size.x - oldPos.x - 1;
-                var toIndex = GetCellIndex(newX, oldPos.y, oldPos.z);
-                var fromIndex = GetCellIndex(oldPos);
+                int newX = m_Size.x - oldPos.x - 1;
+                int toIndex = GetCellIndex(newX, oldPos.y, oldPos.z);
+                int fromIndex = GetCellIndex(oldPos);
                 m_Cells[toIndex] = oldCells[fromIndex];
             }
 
-            var newPivotX = m_Size.x - pivot.x - 1;
+            int newPivotX = m_Size.x - pivot.x - 1;
             pivot = new Vector3Int(newPivotX, pivot.y, pivot.z);
-
-            if (layout == GridLayout.CellLayout.Hexagon)
-            {
-                FlipCellsHexagon(ref m_Cells, new Vector3(-1f, 1f, 1f));
-            }
-            else
-            {
-                FlipCells(ref m_Cells, new Vector3(-1f, 1f, 1f));
-            }
+            FlipCells(ref m_Cells, new Vector3(-1f, 1f, 1f), layout == GridLayout.CellLayout.Hexagon);
         }
 
         private void FlipY(GridLayout.CellLayout layout)
         {
-            var oldCells = m_Cells.Clone() as BrushCell[];
-            var oldBounds = new BoundsInt(Vector3Int.zero, m_Size);
+            BrushCell[] oldCells = m_Cells.Clone() as BrushCell[];
+            BoundsInt oldBounds = new BoundsInt(Vector3Int.zero, m_Size);
 
-            foreach (var oldPos in oldBounds.allPositionsWithin)
+            foreach (Vector3Int oldPos in oldBounds.allPositionsWithin)
             {
-                var newY = m_Size.y - oldPos.y - 1;
-                var toIndex = GetCellIndex(oldPos.x, newY, oldPos.z);
-                var fromIndex = GetCellIndex(oldPos);
+                int newY = m_Size.y - oldPos.y - 1;
+                int toIndex = GetCellIndex(oldPos.x, newY, oldPos.z);
+                int fromIndex = GetCellIndex(oldPos);
                 m_Cells[toIndex] = oldCells[fromIndex];
             }
 
-            var newPivotY = m_Size.y - pivot.y - 1;
+            int newPivotY = m_Size.y - pivot.y - 1;
             pivot = new Vector3Int(pivot.x, newPivotY, pivot.z);
-            if (layout == GridLayout.CellLayout.Hexagon)
-            {
-                FlipCellsHexagon(ref m_Cells, new Vector3(1f, -1f, 1f));
-            }
-            else
-            {
-                FlipCells(ref m_Cells, new Vector3(1f, -1f, 1f));
-            }
+            FlipCells(ref m_Cells, new Vector3(1f, -1f, 1f), layout == GridLayout.CellLayout.Hexagon);
         }
 
-        private static void FlipCellsHexagon(ref BrushCell[] cells, Vector3 scale)
+        private static void FlipCells(ref BrushCell[] cells, Vector3 scale, bool skipRotation)
         {
-            foreach (var cell in cells)
-            {
-                var oldMatrix = cell.matrix;
-                var oldScale = cell.matrix.lossyScale;
-                var unflipScale = Vector3.one;
-                if (oldScale.x < 0)
-                {
-                    unflipScale.x = -1f;
-                }
-                if (oldScale.y < 0)
-                {
-                    unflipScale.y = -1f;
-                }
-                var unflip = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, unflipScale);
-                var unflipMatrix = oldMatrix * unflip;
-                var angles = unflipMatrix.rotation.eulerAngles;
-
-                if (Mathf.Approximately(angles.x, 0f) && Mathf.Approximately(angles.y, 0f))
-                {
-                    var reversedAngles = 360 - angles.z;
-                    var newScale = Vector3.Scale(oldScale, scale);
-                    var newMatrix = Matrix4x4.TRS(oldMatrix.GetPosition(), Quaternion.Euler(0f, 0f, reversedAngles), newScale);
-                    cell.matrix = newMatrix;
-                }
-                else
-                {
-                    var flip = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, scale);
-                    cell.matrix = oldMatrix * flip;
-                }
-            }
-        }
-
-        private static void FlipCells(ref BrushCell[] cells, Vector3 scale)
-        {
-            var flip = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, scale);
+            Matrix4x4 flip = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, scale);
             foreach (BrushCell cell in cells)
             {
                 Matrix4x4 oldMatrix = cell.matrix;
-                if (Mathf.Approximately(oldMatrix.rotation.x + oldMatrix.rotation.y + oldMatrix.rotation.z + oldMatrix.rotation.w, 1.0f))
+                if (skipRotation || Mathf.Approximately(oldMatrix.rotation.x + oldMatrix.rotation.y + oldMatrix.rotation.z + oldMatrix.rotation.w, 1.0f))
                     cell.matrix = oldMatrix * flip;
                 else
                     cell.matrix = oldMatrix * s_180Rotate * flip;
@@ -597,12 +501,12 @@ namespace UnityEditor.Tilemaps
         }
 
         /// <summary>Updates the size, pivot and the number of layers of the brush.</summary>
-        /// <param name="newSize">New size of the brush.</param>
-        /// <param name="newPivot">New pivot of the brush.</param>
-        public void UpdateSizeAndPivot(Vector3Int newSize, Vector3Int newPivot)
+        /// <param name="size">New size of the brush.</param>
+        /// <param name="pivot">New pivot of the brush.</param>
+        public void UpdateSizeAndPivot(Vector3Int size, Vector3Int pivot)
         {
-            m_Size = newSize;
-            m_Pivot = newPivot;
+            m_Size = size;
+            m_Pivot = pivot;
             SizeUpdated();
         }
 
@@ -681,9 +585,8 @@ namespace UnityEditor.Tilemaps
                 position.y >= 0 && position.y < size.y &&
                 position.z >= 0 && position.z < size.z;
             if (!valid)
-                throw new ArgumentException(
-                    $"Position {position} is an invalid cell position. Valid range is between [{Vector3Int.zero}, {size}).");
-            return true;
+                throw new ArgumentException(string.Format("Position {0} is an invalid cell position. Valid range is between [{1}, {2}).", position, Vector3Int.zero, size));
+            return valid;
         }
 
         private void SizeUpdated()
@@ -691,8 +594,8 @@ namespace UnityEditor.Tilemaps
             var cellSize = m_Size.x * m_Size.y * m_Size.z;
             m_Cells = new BrushCell[cellSize];
             m_TileChangeDataList = new List<TileChangeData>(cellSize);
-            var bounds = new BoundsInt(Vector3Int.zero, m_Size);
-            foreach (var pos in bounds.allPositionsWithin)
+            BoundsInt bounds = new BoundsInt(Vector3Int.zero, m_Size);
+            foreach (Vector3Int pos in bounds.allPositionsWithin)
             {
                 m_Cells[GetCellIndex(pos)] = new BrushCell();
             }
@@ -707,8 +610,6 @@ namespace UnityEditor.Tilemaps
             int hash = 0;
             unchecked
             {
-                hash = hash * 33 + size.GetHashCode();
-                hash = hash * 33 + pivot.GetHashCode();
                 foreach (var cell in cells)
                 {
                     hash = hash * 33 + cell.GetHashCode();

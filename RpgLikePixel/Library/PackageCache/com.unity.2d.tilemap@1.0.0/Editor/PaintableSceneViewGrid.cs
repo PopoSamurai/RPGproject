@@ -29,8 +29,6 @@ namespace UnityEditor.Tilemaps
             }
         }
 
-        public Action<GameObject> onEdited;
-
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -244,7 +242,6 @@ namespace UnityEditor.Tilemaps
         {
             if (GridPaintingState.activeBrushEditor != null && grid != null)
                 GridPaintingState.activeBrushEditor.OnEditStart(grid, brushTarget);
-            onEdited?.Invoke(brushTarget);
         }
 
         protected override void OnEditEnd()
@@ -270,24 +267,18 @@ namespace UnityEditor.Tilemaps
             return true;
         }
 
-        protected override Vector2Int ScreenToGrid(Vector2 screenPosition, float zPosition)
+        protected override Vector2Int ScreenToGrid(Vector2 screenPosition)
         {
             if (tilemap != null)
             {
                 var transform = tilemap.transform;
-                var plane = new Plane(GetGridForward(tilemap), transform.position);
-                var screenLocal = GridEditorUtility.ScreenToLocal(transform, screenPosition, plane);
-                if (GridPaintingState.gridBrushMousePositionAtZ)
-                    screenLocal.z = zPosition;
-                var cell = LocalToGrid(tilemap, screenLocal);
+                Plane plane = new Plane(GetGridForward(tilemap), transform.position);
+                Vector3Int cell = LocalToGrid(tilemap, GridEditorUtility.ScreenToLocal(transform, screenPosition, plane));
                 return new Vector2Int(cell.x, cell.y);
             }
             if (grid != null)
             {
-                var screenLocal = GridEditorUtility.ScreenToLocal(gridTransform, screenPosition, GetGridPlane(grid));
-                if (GridPaintingState.gridBrushMousePositionAtZ)
-                    screenLocal.z = zPosition;
-                var cell = LocalToGrid(grid, screenLocal);
+                Vector3Int cell = LocalToGrid(grid, GridEditorUtility.ScreenToLocal(gridTransform, screenPosition, GetGridPlane(grid)));
                 return new Vector2Int(cell.x, cell.y);
             }
             return Vector2Int.zero;
