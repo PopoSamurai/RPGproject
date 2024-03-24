@@ -1,43 +1,36 @@
-using System;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
-public class Slot : MonoBehaviour, IPointerClickHandler
+[System.Serializable]
+public class Slot
 {
-    public Image image;
-
-    public event Action<Item> OnRightClickEvent;
-
-    public Item _item;
-    public int itemCount;
-    public Item Item
-
-    {   get { return _item; }
-        set { 
-            _item = value;
-            if (_item == null)
-            {
-                image.enabled = false;
-            }
-            else
-            {
-                image.sprite = _item.itemIcon;
-                image.enabled = true;
-            }
-        }
-    }
-    protected virtual void OnValidate()
+    [SerializeField] private Item item;
+    [SerializeField] private int count;
+    public Slot()
     {
-        if (image == null)
-            image = GetComponent<Image>();
+        item = null;
+        count = 0;
     }
-
-    public void OnPointerClick(PointerEventData eventData)
+    public Slot(Item _item, int _count)
     {
-        if (eventData != null && eventData.button == PointerEventData.InputButton.Right)
-        {
-            if (Item != null && OnRightClickEvent != null)
-                OnRightClickEvent(Item);
-        }
+        this.item = _item;
+        this.count = _count;
+    }
+    public Slot(Slot slot)
+    {
+        this.item = slot.GetItem();
+        this.count = slot.GetCount();
+    }
+    public void Clear()
+    {
+        this.item = null;
+        this.count = 0;
+    }
+    public Item GetItem() { return item; }
+    public int GetCount() { return count; }
+    public void AddCount(int _count) { count += _count; }
+    public void SubCount(int _count) { count -= _count; }
+    public void AddItem(Item _item, int _count)
+    {
+        this.item = _item;
+        this.count = _count;
     }
 }

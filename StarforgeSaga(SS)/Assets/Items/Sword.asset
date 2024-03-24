@@ -9,21 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d618fa62cb249fe48a69b4ddae360628, type: 3}
-  m_Name: Sword
+  m_Script: {fileID: 11500000, guid: 9a155d4e3d1fe654bb5253cf3c1c450b, type: 3}
+  m_Name: sword
   m_EditorClassIdentifier: 
-  itemName: Long sword
+  itemName: Sword
   itemIcon: {fileID: 1856840765, guid: a0e43e90d95ea414c9040f56bf692d87, type: 3}
-  isStackable: 0
-  count: 0
-  STR: 10
-  VIT: 5
-  INT: 0
-  AGL: 1
-  DEF: 2
-  STRbonus: 0
-  VITbonus: 0
-  INTbonus: 0
-  AGLbonus: 0
-  DEFbonus: 0
+  isStack: 0
   type: 0
