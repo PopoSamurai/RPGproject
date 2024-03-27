@@ -10,8 +10,10 @@ public class ToolClass : Item
         pickaxe,
         water
     }
-    public override Item GetItem() { return this; }
+    public override void Use(PlayerController controller)
+    {
+        base.Use(controller);
+        Debug.Log("Swing tool");
+    }
     public override ToolClass GetTool() { return this; }
-    public override MiscClass GetMisc() { return null; }
-    public override ConsumeableClass GetConsumeable() { return null; }
 }

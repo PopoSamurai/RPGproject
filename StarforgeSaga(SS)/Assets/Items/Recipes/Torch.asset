@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff2a1fd81e29ff74a82e42fd81c3c6ec, type: 3}
+  m_Name: Torch
+  m_EditorClassIdentifier: 
+  inputItems:
+  - item: {fileID: 11400000, guid: ab9393a19745a9e47ac12cdf697a980d, type: 2}
+    count: 1
+  - item: {fileID: 11400000, guid: f6694d4f43670b1468f4a421630e851f, type: 2}
+    count: 1
+  outItem:
+    item: {fileID: 11400000, guid: bb6ea61a5cee78a4bbce123f5232548d, type: 2}
+    count: 1
