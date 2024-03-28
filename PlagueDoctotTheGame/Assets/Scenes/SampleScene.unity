@@ -2540,7 +2540,7 @@ GameObject:
   - component: {fileID: 505067448}
   m_Layer: 0
   m_Name: CraftingTable
-  m_TagString: Untagged
+  m_TagString: interactive
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5534,6 +5534,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: TeleportToHouse
       objectReference: {fileID: 0}
+    - target: {fileID: 8427671585444887664, guid: c0c010f3b97a8bf4480b4724498b6780,
+        type: 3}
+      propertyPath: m_TagString
+      value: interactive
+      objectReference: {fileID: 0}
     - target: {fileID: 8631426376228823104, guid: c0c010f3b97a8bf4480b4724498b6780,
         type: 3}
       propertyPath: m_LocalPosition.y
@@ -6924,6 +6929,7 @@ MonoBehaviour:
   collectTxt: {fileID: 1697679532}
   LoadBar: {fileID: 1623445642}
   interactClick: 0
+  dialogOn: 0
   interactOn: 0
 --- !u!136 &1802917952
 CapsuleCollider:

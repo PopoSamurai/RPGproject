@@ -79,7 +79,6 @@ public class Teleport : MonoBehaviour
         yield return new WaitForSeconds(1f);
         player.GetComponent<Movement>().move = true;
         skipWin.SetActive(false);
-        player.GetComponent<Movement>().interactOn = false;
         tp = false;
     }
 }

@@ -18,21 +18,17 @@ public class NPC : MonoBehaviour
         {
             if (dialogoff == true)
             {
+                player.GetComponent<Movement>().dialogOn = true;
                 dialogManager.currentDialog = endDialog;
-                player.GetComponent<Movement>().move = false;
                 dialogManager.StartDialog(endDialog);
-                player.GetComponent<Movement>().interactOn = false;
                 interactOn = false;
-                player.GetComponent<Movement>().interact.SetActive(false);
             }
             else
             {
+                player.GetComponent<Movement>().dialogOn = true;
                 dialogManager.currentDialog = currentDialog;
-                player.GetComponent<Movement>().move = false;
                 dialogManager.StartDialog(currentDialog);
-                player.GetComponent<Movement>().interactOn = false;
                 interactOn = false;
-                player.GetComponent<Movement>().interact.SetActive(false);
             }
         }
         //
@@ -46,7 +42,6 @@ public class NPC : MonoBehaviour
         if (other.tag == "Player")
         {
             dialogManager.endDialog = false;
-            player.GetComponent<Movement>().interact.SetActive(true);
             interactOn = true;
         }
     }
@@ -54,18 +49,15 @@ public class NPC : MonoBehaviour
     {
         if (other.tag == "Player")
         {
-            player.GetComponent<Movement>().interactOn = false;
+            player.GetComponent<Movement>().dialogOn = false;
             player.GetComponent<Movement>().interactClick = false;
-            player.GetComponent<Movement>().interact.SetActive(false);
             interactOn = false;
-            player.GetComponent<Movement>().move = true;
         }
     }
     public void CloseWin()
     {
+        player.GetComponent<Movement>().dialogOn = false;
         dialogoff = true;
-        player.GetComponent<Movement>().interactOn = false;
         player.GetComponent<Movement>().interactClick = false;
-        player.GetComponent<Movement>().move = true;
     }
 }

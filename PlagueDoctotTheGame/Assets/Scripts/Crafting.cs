@@ -14,8 +14,6 @@ public class Crafting : MonoBehaviour
         if (player.GetComponent<Movement>().interactOn == true && interactOn == true)
         {
             player.GetComponent<Movement>().interactClick = true;
-            player.GetComponent<Movement>().interactOn = false;
-            player.GetComponent<Movement>().move = false;
             CraftPanelWin.SetActive(true);
             interactOn = true;
         }
@@ -24,7 +22,6 @@ public class Crafting : MonoBehaviour
     {
         if (other.tag == "Player")
         {
-            player.GetComponent<Movement>().interact.SetActive(true);
             interactOn = true;
         }
     }
@@ -32,19 +29,14 @@ public class Crafting : MonoBehaviour
     {
         if (other.tag == "Player")
         {
-            player.GetComponent<Movement>().interactOn = false;
             player.GetComponent<Movement>().interactClick = false;
-            player.GetComponent<Movement>().interact.SetActive(false);
             interactOn = false;
-            player.GetComponent<Movement>().move = true;
             CraftPanelWin.SetActive(false);
         }
     }
     public void CloseWin()
     {
         player.GetComponent<Movement>().interactClick = false;
-        player.GetComponent<Movement>().interactOn = false;
-        player.GetComponent<Movement>().move = true;
         CraftPanelWin.SetActive(false);
     }
 }

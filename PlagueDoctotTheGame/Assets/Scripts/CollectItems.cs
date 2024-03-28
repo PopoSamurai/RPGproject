@@ -19,6 +19,7 @@ public class CollectItems : MonoBehaviour
     public Material defaultMat;
     public Material changeMat;
     public bool collected = false;
+    public BoxCollider coll;
     private void Start()
     {
         counDown = 4f;
@@ -31,24 +32,27 @@ public class CollectItems : MonoBehaviour
             case CollectObject.none:
                 if (counDown <= 1.0f)
                 {
+                    coll.enabled = false;
                     startNum = false;
-                    endNone();
+                    endItem();
                     Debug.Log("add item");
                 }
                 break;
             case CollectObject.bush:
                 if (counDown <= 1.0f)
                 {
+                    coll.enabled = false;
                     startNum = false;
-                    endBerry();
+                    endItem();
                     Debug.Log("add berries");
                 }
                 break;
             case CollectObject.rock:
                 if (counDown <= 1.0f)
                 {
+                    coll.enabled = false;
                     startNum = false;
-                    endBerry();
+                    endItem();
                     Debug.Log("add stone");
                 }
                 break;
@@ -74,8 +78,6 @@ public class CollectItems : MonoBehaviour
         if (player.GetComponent<Movement>().interactOn == true && interactOn == true)
         {
             player.GetComponent<Movement>().interactClick = true;
-            player.GetComponent<Movement>().interactOn = false;
-            player.GetComponent<Movement>().move = false;
             interactOn = true;
             startNum = true;
         }
@@ -84,7 +86,6 @@ public class CollectItems : MonoBehaviour
     {
         if (other.tag == "Player" && collected == false)
         {
-            player.GetComponent<Movement>().interact.SetActive(true);
             interactOn = true;
         }
     }
@@ -92,22 +93,16 @@ public class CollectItems : MonoBehaviour
     {
         if (other.tag == "Player")
         {
-            player.GetComponent<Movement>().interactOn = false;
             player.GetComponent<Movement>().interactClick = false;
-            player.GetComponent<Movement>().interact.SetActive(false);
             interactOn = false;
-            player.GetComponent<Movement>().move = true;
         }
     }
-    public void endBerry()
+    public void endItem()
     {
         interactOn = false;
         GetComponent<MeshRenderer>().material = changeMat;
         player.GetComponent<Movement>().interactClick = false;
-        player.GetComponent<Movement>().interactOn = false;
-        player.GetComponent<Movement>().move = true;
         counDown = 4f;
-        player.GetComponent<Movement>().interact.SetActive(false);
         player.GetComponent<Movement>().collectInteract.SetActive(false);
         player.GetComponent<Movement>().LoadBar.GetComponent<Image>().fillAmount = 1;
         collected = true;
@@ -116,39 +111,10 @@ public class CollectItems : MonoBehaviour
     {
         interactOn = false;
         player.GetComponent<Movement>().interactClick = false;
-        player.GetComponent<Movement>().interactOn = false;
-        player.GetComponent<Movement>().move = true;
         counDown = 4f;
-        player.GetComponent<Movement>().interact.SetActive(false);
         player.GetComponent<Movement>().collectInteract.SetActive(false);
         player.GetComponent<Movement>().LoadBar.GetComponent<Image>().fillAmount = 1;
         collected = true;
         Destroy(this.gameObject);
-    }
-    public void endNone()
-    {
-        interactOn = false;
-        GetComponent<MeshRenderer>().material = changeMat;
-        player.GetComponent<Movement>().interactClick = false;
-        player.GetComponent<Movement>().interactOn = false;
-        player.GetComponent<Movement>().move = true;
-        counDown = 4f;
-        player.GetComponent<Movement>().interact.SetActive(false);
-        player.GetComponent<Movement>().collectInteract.SetActive(false);
-        player.GetComponent<Movement>().LoadBar.GetComponent<Image>().fillAmount = 1;
-        collected = true;
-    }
-    public void endStone()
-    {
-        interactOn = false;
-        GetComponent<MeshRenderer>().material = changeMat;
-        player.GetComponent<Movement>().interactClick = false;
-        player.GetComponent<Movement>().interactOn = false;
-        player.GetComponent<Movement>().move = true;
-        counDown = 4f;
-        player.GetComponent<Movement>().interact.SetActive(false);
-        player.GetComponent<Movement>().collectInteract.SetActive(false);
-        player.GetComponent<Movement>().LoadBar.GetComponent<Image>().fillAmount = 1;
-        collected = true;
     }
 }
