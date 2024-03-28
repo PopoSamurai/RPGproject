@@ -35,6 +35,16 @@ public class Movement : MonoBehaviour
             interactOn = true;
         }
     }
+    private void OnCollisionEnter(Collision collision)
+    {
+        if(collision.transform.tag == "NPC" || collision.transform.tag == "Enemy")
+            collision.rigidbody.isKinematic = true;
+    }
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.transform.tag == "NPC" || collision.transform.tag == "Enemy")
+            collision.rigidbody.isKinematic = false;
+    }
     public void MoveOn()
     {
         move = true;

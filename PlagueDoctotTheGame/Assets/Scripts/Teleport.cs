@@ -53,6 +53,7 @@ public class Teleport : MonoBehaviour
         {
             if(type == AreaType.house)
             {
+                Debug.Log("go house");
                 player.GetComponent<Movement>().interact.SetActive(true);
                 tp = true;
             }
