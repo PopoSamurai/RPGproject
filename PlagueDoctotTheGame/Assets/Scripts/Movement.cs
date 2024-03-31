@@ -1,5 +1,4 @@
 using UnityEngine;
-
 public class Movement : MonoBehaviour
 {
     Rigidbody rb;
@@ -80,6 +79,6 @@ public class Movement : MonoBehaviour
     public void Move()
     {
         Vector3 move = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
-        rb.velocity = move.normalized * speed;
+        transform.Translate(move * speed * Time.deltaTime);
     }
 }
