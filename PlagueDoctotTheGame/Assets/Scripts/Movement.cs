@@ -1,10 +1,12 @@
+using System.Collections;
 using UnityEngine;
+using UnityEngine.UIElements;
 public class Movement : MonoBehaviour
 {
     Rigidbody rb;
     public float speed = 5f;
     public float speedMouse;
-    public bool move = true;
+    public bool move;
     public int posPlayer = 2;
     [Header("Interact")]
     public GameObject interact;
@@ -17,11 +19,12 @@ public class Movement : MonoBehaviour
     public bool interactOn = false;
     private void Start()
     {
+        move = true;
         rb = GetComponent<Rigidbody>();
     }
     void Update()
     {
-        if (move)
+        if (move == true)
         {
             Move();
         }
@@ -34,14 +37,21 @@ public class Movement : MonoBehaviour
         {
             interactOn = true;
             interact.SetActive(false);
-            move = false;
+            MoveOff();
         }
-        else interactOn = false;
-
-        if(collectInteract.activeSelf == true || dialogOn == true)
-            move = false;
         else
-            move = true;
+        {
+            interactOn = false;
+        }
+
+        if (collectInteract.activeSelf == true || dialogOn == true)
+        {
+            MoveOff();
+        }
+        else
+        {
+            MoveOn();
+        }
     }
     private void OnCollisionEnter(Collision collision)
     {

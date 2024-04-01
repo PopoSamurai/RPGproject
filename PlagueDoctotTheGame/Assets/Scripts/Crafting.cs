@@ -16,6 +16,7 @@ public class Crafting : MonoBehaviour
             player.GetComponent<Movement>().interactClick = true;
             CraftPanelWin.SetActive(true);
             interactOn = true;
+            player.GetComponent<Movement>().MoveOff();
         }
     }
     private void OnTriggerEnter(Collider other)
@@ -38,5 +39,6 @@ public class Crafting : MonoBehaviour
     {
         player.GetComponent<Movement>().interactClick = false;
         CraftPanelWin.SetActive(false);
+        player.GetComponent<Movement>().MoveOn();
     }
 }

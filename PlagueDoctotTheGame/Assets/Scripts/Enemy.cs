@@ -13,6 +13,7 @@ public class Enemy : MonoBehaviour
     public Vector3 startPos;
     public bool off = false;
     public Rigidbody rb;
+    public bool move = true;
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -37,7 +38,7 @@ public class Enemy : MonoBehaviour
     {
         float distance = Vector3.Distance(transform.position, vision.playerRef.transform.position);
 
-        if (distance > minDist)
+        if (distance > minDist && move == true)
         {
             transform.position = Vector3.MoveTowards(this.transform.position, vision.playerRef.transform.position, speed * Time.deltaTime);
             off = false;
@@ -60,7 +61,6 @@ public class Enemy : MonoBehaviour
             else
             {
                 off = true;
-                rb.velocity = Vector3.zero;
                 vision.radius = 7f;
                 vision.angle = 360;
             }
