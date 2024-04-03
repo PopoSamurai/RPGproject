@@ -43,7 +43,9 @@ public class Teleport : MonoBehaviour
         //
         if (player.GetComponent<Movement>().interactOn == true && tp == true)
         {
-            StartCoroutine(waitForMove());
+            skipWin.SetActive(true);
+            player.GetComponent<Movement>().move = false;
+            Invoke("waitForMove", 1f);
             player.transform.position = point2.position;
         }
     }
@@ -60,7 +62,9 @@ public class Teleport : MonoBehaviour
             else
             {
                 tp = true;
-                StartCoroutine(waitForMove());
+                skipWin.SetActive(true);
+                player.GetComponent<Movement>().move = false;
+                Invoke("waitForMove", 1f);
                 player.transform.position = point2.position;
             }
         }
@@ -72,11 +76,8 @@ public class Teleport : MonoBehaviour
             player.GetComponent<Movement>().interact.SetActive(false);
         }
     }
-    IEnumerator waitForMove()
+    void waitForMove()
     {
-        skipWin.SetActive(true);
-        player.GetComponent<Movement>().move = false;
-        yield return new WaitForSeconds(1f);
         player.GetComponent<Movement>().move = true;
         skipWin.SetActive(false);
         tp = false;

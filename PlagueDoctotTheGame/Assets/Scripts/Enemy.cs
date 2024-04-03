@@ -1,14 +1,12 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using static UnityEngine.GraphicsBuffer;
 public class Enemy : MonoBehaviour
 {
     public GameObject reaction;
     public bool firstlook = false;
     public bool follow = false;
     [Header("move")]
-    float speed = 5f;
+    float speed = 4f;
     float minDist = 1.5f;
     float minDist2 = 0f;
     public VisionScript vision;
@@ -18,6 +16,7 @@ public class Enemy : MonoBehaviour
     public bool move = true;
     float knockbackPower = 20;
     GameObject player;
+    float distance;
     private void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player");
@@ -28,7 +27,8 @@ public class Enemy : MonoBehaviour
     {
         if (firstlook == true && follow == false) //!
         {
-            StartCoroutine(waitToEffect());
+            reaction.SetActive(true);
+            Invoke("waitToEffect", 0.5f);
         }
         else if(follow == true) //follow
         {
@@ -41,34 +41,32 @@ public class Enemy : MonoBehaviour
     }
     public void FollowPlayer()
     {
-        float distance = Vector3.Distance(transform.position, vision.playerRef.transform.position);
+        distance = Vector3.Distance(transform.position, vision.playerRef.transform.position);
 
         if (distance > minDist && move == true)
         {
-            transform.position = Vector3.MoveTowards(this.transform.position, vision.playerRef.transform.position, speed * Time.deltaTime);
+            transform.LookAt(vision.playerRef.transform);
+            transform.position += transform.forward * speed * Time.deltaTime;
             off = false;
         }
     }
     public void ResetFollow()
     {
-        if(follow == false)
+        reaction.SetActive(false);
+        firstlook = false;
+        follow = false;
+
+        distance = Vector3.Distance(transform.position, startPos);
+
+        if (distance > minDist2)
         {
-            reaction.SetActive(false);
-            firstlook = false;
-            follow = false;
-
-            float distance = Vector3.Distance(transform.position, startPos);
-
-            if (distance > minDist2)
-            {
-                transform.position = Vector3.MoveTowards(this.transform.position, startPos, speed * Time.deltaTime);
-            }
-            else
-            {
-                off = true;
-                vision.radius = 7f;
-                vision.angle = 360;
-            }
+            transform.position = Vector3.MoveTowards(this.transform.position, startPos, speed * Time.deltaTime);
+        }
+        else
+        {
+            off = true;
+            vision.radius = 7f;
+            vision.angle = 360;
         }
     }
     private void OnTriggerEnter(Collider other)
@@ -87,10 +85,8 @@ public class Enemy : MonoBehaviour
         yield return new WaitForSeconds(0.2f);
         rb.isKinematic = false;
     }
-    IEnumerator waitToEffect()
+    void waitToEffect()
     {
-        reaction.SetActive(true);
-        yield return new WaitForSeconds(0.5f);
         reaction.SetActive(false);
         firstlook = false;
         follow = true;

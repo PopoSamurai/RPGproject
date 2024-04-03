@@ -1,6 +1,4 @@
-using System.Collections;
 using UnityEngine;
-using UnityEngine.UIElements;
 public class Movement : MonoBehaviour
 {
     Rigidbody rb;
@@ -21,6 +19,7 @@ public class Movement : MonoBehaviour
     [SerializeField] GameObject attackPrefab;
     public bool attack = false;
     public Vector3 direction;
+    public GameObject[] points;
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -30,14 +29,25 @@ public class Movement : MonoBehaviour
     {
         if (move == true)
         {
-            Move();
+            direction = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+            direction = direction.normalized;
+            transform.Translate(direction * speed * Time.deltaTime);
+
+            if (Input.GetMouseButtonDown(0) && attack == false)
+            {
+                Flip();
+                attack = true;
+                attackPrefab.SetActive(true);
+                move = false;
+                Invoke("AttackCo", 0.3f);
+            }
         }
         else
         {
             rb.velocity = Vector3.zero;
         }
 
-        if (Input.GetKeyDown(KeyCode.F) && interact.activeSelf)
+        if (Input.GetKeyDown(KeyCode.F) && interact.activeSelf == true)
         {
             interactOn = true;
             interact.SetActive(false);
@@ -48,15 +58,7 @@ public class Movement : MonoBehaviour
             interactOn = false;
         }
 
-        if (Input.GetMouseButtonDown(0) && attack == false)
-        {
-            attack = true;
-            attackPrefab.SetActive(true);
-            move = false;
-            StartCoroutine(AttackCo());
-        }
-
-        if (collectInteract.activeSelf == true || dialogOn == true || gameM.GetComponent<GameM>().CraftPanelWin.activeSelf == true || attack == true)
+        if (collectInteract.activeSelf == true || dialogOn == true || attack == true)
         {
             move = false;
         }
@@ -65,9 +67,28 @@ public class Movement : MonoBehaviour
             move = true;
         }
     }
-    IEnumerator AttackCo()
+
+    public void Flip()
     {
-        yield return new WaitForSeconds(0.3f);
+        if (direction.x > 0.1f)
+        {
+            attackPrefab.transform.position = points[0].transform.position;
+        }
+        else if (direction.x < -0.1f)
+        {
+            attackPrefab.transform.position = points[1].transform.position;
+        }
+        if (direction.z > 0.1f)
+        {
+            attackPrefab.transform.position = points[2].transform.position;
+        }
+        else if (direction.z < -0.1f)
+        {
+            attackPrefab.transform.position = points[3].transform.position;
+        }
+    }
+    void AttackCo()
+    {
         attackPrefab.SetActive(false);
         attack = false;
     }
@@ -103,10 +124,5 @@ public class Movement : MonoBehaviour
     public void MoveOff()
     {
         move = false;
-    }
-    public void Move()
-    {
-        direction = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
-        transform.Translate(direction.normalized * speed * Time.deltaTime);
     }
 }

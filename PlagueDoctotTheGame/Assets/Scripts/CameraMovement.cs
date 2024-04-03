@@ -1,6 +1,4 @@
-using System.Collections;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 public class CameraMovement : MonoBehaviour
 {
     GameObject player;
@@ -22,7 +20,8 @@ public class CameraMovement : MonoBehaviour
             }
             else if(player.GetComponent<Movement>().interactOn == true)
             {
-                StartCoroutine(waitToTp());
+                Follow();
+                Invoke("waitToTp", 1f);
             }
         }
         else
@@ -64,10 +63,8 @@ public class CameraMovement : MonoBehaviour
     {
         transform.position = this.transform.position;
     }
-    IEnumerator waitToTp()
+    void waitToTp()
     {
-        Follow();
-        yield return new WaitForSeconds(1f);
         inHouse = true;
     }    
 }
