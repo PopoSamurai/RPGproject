@@ -34,7 +34,7 @@ public class Enemy : MonoBehaviour
         {
             FollowPlayer();
         }
-        else //no see
+        else //no see player
         {
             ResetFollow();
         }
