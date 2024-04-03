@@ -67,7 +67,6 @@ public class VisionScript : MonoBehaviour
     {
         if (other.transform.tag == "StopMap")
         {
-            Debug.Log("connector");
             radius = 0f;
             angle = 0;
             enemyScript.follow = false;

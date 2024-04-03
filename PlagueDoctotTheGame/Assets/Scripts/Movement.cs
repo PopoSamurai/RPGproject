@@ -17,10 +17,14 @@ public class Movement : MonoBehaviour
     public bool dialogOn = false;
     //
     public bool interactOn = false;
+    GameObject gameM;
+    [SerializeField] GameObject attackPrefab;
+    public bool attack = false;
+    public Vector3 direction;
     private void Start()
     {
-        move = true;
         rb = GetComponent<Rigidbody>();
+        gameM = GameObject.FindGameObjectWithTag("GameManager");
     }
     void Update()
     {
@@ -37,21 +41,35 @@ public class Movement : MonoBehaviour
         {
             interactOn = true;
             interact.SetActive(false);
-            MoveOff();
+            move = false;
         }
         else
         {
             interactOn = false;
         }
 
-        if (collectInteract.activeSelf == true || dialogOn == true)
+        if (Input.GetMouseButtonDown(0) && attack == false)
         {
-            MoveOff();
+            attack = true;
+            attackPrefab.SetActive(true);
+            move = false;
+            StartCoroutine(AttackCo());
+        }
+
+        if (collectInteract.activeSelf == true || dialogOn == true || gameM.GetComponent<GameM>().CraftPanelWin.activeSelf == true || attack == true)
+        {
+            move = false;
         }
         else
         {
-            MoveOn();
+            move = true;
         }
+    }
+    IEnumerator AttackCo()
+    {
+        yield return new WaitForSeconds(0.3f);
+        attackPrefab.SetActive(false);
+        attack = false;
     }
     private void OnCollisionEnter(Collision collision)
     {
@@ -88,7 +106,7 @@ public class Movement : MonoBehaviour
     }
     public void Move()
     {
-        Vector3 move = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
-        transform.Translate(move * speed * Time.deltaTime);
+        direction = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+        transform.Translate(direction.normalized * speed * Time.deltaTime);
     }
 }

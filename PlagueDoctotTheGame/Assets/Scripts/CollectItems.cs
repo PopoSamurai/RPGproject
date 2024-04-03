@@ -1,11 +1,13 @@
 using UnityEngine;
 using UnityEngine.UI;
+
 public enum CollectObject
 {
     none,
     bush,
     rock,
-    tree
+    tree,
+    table
 }
 public class CollectItems : MonoBehaviour
 {
@@ -20,10 +22,12 @@ public class CollectItems : MonoBehaviour
     public Material changeMat;
     public bool collected = false;
     public BoxCollider coll;
+    GameObject gameM;
     private void Start()
     {
         counDown = 4f;
         player = GameObject.FindGameObjectWithTag("Player");
+        gameM = GameObject.FindGameObjectWithTag("GameManager");
     }
     private void Update()
     {
@@ -64,6 +68,9 @@ public class CollectItems : MonoBehaviour
                     Debug.Log("add wood");
                 }
                 break;
+            case CollectObject.table:
+                startNum = false;
+                break;
         }
         //odliczanie
         if(startNum == true)
@@ -77,9 +84,12 @@ public class CollectItems : MonoBehaviour
 
         if (player.GetComponent<Movement>().interactOn == true && interactOn == true)
         {
+            if (type == CollectObject.table)
+                gameM.GetComponent<GameM>().CraftPanelWin.SetActive(true);
+
+            startNum = true;
             player.GetComponent<Movement>().interactClick = true;
             interactOn = true;
-            startNum = true;
         }
     }
     private void OnTriggerEnter(Collider other)
@@ -116,5 +126,12 @@ public class CollectItems : MonoBehaviour
         player.GetComponent<Movement>().LoadBar.GetComponent<Image>().fillAmount = 1;
         collected = true;
         Destroy(this.gameObject);
+    }
+    public void endTable()
+    {
+        interactOn = false;
+        player.GetComponent<Movement>().interactClick = false;
+        player.GetComponent<Movement>().move = true;
+        gameM.GetComponent<GameM>().CraftPanelWin.SetActive(false);
     }
 }

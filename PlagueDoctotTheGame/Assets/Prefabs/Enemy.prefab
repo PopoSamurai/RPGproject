@@ -370,6 +370,7 @@ MonoBehaviour:
   startPos: {x: 0, y: 0, z: 0}
   off: 0
   rb: {fileID: 0}
+  move: 1
 --- !u!114 &6911549489788020225
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -393,7 +394,6 @@ MonoBehaviour:
     m_Bits: 128
   enemyScript: {fileID: 5160325413361488592}
   seePlayer: 0
-  stopWalk: 0
 --- !u!1 &7879430408701728310
 GameObject:
   m_ObjectHideFlags: 0

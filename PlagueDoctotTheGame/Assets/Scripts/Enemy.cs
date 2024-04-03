@@ -1,5 +1,7 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using static UnityEngine.GraphicsBuffer;
 public class Enemy : MonoBehaviour
 {
     public GameObject reaction;
@@ -14,8 +16,11 @@ public class Enemy : MonoBehaviour
     public bool off = false;
     public Rigidbody rb;
     public bool move = true;
+    float knockbackPower = 20;
+    GameObject player;
     private void Start()
     {
+        player = GameObject.FindGameObjectWithTag("Player");
         rb = GetComponent<Rigidbody>();
         startPos = this.transform.position;
     }
@@ -65,6 +70,22 @@ public class Enemy : MonoBehaviour
                 vision.angle = 360;
             }
         }
+    }
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Attack"))
+        {
+            Vector3 targetHeadingAway = (transform.position - player.transform.position).normalized;
+            rb.AddForce(targetHeadingAway * knockbackPower, ForceMode.Impulse);
+            StartCoroutine(attackCo());
+        }
+    }
+    IEnumerator attackCo()
+    {
+        yield return new WaitForSeconds(0.3f);
+        rb.isKinematic = true;
+        yield return new WaitForSeconds(0.2f);
+        rb.isKinematic = false;
     }
     IEnumerator waitToEffect()
     {
