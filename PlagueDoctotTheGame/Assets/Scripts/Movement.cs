@@ -3,7 +3,6 @@ public class Movement : MonoBehaviour
 {
     Rigidbody rb;
     public float speed = 5f;
-    public float speedMouse;
     public bool move;
     public int posPlayer = 2;
     [Header("Interact")]
@@ -16,10 +15,9 @@ public class Movement : MonoBehaviour
     //
     public bool interactOn = false;
     GameObject gameM;
-    [SerializeField] GameObject attackPrefab;
     public bool attack = false;
     public Vector3 direction;
-    public GameObject[] points;
+    public Animator anim;
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -31,13 +29,19 @@ public class Movement : MonoBehaviour
         {
             direction = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
             direction = direction.normalized;
+            //walk anim
+            if(direction != Vector3.zero)
+            {
+                anim.SetBool("move", true);
+            }
+            else
+                anim.SetBool("move", false);
+
             transform.Translate(direction * speed * Time.deltaTime);
 
             if (Input.GetMouseButtonDown(0) && attack == false)
             {
-                Flip();
                 attack = true;
-                attackPrefab.SetActive(true);
                 move = false;
                 Invoke("AttackCo", 0.3f);
             }
@@ -67,29 +71,9 @@ public class Movement : MonoBehaviour
             move = true;
         }
     }
-
-    public void Flip()
-    {
-        if (direction.x > 0.1f)
-        {
-            attackPrefab.transform.position = points[0].transform.position;
-        }
-        else if (direction.x < -0.1f)
-        {
-            attackPrefab.transform.position = points[1].transform.position;
-        }
-        if (direction.z > 0.1f)
-        {
-            attackPrefab.transform.position = points[2].transform.position;
-        }
-        else if (direction.z < -0.1f)
-        {
-            attackPrefab.transform.position = points[3].transform.position;
-        }
-    }
     void AttackCo()
     {
-        attackPrefab.SetActive(false);
+        //
         attack = false;
     }
     private void OnCollisionEnter(Collision collision)
