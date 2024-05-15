@@ -3,7 +3,7 @@ public class CameraMovement : MonoBehaviour
 {
     GameObject player;
     public Vector3 offset;
-    bool inHouse = false;
+    //bool inHouse = false;
     public bool on = false;
     public bool off = false;
     private void Start()

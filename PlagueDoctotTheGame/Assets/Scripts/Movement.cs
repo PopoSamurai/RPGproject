@@ -1,6 +1,12 @@
 using UnityEngine;
 public class Movement : MonoBehaviour
 {
+    public enum WeamponType
+    {
+        pistol,
+        shotgun
+    }
+    public WeamponType weampon;
     Rigidbody rb;
     public float speed = 5f;
     public bool move;
@@ -18,6 +24,14 @@ public class Movement : MonoBehaviour
     public bool attack = false;
     public Vector3 direction;
     public Animator anim;
+    public Animator pistolAnim;
+    public GameObject bulletPrefab;
+    public Transform shootPos;
+    public GameObject[] weamponList;
+    public int weamponNumber = 0;
+    float pistolShoot = 0.41f;
+    float shotgunShoot = 0.61f;
+    public string animationName;
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -25,6 +39,27 @@ public class Movement : MonoBehaviour
     }
     void Update()
     {
+        switch(weamponNumber)
+        {
+            case 0:
+                for (int i = 0; i < weamponList.Length; i++)
+                {
+                    weamponList[i].SetActive(false);
+                }
+                weampon = WeamponType.pistol;
+                weamponList[0].SetActive(true);
+                animationName = "shoot";
+                break;
+            case 1:
+                for (int i = 0; i < weamponList.Length; i++)
+                {
+                    weamponList[i].SetActive(false);
+                }
+                weampon = WeamponType.shotgun;
+                weamponList[1].SetActive(true);
+                animationName = "shootShotgun";
+                break;
+        }
         if (move == true)
         {
             direction = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
@@ -33,17 +68,32 @@ public class Movement : MonoBehaviour
             if(direction != Vector3.zero)
             {
                 anim.SetBool("move", true);
+                if(attack == true)
+                {
+                    anim.SetBool(animationName, true);
+                    pistolAnim.SetBool("shootWalk", true);
+                }
             }
             else
+            {
                 anim.SetBool("move", false);
+                if (attack == true)
+                {
+                    pistolAnim.SetBool("shoot", true);
+                    anim.SetBool(animationName, true);
+                }
+            }
 
             transform.Translate(direction * speed * Time.deltaTime);
 
-            if (Input.GetMouseButtonDown(0) && attack == false)
+            if (Input.GetMouseButton(0) && attack == false)
             {
+                Instantiate(bulletPrefab, shootPos.position, shootPos.rotation);
                 attack = true;
-                move = false;
-                Invoke("AttackCo", 0.3f);
+                if(weamponNumber == 0)
+                    Invoke("AttackCo", pistolShoot);
+                if (weamponNumber == 1)
+                    Invoke("AttackCo", shotgunShoot);
             }
         }
         else
@@ -62,7 +112,7 @@ public class Movement : MonoBehaviour
             interactOn = false;
         }
 
-        if (collectInteract.activeSelf == true || dialogOn == true || attack == true)
+        if (collectInteract.activeSelf == true || dialogOn == true)
         {
             move = false;
         }
@@ -73,7 +123,10 @@ public class Movement : MonoBehaviour
     }
     void AttackCo()
     {
-        //
+        pistolAnim.SetBool("shootWalk", false);
+        pistolAnim.SetBool("shoot", false);
+        anim.SetBool("shoot", false);
+        anim.SetBool("shootShotgun", false);
         attack = false;
     }
     private void OnCollisionEnter(Collision collision)

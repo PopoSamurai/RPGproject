@@ -20,6 +20,5 @@ public class roateModel : MonoBehaviour
                 transform.LookAt(targetPosition);
             }
         }
-
     }
 }
