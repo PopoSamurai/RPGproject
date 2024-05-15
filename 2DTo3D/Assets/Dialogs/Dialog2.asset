@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 579c8ff9908b45945ac3edb353538e01, type: 3}
+  m_Name: Dialog2
+  m_EditorClassIdentifier: 
+  characterSprite: {fileID: -724574352, guid: 5e3cd6a2a29172b488ecdecc708f6d91, type: 3}
+  NPCSprite: {fileID: -1003445688, guid: 5e3cd6a2a29172b488ecdecc708f6d91, type: 3}
+  NamePlayer: Doktor
+  NameNPC: Random
+  message: Witaj
+  nextMessage: {fileID: 11400000, guid: 4111a4cb03a842347ae687993af9d7d3, type: 2}
+  activePlayer: 1
