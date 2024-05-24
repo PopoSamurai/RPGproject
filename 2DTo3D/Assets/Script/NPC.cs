@@ -8,18 +8,22 @@ public class NPC : MonoBehaviour
     public int startpoint;
     public Transform[] points;
     Rigidbody rb;
+    public int ID { get; set; }
     //
-    public bool dialogOn = false;
+    public static bool dialogOn = false;
     public DialogReader reader;
     public DialogPref dialog, endDialog;
     public bool finalDialog = false;
     public GameObject dialogBox;
     bool move = true;
+    public Quest[] quest;
+    public bool addQuest;
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         finalDialog = false;
         transform.position = points[startpoint].position;
+        ID = 0;
     }
     void Update()
     {
