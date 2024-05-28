@@ -6,6 +6,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject characterSelectedMark;
     GameObject player;
     public Collider2D hit;
+    Sprite frame;
     //
     public GameObject battlePanel;
     private void Start()
@@ -19,16 +20,18 @@ public class GameManager : MonoBehaviour
             Vector2 mouse_position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             hit = Physics2D.OverlapPoint(mouse_position);
 
-            if (hit)
+            if (hit && hit.GetComponent<Interact>().active == false)
             {
-                Debug.Log("select");
+                frame = hit.transform.Find("frame").GetComponent<SpriteRenderer>().sprite;
+                battlePanel.GetComponent<BattleSystem>().enemy1 = hit.GetComponent<Interact>().enemy;
+                battlePanel.GetComponent<BattleSystem>().player1 = player.GetComponent<Movement>().main;
                 isSelected = true;
                 player.GetComponent<Movement>().MovePlayer();
                 player.GetComponent<Movement>().clickMark.SetActive(false);
                 characterSelectedMark.transform.SetParent(prefabParent);
                 characterSelectedMark.SetActive(true);
                 characterSelectedMark.transform.position = hit.transform.position;
-                //Invoke("DeSelect", 1f);
+                characterSelectedMark.GetComponent<SpriteRenderer>().sprite = frame;
             }
         }
     }

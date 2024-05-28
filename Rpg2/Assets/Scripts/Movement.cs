@@ -19,6 +19,7 @@ public class Movement : MonoBehaviour
     public bool startNum = false;
     float counDown;
     public bool interact = false;
+    public Character main;
     void Start()
     {
         target = this.transform.position;
@@ -32,6 +33,12 @@ public class Movement : MonoBehaviour
         myLineRender.positionCount = 0;
 
         counDown = 4f;
+    }
+    public void ResetLine()
+    {
+        myLineRender.startWidth = 0.15f;
+        myLineRender.endWidth = 0.15f;
+        myLineRender.positionCount = 0;
     }
     private void Update()
     {
@@ -85,6 +92,7 @@ public class Movement : MonoBehaviour
         counDown = 4f;
         collectInteract.SetActive(false);
         imagCollect.GetComponent<Image>().fillAmount = 1;
+        gameM.hit.GetComponent<Interact>().active = true;
     }
     public void MovePlayer()
     {
@@ -118,22 +126,23 @@ public class Movement : MonoBehaviour
         {
             interact = true;
             gameM.battlePanel.SetActive(true);
+            gameM.battlePanel.GetComponent<BattleSystem>().Start();
             transform.position = other.transform.position;
         }
         if (other.gameObject.CompareTag("Cave") && gameM.hit != null)
         {
             interact = true;
             startNum = true;
-
-            transform.position = other.transform.position;
-            myLineRender.positionCount = 0;
+            //transform.position = other.transform.position;
             collectInteract.SetActive(true);
+            ResetLine();
         }
     }
     private void OnTriggerExit2D(Collider2D other)
     {
         if (other.gameObject.CompareTag("Enemy"))
         {
+            ResetLine();
             interact = false;
         }
     }
