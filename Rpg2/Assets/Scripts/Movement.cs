@@ -1,8 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.AI;
-using Unity.VisualScripting;
-using UnityEditor.VersionControl;
 public class Movement : MonoBehaviour
 {
     private Vector2 target;
