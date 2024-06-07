@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.Burst.CompilerServices;
 using UnityEngine;
 public class GameManager : MonoBehaviour
 {
@@ -6,6 +7,7 @@ public class GameManager : MonoBehaviour
     public List<GameObject> allUnitsList = new List<GameObject>();
     public List<GameObject> unitSelected = new List<GameObject>();
     public LayerMask clickable;
+    public LayerMask build;
     public LayerMask ground;
     public GameObject groundMarker;
     private Camera cam;
@@ -31,7 +33,7 @@ public class GameManager : MonoBehaviour
         {
             RaycastHit hit;
             Ray ray = cam.ScreenPointToRay(Input.mousePosition);
-
+            //unit
             if (Physics.Raycast(ray, out hit, Mathf.Infinity, clickable))
             {
                 if (Input.GetKey(KeyCode.LeftShift))
@@ -49,6 +51,12 @@ public class GameManager : MonoBehaviour
                 {
                     DeselectAll();
                 }
+            }
+            //build
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity, build))
+            {
+                infoWin.SetActive(true);
+                hit.collider.transform.GetChild(0).gameObject.SetActive(true);
             }
         }
         if (Input.GetMouseButtonDown(1) && unitSelected.Count > 0)

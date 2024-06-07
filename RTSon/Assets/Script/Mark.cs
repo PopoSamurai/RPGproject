@@ -7,6 +7,7 @@ public class Mark : MonoBehaviour
     private void Start()
     {
         render = GetComponent<Renderer>();
+        render.material = green;
     }
     private void OnTriggerEnter(Collider other)
     {
