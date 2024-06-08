@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class UnitSelectionBox : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class UnitSelectionBox : MonoBehaviour
     Vector2 startPosition;
     Vector2 endPosition;
     public bool isPlacing;
+    bool isOverUI;
     void Start()
     {
         cam = Camera.main;
@@ -21,13 +23,13 @@ public class UnitSelectionBox : MonoBehaviour
         if (isPlacing == false)
         {
             //click
-            if (Input.GetMouseButtonDown(0))
+            if (Input.GetMouseButtonDown(0) && !isOverUI)
             {
                 startPosition = Input.mousePosition;
                 selectionBox = new Rect();
             }
             //drag
-            if (Input.GetMouseButton(0))
+            if (Input.GetMouseButton(0) && !isOverUI)
             {
                 if (boxVisual.rect.width > 0 || boxVisual.rect.height > 0)
                 {
@@ -40,7 +42,7 @@ public class UnitSelectionBox : MonoBehaviour
                 DrawSelection();
             }
             //relasing
-            if (Input.GetMouseButtonUp(0))
+            if (Input.GetMouseButtonUp(0) && !isOverUI)
             {
                 SelectUnits();
                 startPosition = Vector2.zero;

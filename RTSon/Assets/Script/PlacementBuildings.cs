@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 public class PlacementBuildings : MonoBehaviour
 {
     public Vector3 place;
@@ -8,6 +9,7 @@ public class PlacementBuildings : MonoBehaviour
     public LayerMask ground;
     public GameObject groundMarker;
     GameObject selection;
+    public bool isOverUI;
     private void Start()
     {
         cam = Camera.main;
@@ -15,7 +17,8 @@ public class PlacementBuildings : MonoBehaviour
     }
     void Update()
     {
-        if(placeNow == true)
+        isOverUI = EventSystem.current.IsPointerOverGameObject();
+        if (placeNow == true)
         {
             RaycastHit hit;
             Ray ray = cam.ScreenPointToRay(Input.mousePosition);
@@ -26,7 +29,7 @@ public class PlacementBuildings : MonoBehaviour
                 groundMarker.transform.localScale = build.transform.localScale;
                 groundMarker.transform.position = new Vector3(hit.point.x, hit.point.y + 0.2f, hit.point.z);
 
-                if (Input.GetMouseButtonDown(0) && groundMarker.GetComponent<Mark>().isGood == true)
+                if (Input.GetMouseButtonDown(0) && groundMarker.GetComponent<Mark>().isGood == true && !isOverUI)
                 {
                     if (Physics.Raycast(ray, out hit, Mathf.Infinity, ground))
                     {

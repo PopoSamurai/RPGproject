@@ -12,7 +12,6 @@ public class RtsCamera : MonoBehaviour
 
     [SerializeField] bool moveWithKeyboad;
     [SerializeField] bool moveWithEdgeScrolling;
-    [SerializeField] bool moveWithMouseDrag;
     [SerializeField] float fastSpeed = 0.05f;
     [SerializeField] float normalSpeed = 0.01f;
     [SerializeField] float movementSensitivity = 1f;
@@ -59,11 +58,6 @@ public class RtsCamera : MonoBehaviour
     }
     void HandleCameraMovement()
     {
-        // Mouse Drag
-        if (moveWithMouseDrag)
-        {
-            HandleMouseDragInput();
-        }
         // Keyboard Control
         if (moveWithKeyboad)
         {
@@ -139,7 +133,7 @@ public class RtsCamera : MonoBehaviour
         }
         transform.position = Vector3.Lerp(transform.position, newPosition, Time.deltaTime * movementSensitivity);
 
-        //Cursor.lockState = CursorLockMode.Confined;
+        Cursor.lockState = CursorLockMode.Confined;
     }
     private void ChangeCursor(CursorArrow newCursor)
     {
@@ -164,35 +158,6 @@ public class RtsCamera : MonoBehaviour
                     break;
             }
             currentCursor = newCursor;
-        }
-    }
-    private void HandleMouseDragInput()
-    {
-        if (Input.GetMouseButtonDown(2) && EventSystem.current.IsPointerOverGameObject() == false)
-        {
-            Plane plane = new Plane(Vector3.up, Vector3.zero);
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-            float entry;
-
-            if (plane.Raycast(ray, out entry))
-            {
-                dragStartPosition = ray.GetPoint(entry);
-            }
-        }
-        if (Input.GetMouseButton(2) && EventSystem.current.IsPointerOverGameObject() == false)
-        {
-            Plane plane = new Plane(Vector3.up, Vector3.zero);
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-            float entry;
-
-            if (plane.Raycast(ray, out entry))
-            {
-                dragCurrentPosition = ray.GetPoint(entry);
-
-                newPosition = transform.position + dragStartPosition - dragCurrentPosition;
-            }
         }
     }
 }

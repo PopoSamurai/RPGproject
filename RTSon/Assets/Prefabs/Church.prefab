@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 7096261718692031764}
   - component: {fileID: 3261432877272734070}
   - component: {fileID: 8558358698056259487}
+  - component: {fileID: 3448451885675942658}
   m_Layer: 3
   m_Name: Church
   m_TagString: Finish
@@ -183,6 +184,21 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.72171384, y: 0.7194288, z: 0.6985953}
   m_Center: {x: 0.000000029802322, y: 0.00045993924, z: 0.34902388}
+--- !u!114 &3448451885675942658
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3655911004440186282}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1422ef78c5fa06b459c663ddd603951b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  icon: {fileID: -1630592268, guid: 5093d41df2684b34e91d3aa27b62b947, type: 3}
+  buildName: Church
+  skill1Icon: {fileID: 401988853, guid: 5093d41df2684b34e91d3aa27b62b947, type: 3}
 --- !u!1 &6074232086105824986
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,6 +1,6 @@
-using System.Transactions;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.EventSystems;
 public class UnitScr : MonoBehaviour
 {
     Camera cam;
@@ -8,6 +8,11 @@ public class UnitScr : MonoBehaviour
     public LayerMask ground;
     Animator anim;
     public bool selectOn = false;
+    //
+    public Sprite icon;
+    public string buildName;
+    public Sprite skill1Icon;
+    bool isOverUI;
     void Start()
     {
         cam = Camera.main;
@@ -18,7 +23,8 @@ public class UnitScr : MonoBehaviour
     }
     void Update()
     {
-        if (Input.GetMouseButtonDown(1) && selectOn == true)
+        isOverUI = EventSystem.current.IsPointerOverGameObject();
+        if (Input.GetMouseButtonDown(1) && selectOn == true && !isOverUI)
         {
             RaycastHit hit;
             Ray ray = cam.ScreenPointToRay(Input.mousePosition);
@@ -35,5 +41,9 @@ public class UnitScr : MonoBehaviour
         }
         else
             anim.SetBool("walk", true);
+    }
+    public void Skill1()
+    {
+        Debug.Log("Walka");
     }
 }

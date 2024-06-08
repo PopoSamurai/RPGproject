@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using Unity.Burst.CompilerServices;
 using UnityEngine;
+using UnityEngine.EventSystems;
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance { get; set; }
@@ -12,6 +12,9 @@ public class GameManager : MonoBehaviour
     public GameObject groundMarker;
     private Camera cam;
     public GameObject infoWin;
+    public bool active;
+    bool isOverUI;
+    GameObject checkUnit;
     void Awake()
     {
         if(instance != null && instance != this)
@@ -29,7 +32,13 @@ public class GameManager : MonoBehaviour
     }
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        isOverUI = EventSystem.current.IsPointerOverGameObject();
+
+        if (Input.GetMouseButtonDown(0) && !isOverUI && infoWin.activeSelf)
+        {
+            infoWin.SetActive(false);
+        }
+        if (Input.GetMouseButtonDown(0) && !isOverUI)
         {
             RaycastHit hit;
             Ray ray = cam.ScreenPointToRay(Input.mousePosition);
@@ -42,7 +51,12 @@ public class GameManager : MonoBehaviour
                 }
                 else
                 {
+                    infoWin.GetComponent<InfoWin>().icon.sprite = hit.collider.GetComponent<UnitScr>().icon;
+                    infoWin.GetComponent<InfoWin>().buildName.text = hit.collider.GetComponent<UnitScr>().name;
+                    infoWin.GetComponent<InfoWin>().skill1Icon.sprite = hit.collider.GetComponent<UnitScr>().skill1Icon;
                     SelectByClicking(hit.collider.gameObject);
+                    infoWin.GetComponent<InfoWin>().skills[0].onClick.RemoveAllListeners();
+                    infoWin.GetComponent<InfoWin>().skills[0].onClick.AddListener(() => checkUnit.GetComponent<UnitScr>().Skill1());
                 }
             }
             else
@@ -53,17 +67,22 @@ public class GameManager : MonoBehaviour
                 }
             }
             //build
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity, build))
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity, build) && active == false)
             {
                 infoWin.SetActive(true);
+                infoWin.GetComponent<InfoWin>().icon.sprite = hit.collider.GetComponent<BuildSt>().icon;
+                infoWin.GetComponent<InfoWin>().buildName.text = hit.collider.GetComponent<BuildSt>().buildName;
+                infoWin.GetComponent<InfoWin>().skills[0].onClick.RemoveAllListeners();
+                infoWin.GetComponent<InfoWin>().skills[0].onClick.AddListener(() => hit.collider.GetComponent<BuildSt>().Skill1());
+                infoWin.GetComponent<InfoWin>().skill1Icon.sprite = hit.collider.GetComponent<BuildSt>().skill1Icon;
+                active = true;
                 hit.collider.transform.GetChild(0).gameObject.SetActive(true);
             }
         }
-        if (Input.GetMouseButtonDown(1) && unitSelected.Count > 0)
+        if (Input.GetMouseButtonDown(1) && unitSelected.Count > 0 && !isOverUI)
         {
             RaycastHit hit;
             Ray ray = cam.ScreenPointToRay(Input.mousePosition);
-
             if (Physics.Raycast(ray, out hit, Mathf.Infinity, ground))
             {
                 groundMarker.transform.localScale = new Vector3(1, 1, 1);
@@ -81,14 +100,15 @@ public class GameManager : MonoBehaviour
         {
             unitSelected.Add(unit);
             SelectUnit(unit, true);
-            infoWin.SetActive(false);
+            active = false;
         }
         else
         {
             SelectUnit(unit, false);
             unitSelected.Remove(unit);
-            infoWin.SetActive(false);
+            active = false;
         }
+        infoWin.SetActive(false);
     }
 
     public void DeselectAll()
@@ -99,7 +119,7 @@ public class GameManager : MonoBehaviour
         }
         groundMarker.SetActive(false);
         unitSelected.Clear();
-        infoWin.SetActive(false);
+        active = false;
     }
 
     private void SelectByClicking(GameObject unit)
@@ -108,6 +128,8 @@ public class GameManager : MonoBehaviour
         unitSelected.Add(unit);
         SelectUnit(unit, true);
         infoWin.SetActive(true);
+        active = true;
+        checkUnit = unit;
     }
     private void SelectUnit(GameObject unit, bool isSelected)
     {
