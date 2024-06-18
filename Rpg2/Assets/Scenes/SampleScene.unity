@@ -5102,11 +5102,17 @@ MonoBehaviour:
   attackBtn: {fileID: 93650849}
   healthBtn: {fileID: 247966988}
   player1: {fileID: 0}
+  player2: {fileID: 11400000, guid: c54f732eefecda44bbb7f73c070cc4e9, type: 2}
   enemy1: {fileID: 0}
+  enemy2: {fileID: 11400000, guid: c6cb1330d1bb50e41aa3d6ed3c9805ff, type: 2}
   player1Sprite: {fileID: 1827120533}
+  player2Sprite: {fileID: 1824720222}
   enemy1Sprite: {fileID: 2003761504}
+  enemy2Sprite: {fileID: 1004995026}
   infoText: {fileID: 2112348611}
-  i: 0
+  list: 00000000010000000200000003000000
+  currentPlayerIndex: 0
+  currentPlayer: 0
 --- !u!1 &1194738180
 GameObject:
   m_ObjectHideFlags: 0
