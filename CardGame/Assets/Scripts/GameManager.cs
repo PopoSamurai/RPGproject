@@ -3,6 +3,8 @@ public class GameManager : MonoBehaviour
 {
     public GameObject[] scenes;
     public int sceneIndex;
+    public int floorNumber = 1;
+    public int goldAmount;
     void Start()
     {
         sceneIndex = 0;
@@ -18,9 +20,13 @@ public class GameManager : MonoBehaviour
             else scenes[i].SetActive(false);
         }
     }
-    public void StartGame()
+    public void SelectChar()
     {
         sceneIndex = 1;
+    }
+    public void GameOn()
+    {
+        sceneIndex = 2;
     }
     public void RetryGame()
     {
@@ -29,5 +35,21 @@ public class GameManager : MonoBehaviour
     public void ExitApp()
     {
         Application.Quit();
+    }
+    public void RestScreen(string sceneName)
+    {
+        sceneIndex = 3;
+    }
+    public void ChestScreen(string sceneName)
+    {
+        sceneIndex = 4;
+    }
+    public void ShopScene(string sceneName)
+    {
+        sceneIndex = 5;
+    }
+    public void UrpageWinOpen()
+    {
+        sceneIndex = 6;
     }
 }
