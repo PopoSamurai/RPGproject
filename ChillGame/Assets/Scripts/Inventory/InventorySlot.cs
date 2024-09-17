@@ -1,6 +1,7 @@
-using Unity.VisualScripting;
+using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using static UnityEngine.RuleTile.TilingRuleOutput;
 public enum SlotType
 {
     None,
@@ -10,226 +11,202 @@ public enum SlotType
     seed,
     crop
 }
-public class InventorySlot : MonoBehaviour, IDropHandler, IPointerDownHandler
+public class InventorySlot : MonoBehaviour, IDropHandler/*, IPointerDownHandler*/
 {
     public bool eqSlot;
     public bool shopSlot;
     public bool rushBin = false;
     public SlotType type;
     GameObject gamem;
-    //
-    float clicked = 0;
-    float clicktime = 0;
-    float clickdelay = 0.5f;
-    public void OnPointerDown(PointerEventData eventData)
-    {
-        clicked++;
-        if (clicked == 1) clicktime = Time.time;
-
-        if (clicked > 1 && Time.time - clicktime < clickdelay)
-        {
-            clicked = 0;
-            clicktime = 0;
-
-            Debug.Log("Use item");
-        }
-        else if (clicked > 2 || Time.time - clicktime > 1) clicked = 0;
-    }
     private void Start()
     {
         gamem = GameObject.FindGameObjectWithTag("gamem");
     }
+
     public void OnDrop(PointerEventData eventData)
     {
-        if (eqSlot == true)
-        {
-            InventoryItem item = eventData.pointerDrag.GetComponent<InventoryItem>();
+        InventoryItem draggedItem = eventData.pointerDrag.GetComponent<InventoryItem>();
 
-            if (transform.childCount == 0)
-            {
-                if ((int)type == (int)item.item.type)
-                {
-                    InventoryItem inventoryItem = eventData.pointerDrag.GetComponent<InventoryItem>();
-                    inventoryItem.parentAfterDrag = transform;
-                }
-            }
-            else if (transform.childCount == 1 && transform.GetChild(0).GetComponent<InventoryItem>().item != eventData.pointerDrag.GetComponent<InventoryItem>().item)
-            {
-                if ((int)type == (int)item.item.type)
-                {
-                    InventoryItem inventoryItem = eventData.pointerDrag.GetComponent<InventoryItem>();
-                    InventoryItem inventoryItem2 = transform.GetChild(0).GetComponent<InventoryItem>();
-                    inventoryItem.parentAfterDrag = transform;
-                    inventoryItem2.parentAfterDrag = inventoryItem.firstPos.transform;
-                    inventoryItem2.transform.SetParent(inventoryItem.firstPos.transform);
-                }
-            }
-            else if (transform.GetChild(0).GetComponent<InventoryItem>().item.isStack == true && transform.GetChild(0).GetComponent<InventoryItem>().count + eventData.pointerDrag.GetComponent<InventoryItem>().count < 65)
-            {
-                InventoryItem inventoryItem = eventData.pointerDrag.GetComponent<InventoryItem>();
-                InventoryItem inventoryItem2 = transform.GetChild(0).GetComponent<InventoryItem>();
-                inventoryItem.parentAfterDrag = transform;
-                inventoryItem.GetComponent<InventoryItem>().count += inventoryItem2.GetComponent<InventoryItem>().count;
-                inventoryItem.GetComponent<InventoryItem>().RefreshCount();
-                Destroy(inventoryItem2.gameObject);
-            }
-            else
-            {
-                InventoryItem inventoryItem = eventData.pointerDrag.GetComponent<InventoryItem>();
-                InventoryItem inventoryItem2 = transform.GetChild(0).GetComponent<InventoryItem>();
-                inventoryItem.parentAfterDrag = transform;
-                inventoryItem2.parentAfterDrag = inventoryItem.firstPos.transform;
-                inventoryItem2.transform.SetParent(inventoryItem.firstPos.transform);
-            }
+        // Handling item in inventory slot
+        if (eqSlot)
+        {
+            HandleInventorySlot(draggedItem);
         }
-        //sell
-        else if (shopSlot == true && eventData.pointerDrag.GetComponent<InventoryItem>().parentAfterDrag.transform.GetComponent<InventorySlot>().shopSlot == false)
+        // Handling selling item to the shop
+        else if (shopSlot && !draggedItem.parentAfterDrag.GetComponent<InventorySlot>().shopSlot)
         {
-            InventoryItem inventoryItem3 = eventData.pointerDrag.GetComponent<InventoryItem>();
-
-            if (transform.childCount == 0)
-            {
-                inventoryItem3.parentAfterDrag = transform;
-                gamem.GetComponent<InventoryManager>().money += inventoryItem3.costItem;
-                Debug.Log("sell");
-            }
-            //not swap
-            else if (transform.childCount == 1 && transform.GetComponentInChildren<InventoryItem>().item != eventData.pointerDrag.GetComponent<InventoryItem>().item)
-            {
-                Debug.Log("Its not free slot");
-            }
-            //connect items
-            else if (transform.GetComponentInChildren<InventoryItem>().item.isStack == true && transform.GetComponentInChildren<InventoryItem>().count + eventData.pointerDrag.GetComponent<InventoryItem>().count < 65)
-            {
-                InventoryItem inventoryItem2 = transform.GetComponentInChildren<InventoryItem>();
-                inventoryItem3.parentAfterDrag = transform;
-                gamem.GetComponent<InventoryManager>().money += inventoryItem3.costItem;
-                inventoryItem3.GetComponent<InventoryItem>().count += inventoryItem2.GetComponent<InventoryItem>().count;
-                inventoryItem3.GetComponent<InventoryItem>().RefreshCount();
-                Destroy(inventoryItem2.gameObject);
-            }
-            else
-            {
-                inventoryItem3.parentAfterDrag = transform;
-            }
+            HandleSellItem(draggedItem);
         }
-        //buy
-        else if (eventData.pointerDrag.GetComponent<InventoryItem>().parentAfterDrag.transform.GetComponent<InventorySlot>().shopSlot == true)
+        // Buying item from the shop
+        else if (draggedItem.parentAfterDrag.GetComponent<InventorySlot>().shopSlot)
         {
-            InventoryItem inventoryItem = eventData.pointerDrag.GetComponent<InventoryItem>();
-            //buy on free slot
-            if (transform.childCount == 0 && gamem.GetComponent<InventoryManager>().money >= inventoryItem.costItem)
-            {
-                inventoryItem.parentAfterDrag = transform;
-
-                if (inventoryItem.parentAfterDrag.transform.GetComponent<InventorySlot>().shopSlot == false)
-                {
-                    gamem.GetComponent<InventoryManager>().money -= inventoryItem.costItem;
-                }
-            }
-            //swap items
-            else if (transform.childCount == 1 && transform.GetComponentInChildren<InventoryItem>().item != eventData.pointerDrag.GetComponent<InventoryItem>().item)
-            {
-                Debug.Log("Its not free slot");
-            }
-            //connect items
-            else if (eventData.pointerDrag.GetComponentInChildren<InventoryItem>().item.isStack == true)
-            {
-                InventoryItem inventoryItem2 = transform.GetComponentInChildren<InventoryItem>();
-
-                if (inventoryItem2 == null && transform.GetComponentInParent<InventorySlot>().shopSlot == false && gamem.GetComponent<InventoryManager>().money >= inventoryItem.item.costTosell)
-                {
-                    gamem.GetComponent<InventoryManager>().money -= inventoryItem.item.costTosell;
-                    inventoryItem.parentAfterDrag = transform;
-                    inventoryItem.RefreshCount();
-                }
-                else if (inventoryItem2 == null && transform.GetComponentInParent<InventorySlot>().shopSlot == true)
-                {
-                    inventoryItem.parentAfterDrag = transform;
-                    inventoryItem.RefreshCount();
-                }
-                else if (inventoryItem2 != null && transform.GetComponentInParent<InventorySlot>().shopSlot == false && gamem.GetComponent<InventoryManager>().money >= inventoryItem.item.costTosell)
-                {
-                    gamem.GetComponent<InventoryManager>().money -= inventoryItem.costItem;
-                    inventoryItem.parentAfterDrag = transform;
-                    inventoryItem.count += inventoryItem2.count;
-                    inventoryItem.RefreshCount();
-                    Destroy(inventoryItem2.gameObject);
-                }
-                else if (inventoryItem2 != null && transform.GetComponentInParent<InventorySlot>().shopSlot == true)
-                {
-                    inventoryItem.parentAfterDrag = transform;
-                    inventoryItem.count += inventoryItem2.count;
-                    inventoryItem.RefreshCount();
-                    Destroy(inventoryItem2.gameObject);
-                }
-                else if(inventoryItem2 == null) //block all
-                {
-                    InventorySlot slotParent = GetComponent<InventorySlot>();
-                    if(eventData.pointerDrag.GetComponentInChildren<InventoryItem>().count == 1)
-                    {
-                        slotParent = inventoryItem.GetComponent<InventoryItem>().parentAfterDrag.GetComponentInParent<InventorySlot>();
-                        slotParent.GetComponentInChildren<InventoryItem>().count += 1;
-                        slotParent.GetComponentInChildren<InventoryItem>().RefreshCount();
-                        Destroy(inventoryItem.gameObject);
-                        Debug.Log("You don't have money farmer");
-                    }
-                    else
-                    {
-                        Debug.Log("You don't have money farmer");
-                    }
-                }
-                else if (inventoryItem2 != null) //block 1 slot
-                {
-                    InventorySlot slotParent = GetComponent<InventorySlot>();
-                    slotParent = inventoryItem.GetComponent<InventoryItem>().parentAfterDrag.GetComponentInParent<InventorySlot>();
-                    slotParent.GetComponentInChildren<InventoryItem>().count += 1;
-                    slotParent.GetComponentInChildren<InventoryItem>().RefreshCount();
-                    Destroy(inventoryItem.gameObject);
-                    Debug.Log("You don't have money farmer");
-                }
-            }
-            else if(inventoryItem.parentAfterDrag.transform.GetComponentInChildren<InventorySlot>().shopSlot == true && transform.GetComponentInChildren<InventorySlot>().shopSlot == true)
-            {
-                inventoryItem.parentAfterDrag = transform;
-            }
-            else
-            {
-                Debug.Log("You don't have money farmer");
-            }
+            HandleBuyItem(draggedItem);
         }
-        //rushbin
-        else if(rushBin == true)
+        // Handling rush bin (delete item)
+        else if (rushBin)
         {
-            Destroy(eventData.pointerDrag);
+            Destroy(eventData.pointerDrag.gameObject);
         }
         else
         {
-            //change item position
-            if (transform.childCount == 0)
+            HandleGeneralSlot(draggedItem);
+        }
+    }
+
+    private void HandleInventorySlot(InventoryItem draggedItem)
+    {
+        if (transform.childCount == 0)
+        {
+            if ((int)type == (int)draggedItem.item.type)
             {
-                InventoryItem inventoryItem = eventData.pointerDrag.GetComponent<InventoryItem>();
-                inventoryItem.parentAfterDrag = transform;
-            }
-            //swap items
-            else if (transform.childCount == 1 && transform.GetComponentInChildren<InventoryItem>().item != eventData.pointerDrag.GetComponent<InventoryItem>().item) // swap items
-            {
-                InventoryItem inventoryItem = eventData.pointerDrag.GetComponent<InventoryItem>();
-                InventoryItem inventoryItem2 = transform.GetComponentInChildren<InventoryItem>();
-                inventoryItem.parentAfterDrag = transform;
-                inventoryItem2.parentAfterDrag = inventoryItem.firstPos.transform;
-                inventoryItem2.transform.SetParent(inventoryItem.firstPos.transform);
-            }
-            //connect items
-            else if (transform.GetComponentInChildren<InventoryItem>().item.isStack == true && transform.GetComponentInChildren<InventoryItem>().count + eventData.pointerDrag.GetComponent<InventoryItem>().count < 65)
-            {
-                InventoryItem inventoryItem = eventData.pointerDrag.GetComponent<InventoryItem>();
-                InventoryItem inventoryItem2 = transform.GetComponentInChildren<InventoryItem>();
-                inventoryItem.parentAfterDrag = transform;
-                inventoryItem.GetComponent<InventoryItem>().count += inventoryItem2.GetComponent<InventoryItem>().count;
-                inventoryItem.GetComponent<InventoryItem>().RefreshCount();
-                Destroy(inventoryItem2.gameObject);
+                draggedItem.parentAfterDrag = transform;
             }
         }
+        else if (transform.childCount == 1)
+        {
+            InventoryItem existingItem = transform.GetChild(0).GetComponent<InventoryItem>();
+
+            if (existingItem.item != draggedItem.item && (int)type == (int)draggedItem.item.type)
+            {
+                SwapItems(draggedItem, existingItem);
+            }
+            else if (existingItem.item.isStack && existingItem.count + draggedItem.count <= 65)
+            {
+                StackItems(draggedItem, existingItem);
+            }
+        }
+    }
+
+    private void HandleSellItem(InventoryItem draggedItem) //w sklepie
+    {
+        InventoryItem existingItem = transform.GetComponentInChildren<InventoryItem>();
+
+        if (transform.childCount == 0) //jak pusty slot
+        {
+            draggedItem.parentAfterDrag = transform;
+            gamem.GetComponent<InventoryManager>().money += draggedItem.costItem;
+            Debug.Log("Item sold");
+        }
+        else if (existingItem.item == draggedItem.item && transform.GetComponentInChildren<InventoryItem>().item.isStack && transform.GetComponentInChildren<InventoryItem>().count + draggedItem.count <= 65)
+        {
+            StackItems(draggedItem, transform.GetComponentInChildren<InventoryItem>());
+            gamem.GetComponent<InventoryManager>().money += draggedItem.costItem;
+        }
+        else
+        {
+            if (existingItem.item == draggedItem.item)
+            {
+                StackItems(draggedItem, existingItem);
+            }
+            else
+            {
+                //dodaj count do poprzedniego
+                draggedItem.firstPos.GetChild(0).GetComponent<InventoryItem>().count += draggedItem.count;
+                draggedItem.firstPos.GetChild(0).GetComponent<InventoryItem>().RefreshCount();
+                Destroy(draggedItem.gameObject);
+                Debug.Log("Slot is not free to sell");
+            }
+        }
+    }
+
+    private void HandleBuyItem(InventoryItem draggedItem)
+    {
+        InventoryManager inventoryManager = gamem.GetComponent<InventoryManager>();
+        InventoryItem existingItem = transform.GetComponentInChildren<InventoryItem>();
+
+        if (transform.childCount == 0 && inventoryManager.money >= draggedItem.costItem)
+        {
+            draggedItem.parentAfterDrag = transform;
+            inventoryManager.money -= draggedItem.costItem;
+        }
+        else if (transform.childCount == 1 && transform.GetComponentInChildren<InventoryItem>().item.isStack && inventoryManager.money >= draggedItem.costItem)
+        {
+            if (existingItem.item == draggedItem.item)
+            {
+                StackItems(draggedItem, transform.GetComponentInChildren<InventoryItem>());
+                inventoryManager.money -= draggedItem.costItem;
+            }
+            else
+            {
+                //dodaj count do poprzedniego
+                draggedItem.firstPos.GetChild(0).GetComponent<InventoryItem>().count += draggedItem.count;
+                draggedItem.firstPos.GetChild(0).GetComponent<InventoryItem>().RefreshCount();
+                Destroy(draggedItem.gameObject);
+                Debug.Log("You don't have a money farmer");
+            }
+        }
+        else
+        {                    
+            if (existingItem.item == draggedItem.item && inventoryManager.money >= draggedItem.costItem)
+            {
+                StackItems(draggedItem, existingItem);
+                inventoryManager.money -= draggedItem.costItem;
+            }
+            else
+            {
+                //dodaj count do poprzedniego
+                draggedItem.firstPos.GetChild(0).GetComponent<InventoryItem>().count += draggedItem.count;
+                draggedItem.firstPos.GetChild(0).GetComponent<InventoryItem>().RefreshCount();
+                Destroy(draggedItem.gameObject);
+                Debug.Log("You don't have a money farmer");
+            }
+        }
+    }
+    private void HandleGeneralSlot(InventoryItem draggedItem) //w eq
+    {
+        if (transform.childCount == 0)
+        {
+            draggedItem.parentAfterDrag = transform;
+        }
+        else
+        {
+            InventoryItem existingItem = transform.GetComponentInChildren<InventoryItem>();
+
+            if (existingItem.item != draggedItem.item && !draggedItem.isSplitting)
+            {
+                SwapItems(draggedItem, existingItem);
+            }
+            else if (existingItem.item.isStack && !draggedItem.isSplitting)
+            {
+                if (existingItem.count + draggedItem.count <= 65)
+                {
+                    StackItems(draggedItem, existingItem);
+                }
+                else
+                {
+                    SwapItems(draggedItem, existingItem);
+                }
+            }
+            else // COS TU NIE GRA > . <'
+            {
+                if(existingItem.item == draggedItem.item)
+                {
+                    StackItems(draggedItem, existingItem);
+                }
+                else
+                {
+                    //dodaj count do poprzedniego
+                    draggedItem.firstPos.GetChild(0).GetComponent<InventoryItem>().count += draggedItem.count;
+                    draggedItem.firstPos.GetChild(0).GetComponent<InventoryItem>().RefreshCount();
+                    Destroy(draggedItem.gameObject);
+                    Debug.Log("It's not a free slot");
+                }
+            }
+        }
+    }
+
+    private void SwapItems(InventoryItem draggedItem, InventoryItem existingItem)
+    {
+        draggedItem.parentAfterDrag = transform;
+        existingItem.parentAfterDrag = draggedItem.firstPos.transform;
+        existingItem.transform.SetParent(draggedItem.firstPos.transform);
+    }
+
+    private void StackItems(InventoryItem draggedItem, InventoryItem existingItem)
+    {
+        draggedItem.parentAfterDrag = transform;
+        existingItem.count += draggedItem.count;
+        existingItem.RefreshCount();
+        Destroy(draggedItem.gameObject);
     }
 }

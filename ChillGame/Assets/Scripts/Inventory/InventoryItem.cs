@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using Unity.VisualScripting;
 public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
 {
     public Image image;
@@ -13,6 +14,7 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     GameObject subGameObject;
     public int costItem = 0;
     Vector3 temp = new Vector3(1.5f, 1.5f, 0);
+    public bool isSplitting = false; // Flaga podzia³u przedmiotów
     public void InitializeItem(Item newItem)
     {
         firstPos = transform.parent;
@@ -37,8 +39,9 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     }
     public void OnBeginDrag(PointerEventData eventData)
     {
-        if (count > 1 && Input.GetKey(KeyCode.R))
+        if (count > 1 && Input.GetMouseButton(1))
         {
+            isSplitting = true;
             SepareteItems(item);
             firstPos = transform.parent;
             parentAfterDrag = transform.parent;
@@ -65,8 +68,33 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     }
     public void OnEndDrag(PointerEventData eventData)
     {
-        image.raycastTarget = true;
-        transform.SetParent(parentAfterDrag);
+        if (isSplitting == true)
+        {
+            if (parentAfterDrag.childCount == 0)
+            {
+                //firstPos.GetChild(0).GetComponent<InventoryItem>().count -= count;
+                firstPos.GetChild(0).GetComponent<InventoryItem>().RefreshCount();
+                firstPos.GetChild(0).GetComponent<InventoryItem>().isSplitting = false;
+                Debug.Log("1");
+            }
+            else
+            {
+                firstPos.GetChild(0).GetComponent<InventoryItem>().count += count;
+                firstPos.GetChild(0).GetComponent<InventoryItem>().RefreshCount();
+                firstPos.GetChild(0).GetComponent<InventoryItem>().isSplitting = false;
+                Destroy(gameObject);
+                Debug.Log("2");
+            }
+            image.raycastTarget = true;
+            transform.SetParent(parentAfterDrag);
+            isSplitting = false;
+        }
+        else
+        {
+            image.raycastTarget = true;
+            transform.SetParent(parentAfterDrag);
+            isSplitting = false;
+        }
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -75,6 +103,7 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         subGameObject.transform.SetParent(GameObject.FindGameObjectWithTag("Canvas").transform, false);
         subGameObject.transform.position = eventData.pointerEnter.transform.position + temp;
         subGameObject.transform.GetChild(0).GetComponent<Text>().text = item.nameItem + '\n' + "<color=green>" + item.type.ToString() + "</color>" + '\n' + '\n' + "<color=yellow>" + costItem + "g" + "</color>";
+        InventoryItem existingItem = transform.GetComponentInChildren<InventoryItem>();
     }
     public void OnPointerExit(PointerEventData eventData)
     {

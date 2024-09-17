@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Tilemaps;
 public enum Actions { Empty, Fishing, Seeds, Water, Crop, Fight}
 public class Movement : MonoBehaviour
 {
