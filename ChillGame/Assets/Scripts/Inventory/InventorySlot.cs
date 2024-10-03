@@ -81,20 +81,20 @@ public class InventorySlot : MonoBehaviour, IDropHandler/*, IPointerDownHandler*
     {
         InventoryItem existingItem = transform.GetComponentInChildren<InventoryItem>();
 
-        if (transform.childCount == 0) //jak pusty slot
+        if (transform.childCount == 0 && shopSlot) //jak pusty slot
         {
             draggedItem.parentAfterDrag = transform;
             gamem.GetComponent<InventoryManager>().money += draggedItem.costItem;
             Debug.Log("Item sold");
         }
-        else if (existingItem.item == draggedItem.item && transform.GetComponentInChildren<InventoryItem>().item.isStack && transform.GetComponentInChildren<InventoryItem>().count + draggedItem.count <= 65)
+        else if (shopSlot && existingItem.item == draggedItem.item && transform.GetComponentInChildren<InventoryItem>().item.isStack && transform.GetComponentInChildren<InventoryItem>().count + draggedItem.count <= 65)
         {
             StackItems(draggedItem, transform.GetComponentInChildren<InventoryItem>());
             gamem.GetComponent<InventoryManager>().money += draggedItem.costItem;
         }
         else
         {
-            if (existingItem.item == draggedItem.item)
+            if (existingItem.item == draggedItem.item && shopSlot)
             {
                 StackItems(draggedItem, existingItem);
             }
@@ -114,22 +114,33 @@ public class InventorySlot : MonoBehaviour, IDropHandler/*, IPointerDownHandler*
         InventoryManager inventoryManager = gamem.GetComponent<InventoryManager>();
         InventoryItem existingItem = transform.GetComponentInChildren<InventoryItem>();
 
-        if (transform.childCount == 0 && inventoryManager.money >= draggedItem.costItem)
+        if (transform.childCount == 0)
         {
-            draggedItem.parentAfterDrag = transform;
-            inventoryManager.money -= draggedItem.costItem;
+            if (inventoryManager.money >= draggedItem.costItem)
+            {
+                draggedItem.parentAfterDrag = transform;
+                inventoryManager.money -= draggedItem.costItem;
+            }
+            else if (shopSlot)
+            {
+                draggedItem.parentAfterDrag = transform;
+            }
+
         }
         else if (transform.childCount == 1 && transform.GetComponentInChildren<InventoryItem>().item.isStack && inventoryManager.money >= draggedItem.costItem)
         {
-            if (existingItem.item == draggedItem.item)
+            if (existingItem.item == draggedItem.item && existingItem.item.isStack)
             {
                 StackItems(draggedItem, transform.GetComponentInChildren<InventoryItem>());
-                inventoryManager.money -= draggedItem.costItem;
+
+                if (!shopSlot)
+                    inventoryManager.money -= draggedItem.costItem;
             }
             else
             {
                 //dodaj count do poprzedniego
-                draggedItem.firstPos.GetChild(0).GetComponent<InventoryItem>().count += draggedItem.count;
+                if (!shopSlot)
+                    draggedItem.firstPos.GetChild(0).GetComponent<InventoryItem>().count += draggedItem.count;
                 draggedItem.firstPos.GetChild(0).GetComponent<InventoryItem>().RefreshCount();
                 Destroy(draggedItem.gameObject);
                 Debug.Log("You don't have a money farmer");
@@ -140,12 +151,22 @@ public class InventorySlot : MonoBehaviour, IDropHandler/*, IPointerDownHandler*
             if (existingItem.item == draggedItem.item && inventoryManager.money >= draggedItem.costItem)
             {
                 StackItems(draggedItem, existingItem);
-                inventoryManager.money -= draggedItem.costItem;
+                if (!shopSlot)
+                    inventoryManager.money -= draggedItem.costItem;
+            }
+            else if(existingItem.item != draggedItem.item && shopSlot)
+            {
+                SwapItems(draggedItem, existingItem);
+            }
+            else if (existingItem.item == draggedItem.item && existingItem.item.isStack && shopSlot)
+            {
+                StackItems(draggedItem, existingItem);
             }
             else
             {
                 //dodaj count do poprzedniego
-                draggedItem.firstPos.GetChild(0).GetComponent<InventoryItem>().count += draggedItem.count;
+                if (!shopSlot)
+                    draggedItem.firstPos.GetChild(0).GetComponent<InventoryItem>().count += draggedItem.count;
                 draggedItem.firstPos.GetChild(0).GetComponent<InventoryItem>().RefreshCount();
                 Destroy(draggedItem.gameObject);
                 Debug.Log("You don't have a money farmer");
@@ -177,11 +198,15 @@ public class InventorySlot : MonoBehaviour, IDropHandler/*, IPointerDownHandler*
                     SwapItems(draggedItem, existingItem);
                 }
             }
-            else // COS TU NIE GRA > . <'
+            else
             {
-                if(existingItem.item == draggedItem.item)
+                if(existingItem.item == draggedItem.item && existingItem.item.isStack)
                 {
                     StackItems(draggedItem, existingItem);
+                }
+                else if(existingItem.item == draggedItem.item && !existingItem.item.isStack)
+                {
+                    SwapItems(draggedItem, existingItem);
                 }
                 else
                 {
