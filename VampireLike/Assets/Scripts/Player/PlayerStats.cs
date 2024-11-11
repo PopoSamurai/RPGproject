@@ -27,6 +27,10 @@ public class PlayerStats : MonoBehaviour
         public int experienceCapIncrease;
     }
     public List<LevelRange> levelsRange;
+    //I-Frames
+    public float invincibilityDuration;
+    float invincibilityTimer;
+    bool isInvincible;
     private void Start()
     {
         experienceCap = levelsRange[0].experienceCapIncrease;
@@ -38,6 +42,17 @@ public class PlayerStats : MonoBehaviour
         currentMoveSpeed = characterData.MoveSpeed;
         currentMight = characterData.Might;
         currentProjectileSpeed = characterData.ProjectileSpeed;
+    }
+    private void Update()
+    {
+        if (invincibilityTimer > 0)
+        {
+            invincibilityTimer -= Time.deltaTime;
+        }
+        else if(isInvincible)
+        {
+            isInvincible = false;
+        }
     }
     public void IncereaseExperience(int amount)
     {
@@ -63,6 +78,38 @@ public class PlayerStats : MonoBehaviour
                 }
             }
             experienceCap += experienceCapIncrease;
+        }
+    }
+    public void TakeDamage(float dmg)
+    {
+        if (!isInvincible)
+        {
+            currentHealth -= dmg;
+
+            invincibilityTimer = invincibilityDuration;
+            isInvincible = true;
+
+            if (currentHealth <= 0)
+            {
+                kill();
+            }
+        }
+    }
+
+    public void kill()
+    {
+        Debug.Log("PLAYER DEAD");
+    }
+    public void RestoreHealth(float amoint)
+    {
+        if (currentHealth < characterData.MaxHealth)
+        {
+            currentHealth += amoint;
+
+            if(currentHealth > characterData.MaxHealth)
+            {
+                currentHealth = characterData.MaxHealth;
+            }
         }
     }
 }

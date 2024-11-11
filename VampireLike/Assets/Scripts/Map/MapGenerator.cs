@@ -89,7 +89,7 @@ public class MapGenerator : MonoBehaviour
             if (opDist > maxDist)
             {
                 spawnedChunkPositions.Remove(chunk.transform.position);
-                Destroy(chunk);
+                chunk.SetActive(false);
                 spawnedChunks.RemoveAt(i);
             }
             else

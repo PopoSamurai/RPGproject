@@ -26,4 +26,12 @@ public class EnemyStats : MonoBehaviour
     {
         Destroy(gameObject);
     }
+    private void OnCollisionStay2D(Collision2D coll)
+    {
+        if(coll.gameObject.CompareTag("Player"))
+        {
+            PlayerStats player = coll.gameObject.GetComponent<PlayerStats>();
+            player.TakeDamage(curretHealth);
+        }
+    }
 }

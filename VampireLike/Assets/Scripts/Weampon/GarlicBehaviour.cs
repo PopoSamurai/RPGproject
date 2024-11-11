@@ -18,5 +18,14 @@ public class GarlicBehaviour : MeleWeampon
 
             markEnemy.Add(coll.gameObject);
         }
+        else if (coll.CompareTag("Prop"))
+        {
+            if (coll.gameObject.TryGetComponent(out breakableProps brakable) && !markEnemy.Contains(coll.gameObject))
+            {
+                brakable.TakeDamage(currentDamage);
+
+                markEnemy.Add(coll.gameObject);
+            }
+        }
     }
 }

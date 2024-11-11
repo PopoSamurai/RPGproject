@@ -81,6 +81,14 @@ public class ProjectWeampon : MonoBehaviour
             enemy.takeDamage(currentDanage);
             ReducePierce();
         }
+        else if (coll.CompareTag("Prop"))
+        {
+            if (coll.gameObject.TryGetComponent(out breakableProps brakable))
+            {
+                brakable.TakeDamage(currentDanage);
+                ReducePierce();
+            }
+        }
     }
     void ReducePierce()
     {

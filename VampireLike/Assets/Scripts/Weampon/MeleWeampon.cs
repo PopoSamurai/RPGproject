@@ -27,5 +27,12 @@ public class MeleWeampon : MonoBehaviour
             EnemyStats enemy = coll.GetComponent<EnemyStats>();
             enemy.takeDamage(currentDamage);
         }
+        else if (coll.CompareTag("Prop"))
+        {
+            if (coll.gameObject.TryGetComponent(out breakableProps brakable))
+            {
+                brakable.TakeDamage(currentDamage);
+            }
+        }
     }
 }

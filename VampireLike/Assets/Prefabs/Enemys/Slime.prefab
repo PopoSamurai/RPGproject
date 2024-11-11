@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 8819416588654330753}
   - component: {fileID: 1980815938467298861}
   - component: {fileID: 8180078271728507419}
+  - component: {fileID: 7164665691772358675}
   m_Layer: 0
   m_Name: Slime
   m_TagString: Enemy
@@ -169,7 +170,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.0038444996, y: -0.45368743}
+  m_Offset: {x: -0.0038444996, y: -0.1517433}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -180,7 +181,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1.008039, y: 0.35442066}
+  m_Size: {x: 1.008039, y: 0.95830894}
   m_EdgeRadius: 0
 --- !u!114 &1980815938467298861
 MonoBehaviour:
@@ -208,3 +209,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyData: {fileID: 11400000, guid: f1b421871699b344b8f8708b93af75f7, type: 2}
+--- !u!114 &7164665691772358675
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7806596963422629624}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 65e98ce40ef4027438420d28749cb8ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  drops:
+  - name: Exp
+    itemPrefab: {fileID: 1517371074757765811, guid: c0590d714c154964eaa8c22f898ffd52, type: 3}
+    dropRate: 50
