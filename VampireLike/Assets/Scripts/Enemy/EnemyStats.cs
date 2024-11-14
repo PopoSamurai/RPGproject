@@ -3,10 +3,12 @@ using UnityEngine;
 public class EnemyStats : MonoBehaviour
 {
     public EnemyScriptableObject enemyData;
-    float curretMoveSpped;
-    float curretHealth;
-    float curretDamage;
-
+    [HideInInspector]
+    public float curretMoveSpped;
+    [HideInInspector]
+    public float curretHealth;
+    [HideInInspector]
+    public float curretDamage;
     void Awake()
     {
         curretMoveSpped = enemyData.MoveSpeed;

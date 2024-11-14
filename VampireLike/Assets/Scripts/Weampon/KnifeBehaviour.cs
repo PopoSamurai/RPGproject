@@ -11,6 +11,6 @@ public class KnifeBehaviour : ProjectWeampon
 
     void Update()
     {
-        transform.position += direction * weamponData.Spped * Time.deltaTime;
+        transform.position += direction * currentSpped * Time.deltaTime;
     }
 }

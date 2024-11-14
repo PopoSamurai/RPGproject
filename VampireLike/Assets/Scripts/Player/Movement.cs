@@ -14,9 +14,10 @@ public class Movement : MonoBehaviour
     public Vector2 lastmovement;
 
     //References
-    public CharacterScriptableObj characterData;
+    PlayerStats player;
     void Start()
     {
+        player = GetComponent<PlayerStats>();
         rb = GetComponent<Rigidbody2D>();
         lastmovement = new Vector2(1, 0f);
         anim = GetComponent<Animator>();
@@ -67,6 +68,6 @@ public class Movement : MonoBehaviour
     }
     public void Move()
     {
-        rb.velocity = new Vector2(direction.x * characterData.MoveSpeed, direction.y * characterData.MoveSpeed);
+        rb.velocity = new Vector2(direction.x * player.currentMoveSpeed, direction.y * player.currentMoveSpeed);
     }
 }

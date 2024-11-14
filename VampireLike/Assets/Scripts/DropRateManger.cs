@@ -18,16 +18,15 @@ public class DropRateManger : MonoBehaviour
 
         foreach (Drops rate in drops)
         {
-            if(randomNum <= rate.dropRate)
+            if (randomNum <= rate.dropRate)
             {
-                possibleDrops.Add(rate);
+                Instantiate(rate.itemPrefab, transform.position, Quaternion.identity);
             }
         }
         if (possibleDrops.Count > 0)
         {
             Drops drops = possibleDrops[UnityEngine.Random.Range(0, possibleDrops.Count)];
-            GameObject droppedItem = Instantiate(drops.itemPrefab, transform.position, Quaternion.identity);
-            Destroy(droppedItem, 5f);
+            Instantiate(drops.itemPrefab, transform.position, Quaternion.identity);
         }
     }
 }
