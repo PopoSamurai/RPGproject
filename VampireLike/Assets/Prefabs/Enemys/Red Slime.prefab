@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: 8180078271728507419}
   - component: {fileID: 7164665691772358675}
   m_Layer: 0
-  m_Name: Slime
+  m_Name: Red Slime
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -80,7 +80,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 1
   m_Sprite: {fileID: 1521113553, guid: 02e4e1913b93edd4e8dc2fa1498314e9, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 0.028301716, b: 0.028301716, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -207,7 +207,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1520fe5ac0573684295859a8295a542a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyData: {fileID: 11400000, guid: f1b421871699b344b8f8708b93af75f7, type: 2}
+  enemyData: {fileID: 11400000, guid: 4f3636592fc6bc042a3b836d1ee19d5f, type: 2}
   curretMoveSpped: 0
   curretHealth: 0
   curretDamage: 0
