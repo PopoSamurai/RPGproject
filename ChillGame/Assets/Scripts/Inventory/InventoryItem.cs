@@ -39,7 +39,7 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     }
     public void OnBeginDrag(PointerEventData eventData)
     {
-        if (count > 1 && Input.GetMouseButton(1))
+        if (count > 1 && Input.GetKey(KeyCode.R))
         {
             isSplitting = true;
             SepareteItems(item);
@@ -72,16 +72,21 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         {
             if (parentAfterDrag.childCount == 0)
             {
-                //firstPos.GetChild(0).GetComponent<InventoryItem>().count -= count;
-                firstPos.GetChild(0).GetComponent<InventoryItem>().RefreshCount();
-                firstPos.GetChild(0).GetComponent<InventoryItem>().isSplitting = false;
-                Debug.Log("1");
+                if (firstPos.childCount > 0)
+                {
+                    firstPos.GetChild(0).GetComponent<InventoryItem>().RefreshCount();
+                    firstPos.GetChild(0).GetComponent<InventoryItem>().isSplitting = false;
+                    Debug.Log("1");
+                }
             }
             else
             {
-                firstPos.GetChild(0).GetComponent<InventoryItem>().count += count;
-                firstPos.GetChild(0).GetComponent<InventoryItem>().RefreshCount();
-                firstPos.GetChild(0).GetComponent<InventoryItem>().isSplitting = false;
+                if (firstPos.childCount > 0)
+                {
+                    firstPos.GetChild(0).GetComponent<InventoryItem>().count += count;
+                    firstPos.GetChild(0).GetComponent<InventoryItem>().RefreshCount();
+                    firstPos.GetChild(0).GetComponent<InventoryItem>().isSplitting = false;
+                }
                 Destroy(gameObject);
                 Debug.Log("2");
             }
@@ -96,7 +101,6 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             isSplitting = false;
         }
     }
-
     public void OnPointerEnter(PointerEventData eventData)
     {
         subGameObject = Instantiate(Resources.Load("ItemStats", typeof(GameObject))) as GameObject;
