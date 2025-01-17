@@ -91,12 +91,14 @@ public class InventorySlot : MonoBehaviour, IDropHandler/*, IPointerDownHandler*
         {
             StackItems(draggedItem, transform.GetComponentInChildren<InventoryItem>());
             gamem.GetComponent<InventoryManager>().money += draggedItem.costItem;
+            Debug.Log("1");
         }
         else
         {
             if (existingItem.item == draggedItem.item && shopSlot)
             {
                 StackItems(draggedItem, existingItem);
+                Debug.Log("2");
             }
             else
             {
@@ -116,14 +118,16 @@ public class InventorySlot : MonoBehaviour, IDropHandler/*, IPointerDownHandler*
 
         if (transform.childCount == 0)
         {
-            if (inventoryManager.money >= draggedItem.costItem)
+            if (inventoryManager.money >= draggedItem.costItem && !shopSlot)
             {
                 draggedItem.parentAfterDrag = transform;
                 inventoryManager.money -= draggedItem.costItem;
+                Debug.Log("3");
             }
             else if (shopSlot)
             {
                 draggedItem.parentAfterDrag = transform;
+                Debug.Log("4");
             }
 
         }
@@ -134,13 +138,19 @@ public class InventorySlot : MonoBehaviour, IDropHandler/*, IPointerDownHandler*
                 StackItems(draggedItem, transform.GetComponentInChildren<InventoryItem>());
 
                 if (!shopSlot)
+                {
                     inventoryManager.money -= draggedItem.costItem;
+                    Debug.Log("5");
+                }
             }
             else
             {
                 //dodaj count do poprzedniego
                 if (!shopSlot)
+                {
                     draggedItem.firstPos.GetChild(0).GetComponent<InventoryItem>().count += draggedItem.count;
+                    Debug.Log("6");
+                }
                 draggedItem.firstPos.GetChild(0).GetComponent<InventoryItem>().RefreshCount();
                 Destroy(draggedItem.gameObject);
                 Debug.Log("You don't have a money farmer");

@@ -4,7 +4,21 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    public static GameManager instance;
     public GameObject[] panels;
+    public TileManager tileManager;
+    private void Awake()
+    {
+        if(instance != null && instance != this)
+        {
+            Destroy(this.gameObject);
+        }
+        else
+            instance = this;
+
+        DontDestroyOnLoad(this.gameObject);
+        tileManager = GetComponent<TileManager>();
+    }
     private void Update()
     {
         if (Input.GetKey(KeyCode.Escape))

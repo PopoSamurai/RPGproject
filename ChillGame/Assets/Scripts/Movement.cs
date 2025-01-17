@@ -1,5 +1,7 @@
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using static UnityEngine.GraphicsBuffer;
 public enum Actions { Empty, Fishing, Seeds, Water, Crop, Fight}
 public class Movement : MonoBehaviour
 {
@@ -11,6 +13,8 @@ public class Movement : MonoBehaviour
     public static bool move = true;
     public GameObject ActionUI;
     public bool actionButton = false;
+    public GameObject[] toolPosition;
+    public int posT = 2;
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -52,6 +56,22 @@ public class Movement : MonoBehaviour
                     break;
             }
         }
+
+        switch (posT)
+        {
+            case 1: //up
+                ActivateOnly(toolPosition[0]);
+                break;
+            case 2: //down
+                ActivateOnly(toolPosition[1]);
+                break;
+            case 3: //left
+                ActivateOnly(toolPosition[2]);
+                break;
+            case 4: //right
+                ActivateOnly(toolPosition[3]);
+                break;
+        }
         if (move)
         {
             if (Input.GetKey(KeyCode.Mouse0) && !EventSystem.current.IsPointerOverGameObject())
@@ -62,6 +82,7 @@ public class Movement : MonoBehaviour
             change = Vector3.zero;
             change.x = Input.GetAxisRaw("Horizontal");
             change.y = Input.GetAxisRaw("Vertical");
+            UpdateDirection(); //Tool position
             updateAnimationAndMove();
 
             if (Input.GetKeyDown(KeyCode.Mouse2) && !actionButton)
@@ -70,7 +91,7 @@ public class Movement : MonoBehaviour
             }
 
             //actions
-            if(Input.GetKeyDown(KeyCode.Alpha1))
+            if (Input.GetKeyDown(KeyCode.Alpha1))
             {
                 Empty();
             }
@@ -96,9 +117,27 @@ public class Movement : MonoBehaviour
             }
         }
     }
+    public void ActivateOnly(GameObject target)
+    {
+        foreach (var obj in toolPosition)
+        {
+            if (obj == target)
+            {
+                obj.SetActive(true);
+            }
+            else
+            {
+                obj.SetActive(false);
+            }
+        }
+    }
     private void UseTool()
     {
         //Vector2 position = rb.position + this.transform.
+        if(action == Actions.Crop)
+        {
+            MontykaOnn();
+        }
     }
     void updateAnimationAndMove()
     {
@@ -112,6 +151,29 @@ public class Movement : MonoBehaviour
         else
         {
             anim.SetBool("move", false);
+        }
+    }
+    void UpdateDirection()
+    {
+        if (change.y > 0)
+        {
+            posT = 1; // Góra
+        }
+        else if (change.y < 0)
+        {
+            posT = 2; // Dó³
+        }
+        else if (change.x > 0)
+        {
+            posT = 4; // Prawo
+        }
+        else if (change.x < 0)
+        {
+            posT = 3; // Lewo
+        }
+        else
+        {
+            posT = 0; // Brak ruchu
         }
     }
     public void MoveCharacter()
@@ -155,8 +217,19 @@ public class Movement : MonoBehaviour
     public void Crop()
     {
         action = Actions.Crop;
-        Debug.Log("Motyka");
+        //Debug.Log("Motyka");
         ActionUI.SetActive(false);
+    }
+    public void MontykaOnn()
+    {
+        Vector3Int position = new Vector3Int((int)toolPosition[posT].transform.position.x,
+            (int)transform.position.y, 0);
+
+        if (GameManager.instance.tileManager.isInteractive(position))
+        {
+            Debug.Log("Motyka");
+            GameManager.instance.tileManager.SetInteracted(position);
+        }
     }
     public void Fishing()
     {
