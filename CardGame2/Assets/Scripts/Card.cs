@@ -22,11 +22,11 @@ public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
     public bool selected;
     private Vector3 originalPosition;
     private Transform originalParent;
-    [HideInInspector] public bool isDrag;
     private RectTransform rectTransform;
 
     private bool isSelected = false;
     private float selectOffset = 50f;
+    [HideInInspector] public bool isDrag;
     private void Awake()
     {
         canvasGroup = gameObject.GetComponent<CanvasGroup>() ?? gameObject.AddComponent<CanvasGroup>();
