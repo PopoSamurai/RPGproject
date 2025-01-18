@@ -33,7 +33,6 @@ public class DeckController : MonoBehaviour
             card.name = cardCount.ToString();
             cardCount++;
         }
-
     }
     private void BeginDrag(Card card)
     {
@@ -50,15 +49,7 @@ public class DeckController : MonoBehaviour
         rect.sizeDelta -= Vector2.right;
 
         selectedCard = null;
-
     }
-    void CardPointerEnter(Card card)
-    {
-        
-    }
-
-    void CardPointerExit(Card card)
-    {
-        
-    }
+    void CardPointerEnter(Card card) { }
+    void CardPointerExit(Card card) { }
 }

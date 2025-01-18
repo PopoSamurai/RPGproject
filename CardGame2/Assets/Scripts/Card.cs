@@ -5,7 +5,7 @@ using System;
 using DG.Tweening;
 using System.Collections.Generic;
 
-public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler, IPointerUpHandler, IPointerDownHandler
+public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler, IPointerUpHandler, IPointerDownHandler, IPointerClickHandler
 {
     private CanvasGroup canvasGroup;
     private Canvas canvas;
@@ -17,16 +17,16 @@ public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
     [HideInInspector] public UnityEvent<Card> pointExit;
     [HideInInspector] public UnityEvent<Card, bool> ppointUp;
     [HideInInspector] public UnityEvent<Card> pointDonw;
-    [HideInInspector] public UnityEvent<Card, bool> SelectEvent; 
+    [HideInInspector] public UnityEvent<Card, bool> SelectEvent;
     public float selectionOffset = 50;
     public bool selected;
     private Vector3 originalPosition;
     private Transform originalParent;
     private RectTransform rectTransform;
 
-    private bool isSelected = false;
     private float selectOffset = 50f;
     [HideInInspector] public bool isDrag;
+
     private void Awake()
     {
         canvasGroup = gameObject.GetComponent<CanvasGroup>() ?? gameObject.AddComponent<CanvasGroup>();
@@ -39,6 +39,7 @@ public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
             eventSystem.AddComponent<StandaloneInputModule>();
         }
     }
+
     private void Start()
     {
         canvas = GetComponentInParent<Canvas>();
@@ -56,15 +57,15 @@ public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
 
         originalPosition = rectTransform.anchoredPosition;
     }
+
     public void OnPointerClick(PointerEventData eventData)
     {
         if (!isDrag)
         {
-            isSelected = !isSelected;
-
-            if (isSelected)
+            selected = !selected;
+            if (selected)
             {
-                rectTransform.DOAnchorPos(originalPosition + new Vector3(0, selectOffset, 0), 0.2f).SetEase(Ease.OutBack);
+                rectTransform.DOAnchorPos(originalPosition + new Vector3(0, selectionOffset, 0), 0.2f).SetEase(Ease.OutBack);
             }
             else
             {
@@ -72,6 +73,7 @@ public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
             }
         }
     }
+
     public void OnBeginDrag(PointerEventData eventData)
     {
         isDrag = true;
@@ -105,6 +107,7 @@ public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
             rectTransform.position = canvas.transform.TransformPoint(localPoint);
         }
     }
+
     public void OnEndDrag(PointerEventData eventData)
     {
         isDrag = false;
@@ -123,17 +126,23 @@ public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
             rectTransform.DOAnchorPos(originalPosition, 0.2f).SetEase(Ease.OutBack);
         }
     }
+
     private void SwapCards(Card otherCard)
     {
         Transform tempParent = otherCard.transform.parent;
         Vector3 tempPosition = otherCard.rectTransform.anchoredPosition;
+        bool tempSelected = otherCard.selected;
 
         otherCard.transform.SetParent(originalParent);
         transform.SetParent(tempParent);
 
         otherCard.rectTransform.anchoredPosition = originalPosition;
         rectTransform.anchoredPosition = tempPosition;
+
+        otherCard.selected = selected;
+        selected = tempSelected;
     }
+
     private Card GetCardUnderPointer(PointerEventData eventData)
     {
         PointerEventData pointerEventData = new PointerEventData(EventSystem.current)
@@ -155,6 +164,7 @@ public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
 
         return null;
     }
+
     public void OnPointerEnter(PointerEventData eventData)
     {
         if (isDrag)
@@ -170,8 +180,10 @@ public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
             hoveredCard = null;
         }
     }
+
     public void OnPointerUp(PointerEventData eventData) { }
     public void OnPointerDown(PointerEventData eventData) { }
+
     internal int ParentIndex()
     {
         throw new NotImplementedException();
