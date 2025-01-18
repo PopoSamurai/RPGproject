@@ -18,13 +18,12 @@ public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
     [HideInInspector] public UnityEvent<Card, bool> ppointUp;
     [HideInInspector] public UnityEvent<Card> pointDonw;
     [HideInInspector] public UnityEvent<Card, bool> SelectEvent;
-    public float selectionOffset = 50;
     public bool selected;
-    private Vector3 originalPosition;
+    [SerializeField] private Vector3 originalPosition;
     private Transform originalParent;
     private RectTransform rectTransform;
 
-    private float selectOffset = 50f;
+    public float selectOffset = 50f;
     [HideInInspector] public bool isDrag;
 
     private void Awake()
@@ -65,7 +64,7 @@ public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
             selected = !selected;
             if (selected)
             {
-                rectTransform.DOAnchorPos(originalPosition + new Vector3(0, selectionOffset, 0), 0.2f).SetEase(Ease.OutBack);
+                rectTransform.DOAnchorPos(originalPosition + new Vector3(0, selectOffset, 0), 0.2f).SetEase(Ease.OutBack);
             }
             else
             {
