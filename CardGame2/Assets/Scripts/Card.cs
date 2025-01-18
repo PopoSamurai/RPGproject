@@ -20,6 +20,7 @@ public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
     [HideInInspector] public UnityEvent<Card, bool> SelectEvent;
     public bool selected;
     [SerializeField] private Vector3 originalPosition;
+    [SerializeField] private Vector3 originalPositionFix;
     private Transform originalParent;
     private RectTransform rectTransform;
 
@@ -55,6 +56,7 @@ public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
         }
 
         originalPosition = rectTransform.anchoredPosition;
+        originalPositionFix = originalPosition;
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -64,10 +66,12 @@ public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
             selected = !selected;
             if (selected)
             {
+                Debug.Log("Wysuñ");
                 rectTransform.DOAnchorPos(originalPosition + new Vector3(0, selectOffset, 0), 0.2f).SetEase(Ease.OutBack);
             }
             else
             {
+                Debug.Log("Schowaj");
                 rectTransform.DOAnchorPos(originalPosition, 0.2f).SetEase(Ease.OutBack);
             }
         }
@@ -118,6 +122,7 @@ public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
         if (hoveredCard != null)
         {
             SwapCards(hoveredCard);
+            rectTransform.DOAnchorPos(originalPosition, 0.2f).SetEase(Ease.OutBack);
         }
         else
         {
@@ -128,6 +133,7 @@ public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
 
     private void SwapCards(Card otherCard)
     {
+        originalPosition = originalPositionFix;
         Transform tempParent = otherCard.transform.parent;
         Vector3 tempPosition = otherCard.rectTransform.anchoredPosition;
         bool tempSelected = otherCard.selected;
@@ -138,8 +144,12 @@ public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
         otherCard.rectTransform.anchoredPosition = originalPosition;
         rectTransform.anchoredPosition = tempPosition;
 
-        otherCard.selected = selected;
-        selected = tempSelected;
+        //naprawiæ bo mnie coœ strzeli
+        if (selected == true) selected = false;
+            else selected = false;
+
+        if (otherCard.selected == true) otherCard.selected = false;
+            else otherCard.selected = false;
     }
 
     private Card GetCardUnderPointer(PointerEventData eventData)
@@ -160,7 +170,6 @@ public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
                 return card;
             }
         }
-
         return null;
     }
 
