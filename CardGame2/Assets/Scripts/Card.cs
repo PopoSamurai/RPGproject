@@ -64,16 +64,8 @@ public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
         if (!isDrag)
         {
             selected = !selected;
-            if (selected)
-            {
-                Debug.Log("Wysuñ");
-                rectTransform.DOAnchorPos(originalPosition + new Vector3(0, selectOffset, 0), 0.2f).SetEase(Ease.OutBack);
-            }
-            else
-            {
-                Debug.Log("Schowaj");
-                rectTransform.DOAnchorPos(originalPosition, 0.2f).SetEase(Ease.OutBack);
-            }
+            if (selected) rectTransform.DOAnchorPos(originalPosition + new Vector3(0, selectOffset, 0), 0.2f).SetEase(Ease.OutBack);
+            else rectTransform.DOAnchorPos(originalPosition, 0.2f).SetEase(Ease.OutBack);
         }
     }
 
@@ -106,7 +98,6 @@ public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
                 RectTransformUtility.ScreenPointToLocalPointInRectangle(
                     canvas.transform as RectTransform, eventData.position, null, out localPoint);
             }
-
             rectTransform.position = canvas.transform.TransformPoint(localPoint);
         }
     }
@@ -122,18 +113,22 @@ public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
         if (hoveredCard != null)
         {
             SwapCards(hoveredCard);
-            rectTransform.DOAnchorPos(originalPosition, 0.2f).SetEase(Ease.OutBack);
+            rectTransform.DOAnchorPos(originalPositionFix, 0.2f).SetEase(Ease.OutBack);
         }
         else
         {
             transform.SetParent(originalParent);
-            rectTransform.DOAnchorPos(originalPosition, 0.2f).SetEase(Ease.OutBack);
+            rectTransform.DOAnchorPos(originalPositionFix, 0.2f).SetEase(Ease.OutBack);
         }
+
+        selected = false;
+        originalPosition = originalPositionFix;
     }
 
     private void SwapCards(Card otherCard)
     {
         originalPosition = originalPositionFix;
+
         Transform tempParent = otherCard.transform.parent;
         Vector3 tempPosition = otherCard.rectTransform.anchoredPosition;
         bool tempSelected = otherCard.selected;
@@ -143,13 +138,8 @@ public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
 
         otherCard.rectTransform.anchoredPosition = originalPosition;
         rectTransform.anchoredPosition = tempPosition;
-
-        //naprawiæ bo mnie coœ strzeli
-        if (selected == true) selected = false;
-            else selected = false;
-
-        if (otherCard.selected == true) otherCard.selected = false;
-            else otherCard.selected = false;
+        selected = false;
+        otherCard.selected = false;
     }
 
     private Card GetCardUnderPointer(PointerEventData eventData)
