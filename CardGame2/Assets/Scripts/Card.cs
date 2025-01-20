@@ -7,6 +7,8 @@ using System.Collections.Generic;
 
 public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler, IPointerUpHandler, IPointerDownHandler, IPointerClickHandler
 {
+
+    public int cardcost;
     private CanvasGroup canvasGroup;
     private Canvas canvas;
     private Card hoveredCard;
@@ -63,9 +65,24 @@ public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
     {
         if (!isDrag)
         {
+            if (selected)
+            {
+                DeckController.Instance.currentEnergy += cardcost;
+                DeckController.Instance.UpdateEnergyText();
+            }
+            else if (DeckController.Instance.CanUseCard(cardcost))
+            {
+                DeckController.Instance.currentEnergy -= cardcost;
+                DeckController.Instance.UpdateEnergyText();
+            }
+            else
+            {
+                Debug.Log("Nie masz wystarczaj¹cej energii!");
+                return;
+            }
+
             selected = !selected;
-            if (selected) rectTransform.DOAnchorPos(originalPosition + new Vector3(0, selectOffset, 0), 0.2f).SetEase(Ease.OutBack);
-            else rectTransform.DOAnchorPos(originalPosition, 0.2f).SetEase(Ease.OutBack);
+            rectTransform.DOAnchorPos(selected ? originalPosition + new Vector3(0, selectOffset, 0) : originalPosition, 0.2f).SetEase(Ease.OutBack);
         }
     }
 
@@ -128,7 +145,6 @@ public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
     private void SwapCards(Card otherCard)
     {
         originalPosition = originalPositionFix;
-
         Transform tempParent = otherCard.transform.parent;
         Vector3 tempPosition = otherCard.rectTransform.anchoredPosition;
         bool tempSelected = otherCard.selected;
@@ -138,6 +154,12 @@ public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
 
         otherCard.rectTransform.anchoredPosition = originalPosition;
         rectTransform.anchoredPosition = tempPosition;
+
+        if (selected) DeckController.Instance.currentEnergy += cardcost;
+        if (otherCard.selected) DeckController.Instance.currentEnergy += otherCard.cardcost;
+
+        DeckController.Instance.UpdateEnergyText();
+
         selected = false;
         otherCard.selected = false;
     }

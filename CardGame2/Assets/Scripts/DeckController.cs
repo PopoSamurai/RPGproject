@@ -6,55 +6,71 @@ using UnityEngine.UI;
 
 public class DeckController : MonoBehaviour
 {
-    [SerializeField] private Card selectedCard;
+    public static DeckController Instance;
+    public Text enegyText;
+    public int maxEnergy = 3; //Max energia
+    public int currentEnergy;
+
     [SerializeField] private GameObject slotPrefab;
+    [SerializeField] private List<GameObject> deckPrefabs;
     private RectTransform rect;
     private HorizontalLayoutGroup layoutGroup;
 
-    public List<Card> cards;
-    [SerializeField] private int cardsInt = 7;
-    [SerializeField] private bool tweenCardReturn = true;
+    private Queue<GameObject> deck = new Queue<GameObject>(); //talia
+    public List<Card> cards = new List<Card>(); //karty w tali
+    [SerializeField] private int maxHandSize = 7;
+    [SerializeField] private int startingHandSize = 5;
+    private void Awake()
+    {
+        Instance = this;
+    }
     private void Start()
     {
-        for (int i = 0; i < cardsInt; i++)
-        {
-            Instantiate(slotPrefab, transform);
-        }
-
+        currentEnergy = maxEnergy;
+        enegyText.text = currentEnergy + "/" + maxEnergy;
         rect = GetComponent<RectTransform>();
         layoutGroup = GetComponent<HorizontalLayoutGroup>();
-        cards = GetComponentsInChildren<Card>().ToList();
 
-        int cardCount = 0;
+        InitializeDeck();
+        DrawStartingHand();
+    }
+    private void InitializeDeck()
+    {
+        List<GameObject> shuffledDeck = new List<GameObject>(deckPrefabs);
+        shuffledDeck = shuffledDeck.OrderBy(x => Random.value).ToList(); // Tasowanie kart
 
-        foreach (Card card in cards)
+        foreach (GameObject cardPrefab in shuffledDeck)
         {
-            card.pointEnter.AddListener(CardPointerEnter);
-            card.pointExit.AddListener(CardPointerExit);
-            card.beginDrag.AddListener(BeginDrag);
-            card.endDrag.AddListener(EndDrag);
-            card.name = cardCount.ToString();
-            cardCount++;
+            deck.Enqueue(cardPrefab);
         }
     }
-    private void BeginDrag(Card card)
+    private void DrawStartingHand()
     {
-        selectedCard = card;
+        for (int i = 0; i < startingHandSize; i++)
+        {
+            DrawCard();
+        }
     }
-    void EndDrag(Card card)
+    private void DrawCard()
     {
-        if (selectedCard == null)
-            return;
+        if (deck.Count > 0 && cards.Count < maxHandSize)
+        {
+            GameObject cardPrefab = deck.Dequeue();
 
-        selectedCard.transform.DOLocalMove(selectedCard.selected ? new Vector3(0, selectedCard.selectOffset, 0) : Vector3.zero, tweenCardReturn ? .15f : 0).SetEase(Ease.OutBack);
+            GameObject newSlot = Instantiate(slotPrefab, transform);
 
-        rect.sizeDelta += Vector2.right;
-        rect.sizeDelta -= Vector2.right;
+            foreach (Transform child in newSlot.transform)
+            {
+                Destroy(child.gameObject);
+            }
 
-        selectedCard = null;
+            GameObject newCardObj = Instantiate(cardPrefab, newSlot.transform, false);
+            Card newCard = newCardObj.GetComponent<Card>();
+
+            newCard.gameObject.SetActive(true);
+            cards.Add(newCard);
+        }
     }
-    void CardPointerEnter(Card card) { }
-    void CardPointerExit(Card card) { }
     public void EndTurn()
     {
         List<Card> cardsToRemove = cards.Where(card => card.selected).ToList();
@@ -67,11 +83,42 @@ public class DeckController : MonoBehaviour
 
                 card.GetComponent<CanvasGroup>().DOFade(0, 0.5f).OnComplete(() =>
                 {
-                    Destroy(card.gameObject);
-                    if (cardParent != null) Destroy(cardParent.gameObject);
+                    ResetEnergy();
                     cards.Remove(card);
+                    Destroy(card.gameObject);
+                    currentEnergy = maxEnergy;
+                    if (cardParent != null) Destroy(cardParent.gameObject);
                 });
             }
         }
+
+        while (cards.Count < maxHandSize && deck.Count > 0)
+        {
+            DrawCard();
+        }
+    }
+    //ENERGY
+    public bool CanUseCard(int cost)
+    {
+        UpdateEnergyText();
+        return currentEnergy >= cost;
+    }
+
+    public void UseEnergy(int cost)
+    {
+        if (currentEnergy >= cost)
+        {
+            currentEnergy -= cost;
+            UpdateEnergyText();
+        }
+    }
+    private void ResetEnergy()
+    {
+        currentEnergy = maxEnergy;
+        UpdateEnergyText();
+    }
+    public void UpdateEnergyText()
+    {
+        enegyText.text = $"{currentEnergy}/{maxEnergy}";
     }
 }
