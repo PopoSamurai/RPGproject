@@ -2,12 +2,14 @@ using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class DeckController : MonoBehaviour
 {
     [SerializeField] private Card selectedCard;
     [SerializeField] private GameObject slotPrefab;
     private RectTransform rect;
+    private HorizontalLayoutGroup layoutGroup;
 
     public List<Card> cards;
     [SerializeField] private int cardsInt = 7;
@@ -20,6 +22,7 @@ public class DeckController : MonoBehaviour
         }
 
         rect = GetComponent<RectTransform>();
+        layoutGroup = GetComponent<HorizontalLayoutGroup>();
         cards = GetComponentsInChildren<Card>().ToList();
 
         int cardCount = 0;
@@ -52,4 +55,23 @@ public class DeckController : MonoBehaviour
     }
     void CardPointerEnter(Card card) { }
     void CardPointerExit(Card card) { }
+    public void EndTurn()
+    {
+        List<Card> cardsToRemove = cards.Where(card => card.selected).ToList();
+
+        foreach (Card card in cardsToRemove)
+        {
+            if (card != null)
+            {
+                Transform cardParent = card.transform.parent;
+
+                card.GetComponent<CanvasGroup>().DOFade(0, 0.5f).OnComplete(() =>
+                {
+                    Destroy(card.gameObject);
+                    if (cardParent != null) Destroy(cardParent.gameObject);
+                    cards.Remove(card);
+                });
+            }
+        }
+    }
 }
