@@ -81,13 +81,25 @@ public class CharacterClass : MonoBehaviour
     {
         StartCoroutine(czekaj());
     }
+
     IEnumerator czekaj()
     {
-        attackSword.Play();
-        anim.SetBool("attack", true);
+        // AUDIO (opcjonalnie)
+        if (attackSword != null)
+            attackSword.Play();
+
+        // ANIMATOR (opcjonalnie)
+        if (anim != null)
+            anim.SetBool("attack", true);
+
         yield return new WaitForSeconds(1f);
-        anim.SetBool("attack", false);
-        transform.position = firstPos;
+
+        if (anim != null)
+            anim.SetBool("attack", false);
+
+        // POWRÓT NA PIERWSZ¥ POZYCJÊ (jeœli ustawiona)
+        if (firstPos != null)
+            transform.position = firstPos;
     }
     public void Heal(int amount, int mana)
     {

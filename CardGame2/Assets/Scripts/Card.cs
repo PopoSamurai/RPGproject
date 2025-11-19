@@ -29,6 +29,9 @@ public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
     public float selectOffset = 50f;
     [HideInInspector] public bool isDrag;
 
+    public int damageValue;
+    public int defenceValue;
+    public int energyValue;
     private void Awake()
     {
         canvasGroup = gameObject.GetComponent<CanvasGroup>() ?? gameObject.AddComponent<CanvasGroup>();
@@ -69,11 +72,13 @@ public class Card : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHand
             {
                 DeckController.Instance.currentEnergy += cardcost;
                 DeckController.Instance.UpdateEnergyText();
+                Turn.Instance.RemoveDamage(damageValue);
             }
             else if (DeckController.Instance.CanUseCard(cardcost))
             {
                 DeckController.Instance.currentEnergy -= cardcost;
                 DeckController.Instance.UpdateEnergyText();
+                Turn.Instance.AddDamage(damageValue);
             }
             else
             {

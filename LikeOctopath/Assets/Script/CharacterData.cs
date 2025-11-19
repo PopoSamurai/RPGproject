@@ -1,0 +1,14 @@
+using UnityEngine;
+
+[CreateAssetMenu(menuName = "RPG/Character Data")]
+public class CharacterData : ScriptableObject
+{
+    public string characterName;
+    public int maxHP = 100;
+    public int attackPower = 20;
+    public int healPower = 15;
+    public int speed = 10;
+    public bool isPlayer;
+
+    public Sprite sprite;
+}

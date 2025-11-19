@@ -20,6 +20,7 @@ public class DeckController : MonoBehaviour
     public List<Card> cards = new List<Card>(); //karty w tali
     [SerializeField] private int maxHandSize = 7;
     [SerializeField] private int startingHandSize = 5;
+    public bool end = false;
     private void Awake()
     {
         Instance = this;
@@ -83,10 +84,8 @@ public class DeckController : MonoBehaviour
 
                 card.GetComponent<CanvasGroup>().DOFade(0, 0.5f).OnComplete(() =>
                 {
-                    ResetEnergy();
                     cards.Remove(card);
                     Destroy(card.gameObject);
-                    currentEnergy = maxEnergy;
                     if (cardParent != null) Destroy(cardParent.gameObject);
                 });
             }
@@ -112,7 +111,7 @@ public class DeckController : MonoBehaviour
             UpdateEnergyText();
         }
     }
-    private void ResetEnergy()
+    public void ResetEnergy()
     {
         currentEnergy = maxEnergy;
         UpdateEnergyText();
