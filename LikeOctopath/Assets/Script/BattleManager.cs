@@ -29,7 +29,6 @@ public class BattleManager : MonoBehaviour
     private List<BattleUnit> _playerUnits = new List<BattleUnit>();
     private BattleUnit _currentUnit;
 
-    private bool waitingForPlayerInput = false;
     private BattleActionType chosenPlayerAction;
 
     private bool waitingForActionChoice;
@@ -169,16 +168,18 @@ public class BattleManager : MonoBehaviour
     {
         SetTurnText(unit);
 
+        if (!unit.IsPlayer)
+        {
+            unit.StartHighlight();
+        }
         if (unit.IsPlayer)
         {
-            // >>> NOWE: gracz wychodzi na środek na początku tury
             yield return StartCoroutine(unit.StepOut());
 
             Debug.Log($"(GRACZ) Tura: {unit.data.characterName}. Wybierz akcję...");
             waitingForActionChoice = true;
             ShowActionButtons(true);
             ShowTargetButtons(false);
-
             yield return new WaitUntil(() => waitingForActionChoice == false);
 
             switch (chosenPlayerAction)
@@ -223,6 +224,8 @@ public class BattleManager : MonoBehaviour
             }
             ShowActionButtons(false);
             ShowTargetButtons(false);
+
+            unit.StopHighlight();
             yield return StartCoroutine(unit.ReturnToStart());
             yield break;
         }
@@ -266,6 +269,10 @@ public class BattleManager : MonoBehaviour
                 Debug.Log($"{unit.data.characterName} pomija turę.");
                 yield return new WaitForSeconds(0.5f);
                 break;
+        }
+        if (!unit.IsPlayer)
+        {
+            unit.StopHighlight();
         }
     }
     IEnumerator PerformHeal(BattleUnit healer, BattleUnit target)

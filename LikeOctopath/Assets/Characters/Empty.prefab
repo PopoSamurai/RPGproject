@@ -114,6 +114,7 @@ GameObject:
   - component: {fileID: 1479891575959456011}
   - component: {fileID: 8337510667654227872}
   - component: {fileID: 7049018508844730780}
+  - component: {fileID: 3632093046012221434}
   m_Layer: 0
   m_Name: Empty
   m_TagString: Untagged
@@ -150,7 +151,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hpBarFillImage: {fileID: 2301961526971752278}
-  damageTextPrefab: {fileID: 0}
   stepOutOffsetX: 0.5
   stepOutSpeed: 6
   data: {fileID: 0}
@@ -209,6 +209,27 @@ SpriteRenderer:
   m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!95 &3632093046012221434
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1353685357068474561}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 06d679d7cd68f934d81b9e60aaaa7043, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &3590021472539444510
 GameObject:
   m_ObjectHideFlags: 0

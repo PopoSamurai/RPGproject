@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using UnityEditor.Rendering.LookDev;
 using UnityEngine;
 using UnityEngine.UI;
 public class BattleUnit : MonoBehaviour
@@ -118,10 +119,16 @@ public class BattleUnit : MonoBehaviour
         if (actualDamage > 0 && DamageTextManager.Instance != null)
         {
             Vector3 offset = Vector3.up * 0.5f;
-            DamageTextManager.Instance.ShowDamageText(actualDamage, transform.position + offset, false);
+            bool fromPlayerSide = data.isPlayer;
+            DamageTextManager.Instance.ShowDamageText(actualDamage, transform.position + offset, false, fromPlayerSide);
+        }
+        if (CameraShake.Instance != null && actualDamage > 0)
+        {
+            CameraShake.Instance.Shake(0.08f, 0.05f);
         }
         Debug.Log($"{data.characterName} otrzymuje {actualDamage} DMG (HP={CurrentHP})");
         UpdateHpBar();
+
         StartCoroutine(HitFlash());
         StartCoroutine(HitPushback());
 
@@ -153,22 +160,24 @@ public class BattleUnit : MonoBehaviour
             _spriteRenderer.color = _originalColor;
         }
     }
-
     IEnumerator HighlightBlink()
     {
-        if (_spriteRenderer == null || hitMaterial == null) yield break;
-        if (_defaultMaterial == null)
-            _defaultMaterial = _spriteRenderer.material;
+        if (_spriteRenderer == null) yield break;
 
-        float singleFlashTime = 0.15f;
+        float t = 0f;
+        float whiteAmount = 0.45f;
+        float speed = 4f;
 
         while (true)
         {
-            _spriteRenderer.material = hitMaterial;
-            yield return new WaitForSeconds(singleFlashTime);
+            t += Time.deltaTime * speed;
+            float pulse = 0.5f + 0.5f * Mathf.Sin(t);
 
-            _spriteRenderer.material = _defaultMaterial;
-            yield return new WaitForSeconds(singleFlashTime);
+            float lerpVal = pulse * whiteAmount;
+            Color target = Color.Lerp(_originalColor, Color.red, lerpVal);
+
+            _spriteRenderer.color = target;
+            yield return null;
         }
     }
     IEnumerator HitPushback(float distance = 0.2f, float speed = 6f)
@@ -202,19 +211,23 @@ public class BattleUnit : MonoBehaviour
     public IEnumerator HitFlash()
     {
         if (_spriteRenderer == null) yield break;
-        if (_defaultMaterial == null)
-            _defaultMaterial = _spriteRenderer.material;
 
-        int flashes = 3;
-        float singleFlashTime = 0.07f;
+        int flashes = 2;
+        float singleFlashTime = 0.08f;
+        float whiteAmount = 0.7f;
 
         for (int i = 0; i < flashes; i++)
         {
-            _spriteRenderer.material = hitMaterial;
-            yield return new WaitForSeconds(singleFlashTime);
-
-            _spriteRenderer.material = _defaultMaterial;
-            yield return new WaitForSeconds(singleFlashTime);
+            float t = 0f;
+            while (t < singleFlashTime)
+            {
+                t += Time.deltaTime;
+                float lerp = Mathf.PingPong(t * 10f, 1f);
+                Color c = Color.Lerp(_originalColor, Color.red, lerp * whiteAmount);
+                _spriteRenderer.color = c;
+                yield return null;
+            }
+            _spriteRenderer.color = _originalColor;
         }
     }
     IEnumerator Die()
@@ -262,7 +275,8 @@ public class BattleUnit : MonoBehaviour
         if (DamageTextManager.Instance != null)
         {
             Vector3 offset = Vector3.up * 0.5f;
-            DamageTextManager.Instance.ShowDamageText(actualHeal, transform.position + offset, true);
+            bool fromPlayerSide = data.isPlayer;
+            DamageTextManager.Instance.ShowDamageText(actualHeal, transform.position + offset, true, fromPlayerSide);
         }
         Debug.Log($"{data.characterName} leczy {actualHeal} HP (HP={CurrentHP})");
         UpdateHpBar();

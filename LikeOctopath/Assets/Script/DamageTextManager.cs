@@ -10,12 +10,13 @@ public class DamageTextManager : MonoBehaviour
     {
         Instance = this;
     }
-    public void ShowDamageText(int value, Vector3 worldPos, bool isHeal)
+    public void ShowDamageText(int value, Vector3 worldPos, bool isHeal, bool fromPlayerSide)
     {
         if (damageTextPrefab == null || canvas == null) return;
         Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPos);
         DamageText dt = Instantiate(damageTextPrefab, canvas.transform);
         dt.transform.position = screenPos;
-        dt.Init(value, isHeal);
+        Vector2 dir = fromPlayerSide ? Vector2.left : Vector2.right;
+        dt.Init(value, isHeal, dir);
     }
 }
