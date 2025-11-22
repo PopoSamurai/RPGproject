@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-public enum BattleActionType { Attack, Heal, Skip }
+public enum BattleActionType { Attack, Heal, Defend, Skip }
 public class BattleManager : MonoBehaviour
 {
+    private List<BattleUnit> _turnQueue = new List<BattleUnit>();
     public static BattleManager Instance;
     [HideInInspector]
     public BattleUnit LastAttacker;
@@ -16,6 +17,7 @@ public class BattleManager : MonoBehaviour
     public GameObject targetButtonsPanel;
     public Button[] targetButtons;
     float enemyDecisionDelay = 1f;
+    public TurnOrderUI turnOrderUI;
 
     [Header("Ustaw w inspectorze")]
     public BattlePosition[] positions;
@@ -133,181 +135,218 @@ public class BattleManager : MonoBehaviour
                 .OrderByDescending(u => u.data.speed)
                 .ToList();
 
-            foreach (var unit in turnOrder)
+            _turnQueue = new List<BattleUnit>(turnOrder);
+
+            for (int i = 0; i < turnOrder.Count; i++)
             {
+                var unit = turnOrder[i];
                 if (unit.IsDead) continue;
+
                 _currentUnit = unit;
+                if (turnOrderUI != null)
+                    turnOrderUI.Refresh(_turnQueue, _currentUnit);
+
                 Debug.Log($"Tura: {_currentUnit.data.characterName}");
                 yield return StartCoroutine(HandleTurn(_currentUnit));
-            }
-        }
-    }
-    IEnumerator PerformAttack(BattleUnit attacker, BattleUnit target)
-    {
-        if (target == null || target.IsDead) yield break;
-        Debug.Log($"{attacker.data.characterName} atakuje {target.data.characterName}");
-        yield return StartCoroutine(attacker.StepOut());
 
-        LastAttacker = attacker;
-        target.ReceiveDamage(attacker.data.attackPower);
-
-        yield return new WaitForSeconds(0.2f);
-
-        UpdateEnemyTargetButtons();
-        UpdateAllyTargetButtons();
-
-        yield return StartCoroutine(attacker.ReturnToStart());
-    }
-
-    bool IsTeamDead(bool players)
-    {
-        return _allUnits
-            .Where(u => u.IsPlayer == players)
-            .All(u => u.IsDead);
-    }
-    IEnumerator HandleTurn(BattleUnit unit)
-    {
-        SetTurnText(unit);
-
-        if (!unit.IsPlayer)
-        {
-            unit.StartHighlight();
-        }
-        if (unit.IsPlayer)
-        {
-            yield return StartCoroutine(unit.StepOut());
-            while (true)
-            {
-                Debug.Log($"(GRACZ) Tura: {unit.data.characterName}. Wybierz akcję...");
-                waitingForActionChoice = true;
-                ShowActionButtons(true);
-                ShowTargetButtons(false);
-                yield return new WaitUntil(() => waitingForActionChoice == false);
-                playerCanceledTargetSelection = false;
-
-                if (_highlightedUnit != null)
+                if (_turnQueue.Count > 0)
                 {
-                    _highlightedUnit.StopHighlight();
-                    _highlightedUnit = null;
+                    var first = _turnQueue[0];
+                    _turnQueue.RemoveAt(0);
+
+                    if (first != null && !first.IsDead)
+                    {
+                        _turnQueue.Add(first);
+                    }
+                    else
+                    {
+                        _turnQueue = _turnQueue
+                            .Where(u => u != null && !u.IsDead)
+                            .ToList();
+                    }
                 }
-                switch (chosenPlayerAction)
+            }
+            IEnumerator PerformAttack(BattleUnit attacker, BattleUnit target)
+            {
+                if (target == null || target.IsDead) yield break;
+                Debug.Log($"{attacker.data.characterName} atakuje {target.data.characterName}");
+                yield return StartCoroutine(attacker.StepOut());
+
+                LastAttacker = attacker;
+                target.ReceiveDamage(attacker.data.attackPower, attacker.data.attackElement);
+
+                yield return new WaitForSeconds(0.2f);
+
+                UpdateEnemyTargetButtons();
+                UpdateAllyTargetButtons();
+
+                yield return StartCoroutine(attacker.ReturnToStart());
+            }
+
+            bool IsTeamDead(bool players)
+            {
+                return _allUnits
+                    .Where(u => u.IsPlayer == players)
+                    .All(u => u.IsDead);
+            }
+            IEnumerator HandleTurn(BattleUnit unit)
+            {
+                SetTurnText(unit);
+                if (unit.IsBroken)
+                {
+                    unit.OnBrokenTurn();
+                    yield return new WaitForSeconds(0.5f);
+                    yield break;
+                }
+                if (!unit.IsPlayer)
+                {
+                    unit.StartHighlight();
+                }
+                if (unit.IsPlayer)
+                {
+                    yield return StartCoroutine(unit.StepOut());
+                    while (true)
+                    {
+                        Debug.Log($"(GRACZ) Tura: {unit.data.characterName}. Wybierz akcję...");
+                        waitingForActionChoice = true;
+                        ShowActionButtons(true);
+                        ShowTargetButtons(false);
+                        yield return new WaitUntil(() => waitingForActionChoice == false);
+                        playerCanceledTargetSelection = false;
+
+                        if (_highlightedUnit != null)
+                        {
+                            _highlightedUnit.StopHighlight();
+                            _highlightedUnit = null;
+                        }
+                        switch (chosenPlayerAction)
+                        {
+                            case BattleActionType.Attack:
+                                waitingForTargetChoice = true;
+                                ShowActionButtons(false);
+                                ShowTargetButtons(true);
+                                UpdateEnemyTargetButtons();
+
+                                Debug.Log("Wybierz wroga (1–4) albo cofnij.");
+                                yield return new WaitUntil(() => waitingForTargetChoice == false);
+
+                                if (playerCanceledTargetSelection)
+                                {
+                                    ShowTargetButtons(false);
+                                    continue;
+                                }
+                                BattleUnit enemyTarget = GetEnemyByIndex(chosenTargetIndex);
+                                if (enemyTarget != null)
+                                    yield return StartCoroutine(PerformAttack(unit, enemyTarget));
+                                else
+                                    Debug.Log("Wybrany wróg nie istnieje lub jest martwy.");
+                                break;
+
+                            case BattleActionType.Heal:
+                                waitingForTargetChoice = true;
+                                ShowActionButtons(false);
+                                ShowTargetButtons(true);
+                                UpdateAllyTargetButtons();
+
+                                Debug.Log("Wybierz sojusznika do leczenia (1–4) albo cofnij.");
+                                yield return new WaitUntil(() => waitingForTargetChoice == false);
+
+                                if (playerCanceledTargetSelection)
+                                {
+                                    ShowTargetButtons(false);
+                                    continue;
+                                }
+                                BattleUnit allyTarget = GetAllyByIndex(chosenTargetIndex);
+                                if (allyTarget != null)
+                                {
+                                    yield return StartCoroutine(PerformHeal(unit, allyTarget));
+                                }
+                                break;
+
+                            case BattleActionType.Defend:
+                                unit.Defend();
+                                Debug.Log($"{unit.data.characterName} wybiera Defend.");
+                                yield return new WaitForSeconds(0.5f);
+                                break;
+
+                            case BattleActionType.Skip:
+                                Debug.Log($"{unit.data.characterName} pomija turę.");
+                                yield return new WaitForSeconds(0.5f);
+                                break;
+                        }
+                        ShowActionButtons(false);
+                        ShowTargetButtons(false);
+
+                        unit.StopHighlight();
+                        yield return StartCoroutine(unit.ReturnToStart());
+                        yield break;
+                    }
+                }
+                Debug.Log($"(WRÓG) Tura: {unit.data.characterName}. Czekam {enemyDecisionDelay}s...");
+                ShowActionButtons(false);
+                ShowTargetButtons(false);
+                yield return new WaitForSeconds(enemyDecisionDelay);
+
+                bool canHeal = unit.data.healPower > 0;
+                var woundedAllies = _allUnits
+                    .Where(u => u.IsPlayer == unit.IsPlayer && !u.IsDead && u.CurrentHP < u.data.maxHP)
+                    .ToList();
+
+                BattleActionType enemyAction = BattleActionType.Attack;
+                if (canHeal && woundedAllies.Count > 0)
+                {
+                    // np. 60% szansy, że wybierze Heal zamiast Attack
+                    float healChance = 0.6f;
+                    if (Random.value < healChance)
+                        enemyAction = BattleActionType.Heal;
+                }
+
+                switch (enemyAction)
                 {
                     case BattleActionType.Attack:
-                        waitingForTargetChoice = true;
-                        ShowActionButtons(false);
-                        ShowTargetButtons(true);
-                        UpdateEnemyTargetButtons();
+                        var possibleTargets = _allUnits
+                            .Where(u => u.IsPlayer && !u.IsDead)
+                            .ToList();
 
-                        Debug.Log("Wybierz wroga (1–4) albo cofnij.");
-                        yield return new WaitUntil(() => waitingForTargetChoice == false);
+                        BattleUnit enemyTarget = possibleTargets.Count > 0
+                            ? possibleTargets[Random.Range(0, possibleTargets.Count)]
+                            : null;
 
-                        if (playerCanceledTargetSelection)
-                        {
-                            ShowTargetButtons(false);
-                            continue;
-                        }
-                        BattleUnit enemyTarget = GetEnemyByIndex(chosenTargetIndex);
                         if (enemyTarget != null)
                             yield return StartCoroutine(PerformAttack(unit, enemyTarget));
-                        else
-                            Debug.Log("Wybrany wróg nie istnieje lub jest martwy.");
                         break;
 
                     case BattleActionType.Heal:
-                        waitingForTargetChoice = true;
-                        ShowActionButtons(false);
-                        ShowTargetButtons(true);
-                        UpdateAllyTargetButtons();
+                        var allies = _allUnits
+                                .Where(u => u.IsPlayer == unit.IsPlayer && !u.IsDead && u.CurrentHP < u.data.maxHP)
+                                .OrderBy(u => (float)u.CurrentHP / u.data.maxHP)
+                                .ToList();
 
-                        Debug.Log("Wybierz sojusznika do leczenia (1–4) albo cofnij.");
-                        yield return new WaitUntil(() => waitingForTargetChoice == false);
-
-                        if (playerCanceledTargetSelection)
+                        if (allies.Count > 0)
                         {
-                            ShowTargetButtons(false);
-                            continue;
+                            var healTarget = allies[0];
+                            Debug.Log($"(WRÓG) {unit.data.characterName} leczy {healTarget.data.characterName}");
+                            yield return StartCoroutine(PerformHeal(unit, healTarget));
                         }
-                        BattleUnit allyTarget = GetAllyByIndex(chosenTargetIndex);
-                        if (allyTarget != null)
+                        else
                         {
-                            yield return StartCoroutine(PerformHeal(unit, allyTarget));
+                            goto case BattleActionType.Attack;
                         }
                         break;
+
                     case BattleActionType.Skip:
                         Debug.Log($"{unit.data.characterName} pomija turę.");
                         yield return new WaitForSeconds(0.5f);
                         break;
                 }
-                ShowActionButtons(false);
-                ShowTargetButtons(false);
-
-                unit.StopHighlight();
-                yield return StartCoroutine(unit.ReturnToStart());
-                yield break;
+                if (!unit.IsPlayer)
+                {
+                    unit.StopHighlight();
+                }
             }
         }
-        Debug.Log($"(WRÓG) Tura: {unit.data.characterName}. Czekam {enemyDecisionDelay}s...");
-        ShowActionButtons(false);
-        ShowTargetButtons(false);
-        yield return new WaitForSeconds(enemyDecisionDelay);
-
-        bool canHeal = unit.data.healPower > 0;
-        var woundedAllies = _allUnits
-            .Where(u => u.IsPlayer == unit.IsPlayer && !u.IsDead && u.CurrentHP < u.data.maxHP)
-            .ToList();
-
-        BattleActionType enemyAction = BattleActionType.Attack;
-        if (canHeal && woundedAllies.Count > 0)
-        {
-            // np. 60% szansy, że wybierze Heal zamiast Attack
-            float healChance = 0.6f;
-            if (Random.value < healChance)
-                enemyAction = BattleActionType.Heal;
-        }
-
-        switch (enemyAction)
-        {
-            case BattleActionType.Attack:
-                var possibleTargets = _allUnits
-                    .Where(u => u.IsPlayer && !u.IsDead)
-                    .ToList();
-
-                BattleUnit enemyTarget = possibleTargets.Count > 0
-                    ? possibleTargets[Random.Range(0, possibleTargets.Count)]
-                    : null;
-
-                if (enemyTarget != null)
-                    yield return StartCoroutine(PerformAttack(unit, enemyTarget));
-                break;
-
-            case BattleActionType.Heal:
-                var allies = _allUnits
-                        .Where(u => u.IsPlayer == unit.IsPlayer && !u.IsDead && u.CurrentHP < u.data.maxHP)
-                        .OrderBy(u => (float)u.CurrentHP / u.data.maxHP)
-                        .ToList();
-
-                if (allies.Count > 0)
-                {
-                    var healTarget = allies[0];
-                    Debug.Log($"(WRÓG) {unit.data.characterName} leczy {healTarget.data.characterName}");
-                    yield return StartCoroutine(PerformHeal(unit, healTarget));
-                }
-                else
-                {
-                    goto case BattleActionType.Attack;
-                }
-                break;
-
-            case BattleActionType.Skip:
-                Debug.Log($"{unit.data.characterName} pomija turę.");
-                yield return new WaitForSeconds(0.5f);
-                break;
-        }
-        if (!unit.IsPlayer)
-        {
-            unit.StopHighlight();
-        }
     }
+    
     public void OnTargetBackButton()
     {
         if (!waitingForTargetChoice)
@@ -363,6 +402,12 @@ public class BattleManager : MonoBehaviour
     {
         if (!waitingForActionChoice) return;
         chosenPlayerAction = BattleActionType.Heal;
+        waitingForActionChoice = false;
+    }
+    public void OnDefendButton()
+    {
+        if (!waitingForActionChoice) return;
+        chosenPlayerAction = BattleActionType.Defend;
         waitingForActionChoice = false;
     }
     public void OnSkipButton()

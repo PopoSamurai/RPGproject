@@ -14,8 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   characterName: Adolf
   maxHP: 80
-  attackPower: 20
+  attackPower: 5
   healPower: 15
   speed: 15
   isPlayer: 1
   sprite: {fileID: -523532527, guid: fee3be854ff3d1e408935942b090a764, type: 3}
+  attackElement: 6
+  elementalWeaknesses: 07000000
+  elementalResistances: 04000000
+  maxShield: 0

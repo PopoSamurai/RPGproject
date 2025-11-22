@@ -5,17 +5,28 @@ public class BattleUnit : MonoBehaviour
 {
     [Header("UI")]
     public Image hpBarFillImage;
+    public Image elementIconImage; //element
+    public Text shieldText;
+
+    [Header("Weakness Icons")]
+    public Image[] weaknessIconSlots;
+    public ElementIconSet elementIconSet;
 
     [Header("Step out")]
     public float stepOutOffsetX = 0.5f;
     public float stepOutSpeed = 6f;
     private Vector3 _stepOutPosition;
 
+    public int CurrentShield { get; private set; }
+    public bool HasShield => data != null && data.maxShield > 0;
+    public bool IsBroken { get; private set; }
+
     public CharacterData data;
     public BattlePosition position;
     public int CurrentHP { get; private set; }
     public bool IsDead => CurrentHP <= 0;
     public bool IsPlayer => data != null && data.isPlayer;
+    public bool IsDefending { get; private set; }
     [Header("Ruch")]
     public float moveSpeed = 6f;
     float attackOffsetFromTarget = 0.2f;
@@ -35,6 +46,53 @@ public class BattleUnit : MonoBehaviour
         if (_spriteRenderer == null) return;
         _spriteRenderer.material.SetFloat(FlashPropId, value);
     }
+    void SetupElementIcon()
+    {
+        if (elementIconImage == null || elementIconSet == null || data == null)
+            return;
+
+        ElementType elem = data.attackElement;
+        if (elem == ElementType.None)
+        {
+            elementIconImage.gameObject.SetActive(false);
+            return;
+        }
+
+        Sprite icon = elementIconSet.GetIcon(elem);
+        elementIconImage.sprite = icon;
+        elementIconImage.preserveAspect = true;
+        elementIconImage.gameObject.SetActive(true);
+    }
+    void UpdateShieldUI()
+    {
+        if (shieldText == null)
+            return;
+
+        Transform root = shieldText.transform.parent;
+        if (!HasShield || CurrentShield <= 0)
+        {
+            if (root != null)
+                root.gameObject.SetActive(false);
+
+            return;
+        }
+        if (root != null)
+            root.gameObject.SetActive(true);
+
+        shieldText.text = CurrentShield.ToString();
+    }
+    bool IsHitWeakness(ElementType element)
+    {
+        if (element == ElementType.None || data == null || data.elementalWeaknesses == null)
+            return false;
+
+        foreach (var weak in data.elementalWeaknesses)
+        {
+            if (weak == element)
+                return true;
+        }
+        return false;
+    }
     void UpdateHpBar()
     {
         if (hpBarFillImage == null || data == null) return;
@@ -53,6 +111,46 @@ public class BattleUnit : MonoBehaviour
             yield return null;
         }
         transform.position = _stepOutPosition;
+    }
+    void SetupWeaknessIcons()
+    {
+        if (weaknessIconSlots == null || elementIconSet == null || data == null)
+            return;
+
+        for (int i = 0; i < weaknessIconSlots.Length; i++)
+        {
+            if (weaknessIconSlots[i] != null)
+                weaknessIconSlots[i].gameObject.SetActive(false);
+        }
+        if (data.elementalWeaknesses == null)
+            return;
+
+        int count = Mathf.Min(data.elementalWeaknesses.Length, weaknessIconSlots.Length);
+        if (count == 0)
+            return;
+
+        float spacing = 20f;
+
+        for (int i = 0; i < count; i++)
+        {
+            var slot = weaknessIconSlots[i];
+            if (slot == null) continue;
+
+            ElementType elem = data.elementalWeaknesses[i];
+            Sprite icon = elementIconSet.GetIcon(elem);
+
+            slot.sprite = icon;
+            slot.preserveAspect = true;
+            slot.gameObject.SetActive(true);
+
+            RectTransform rt = slot.rectTransform;
+            Vector2 pos = rt.anchoredPosition;
+
+            float indexFromCenter = i - (count - 1) * 0.5f;
+            pos.x = indexFromCenter * spacing;
+
+            rt.anchoredPosition = pos;
+        }
     }
     public IEnumerator HighlightTarget(float time = 0.3f)
     {
@@ -99,8 +197,8 @@ public class BattleUnit : MonoBehaviour
         data = characterData;
         position = pos;
         pos.currentUnit = this;
-
         _startPosition = pos.transform.position;
+
         if (pos.stepOutPoint != null)
         {
             _stepOutPosition = pos.stepOutPoint.position;
@@ -112,8 +210,11 @@ public class BattleUnit : MonoBehaviour
                 0, 0);
         }
         transform.position = _startPosition;
+        IsBroken = false;
+        IsDefending = false;
 
         CurrentHP = data.maxHP;
+        CurrentShield = data.maxShield;
 
         if (_spriteRenderer == null)
             _spriteRenderer = GetComponent<SpriteRenderer>();
@@ -121,25 +222,65 @@ public class BattleUnit : MonoBehaviour
         if (data.sprite != null)
             _spriteRenderer.sprite = data.sprite;
 
+        SetupElementIcon();
+        SetupWeaknessIcons();
         UpdateHpBar();
+        UpdateShieldUI();
     }
-    public void ReceiveDamage(int amount)
+    public void ReceiveDamage(int amount, ElementType element = ElementType.None)
     {
         int prevHP = CurrentHP;
-        CurrentHP -= amount;
+        int finalAmount = amount;
+        bool hitWeakness = IsHitWeakness(element);
+        bool wasBroken = IsBroken;
+
+        if (hitWeakness && HasShield && CurrentShield > 0)
+        {
+            CurrentShield -= 1;
+            if (CurrentShield < 0) CurrentShield = 0;
+            if (CurrentShield == 0 && !IsBroken)
+            {
+                IsBroken = true;
+                if (DamageTextManager.Instance != null)
+                {
+                    Vector3 offset = Vector3.up * 0.3f;
+                    bool fromPlayerSide = data.isPlayer;
+                    DamageTextManager.Instance.ShowDamageText(
+                        -1,
+                        transform.position + offset,
+                        false,
+                        fromPlayerSide
+                    );
+                }
+            }
+            UpdateShieldUI();
+        }
+        // DEFEND
+        if (IsDefending)
+        {
+            finalAmount = Mathf.CeilToInt(finalAmount * 0.5f);
+            IsDefending = false;
+        }
+        float elementMult = GetElementMultiplier(element);
+        finalAmount = Mathf.CeilToInt(finalAmount * elementMult);
+
+        if (wasBroken)
+            finalAmount = Mathf.CeilToInt(finalAmount * 2f);
+
+        CurrentHP -= finalAmount;
         if (CurrentHP < 0) CurrentHP = 0;
         int actualDamage = prevHP - CurrentHP;
 
         if (actualDamage > 0 && DamageTextManager.Instance != null)
         {
-            Vector3 offset = Vector3.up * 0.5f;
+            Vector3 offset = Vector3.up * 0.1f;
             bool fromPlayerSide = data.isPlayer;
             DamageTextManager.Instance.ShowDamageText(actualDamage, transform.position + offset, false, fromPlayerSide);
         }
+
         if (CameraShake.Instance != null && actualDamage > 0)
-        {
             CameraShake.Instance.Shake(0.08f, 0.05f);
-        }
+
         Debug.Log($"{data.characterName} otrzymuje {actualDamage} DMG (HP={CurrentHP})");
         UpdateHpBar();
 
@@ -147,9 +288,44 @@ public class BattleUnit : MonoBehaviour
         StartCoroutine(HitPushback());
 
         if (CurrentHP <= 0)
-        {
             StartCoroutine(Die());
+    }
+    public void OnBrokenTurn()
+    {
+        Debug.Log($"{data.characterName} jest oszołomiony (BREAK) i pomija turę.");
+        if (HasShield)
+        {
+            CurrentShield = data.maxShield;
+            UpdateShieldUI();
         }
+        IsBroken = false;
+    }
+    float GetElementMultiplier(ElementType element)
+    {
+        if (element == ElementType.None || data == null)
+            return 1f;
+
+        // Vulnerabilities
+        if (data.elementalWeaknesses != null)
+        {
+            for (int i = 0; i < data.elementalWeaknesses.Length; i++)
+            {
+                if (data.elementalWeaknesses[i] == element)
+                    return 1.5f; // +50% dmg
+            }
+        }
+
+        // Ressist
+        if (data.elementalResistances != null)
+        {
+            for (int i = 0; i < data.elementalResistances.Length; i++)
+            {
+                if (data.elementalResistances[i] == element)
+                    return 0.5f; // half dmg
+            }
+        }
+
+        return 1f;
     }
     public void StartHighlight()
     {
@@ -270,6 +446,12 @@ public class BattleUnit : MonoBehaviour
     public IEnumerator ReturnToStart()
     {
         yield return MoveToPosition(_startPosition);
+    }
+    public void Defend()
+    {
+        IsDefending = true;
+        Debug.Log($"{data.characterName} przyjmuje pozycję obronną (Defend).");
+        // tu możesz później dodać animację, efekt itp.
     }
     public void Heal(int amount)
     {

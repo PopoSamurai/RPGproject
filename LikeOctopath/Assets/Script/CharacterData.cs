@@ -11,4 +11,15 @@ public class CharacterData : ScriptableObject
     public bool isPlayer;
 
     public Sprite sprite;
+    [Header("Elements")]
+    public ElementType attackElement = ElementType.None;
+
+    [Tooltip("Elements Vulnerabilities")]
+    public ElementType[] elementalWeaknesses;
+
+    [Tooltip("Elements Resist")]
+    public ElementType[] elementalResistances;
+
+    [Header("Shield / Break")]
+    public int maxShield = 0;
 }

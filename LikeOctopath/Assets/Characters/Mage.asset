@@ -14,8 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   characterName: Sister Emily
   maxHP: 70
-  attackPower: 10
+  attackPower: 5
   healPower: 30
   speed: 10
   isPlayer: 1
   sprite: {fileID: 298598929, guid: fee3be854ff3d1e408935942b090a764, type: 3}
+  attackElement: 2
+  elementalWeaknesses: 01000000
+  elementalResistances: 07000000
+  maxShield: 0
