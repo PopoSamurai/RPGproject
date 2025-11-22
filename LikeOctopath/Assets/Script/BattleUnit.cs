@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using UnityEditor.Rendering.LookDev;
 using UnityEngine;
 using UnityEngine.UI;
 public class BattleUnit : MonoBehaviour
@@ -20,14 +19,22 @@ public class BattleUnit : MonoBehaviour
     [Header("Ruch")]
     public float moveSpeed = 6f;
     float attackOffsetFromTarget = 0.2f;
-    private Coroutine highlightRoutine;
 
     [Header("Hit effect")]
     public Material hitMaterial;
     private Material _defaultMaterial;
+    private static readonly int FlashPropId = Shader.PropertyToID("_Flash");
+
     private Vector3 _startPosition;
     private SpriteRenderer _spriteRenderer;
     private Color _originalColor;
+    private Coroutine highlightRoutine;
+
+    private void SetFlash(float value)
+    {
+        if (_spriteRenderer == null) return;
+        _spriteRenderer.material.SetFloat(FlashPropId, value);
+    }
     void UpdateHpBar()
     {
         if (hpBarFillImage == null || data == null) return;
@@ -65,7 +72,14 @@ public class BattleUnit : MonoBehaviour
         if (_spriteRenderer != null)
         {
             _originalColor = _spriteRenderer.color;
+
+            if (hitMaterial != null)
+            {
+                _spriteRenderer.material = new Material(hitMaterial);
+            }
+
             _defaultMaterial = _spriteRenderer.material;
+            SetFlash(0f);
         }
         if (hpBarFillImage == null)
         {
@@ -151,32 +165,26 @@ public class BattleUnit : MonoBehaviour
             StopCoroutine(highlightRoutine);
             highlightRoutine = null;
         }
+        SetFlash(0f);
 
         if (_spriteRenderer != null)
-        {
-            if (_defaultMaterial != null)
-                _spriteRenderer.material = _defaultMaterial;
-
             _spriteRenderer.color = _originalColor;
-        }
     }
     IEnumerator HighlightBlink()
     {
         if (_spriteRenderer == null) yield break;
 
         float t = 0f;
-        float whiteAmount = 0.45f;
         float speed = 4f;
+        float maxFlash = 0.10f;
 
         while (true)
         {
             t += Time.deltaTime * speed;
             float pulse = 0.5f + 0.5f * Mathf.Sin(t);
+            float amount = pulse * maxFlash;
 
-            float lerpVal = pulse * whiteAmount;
-            Color target = Color.Lerp(_originalColor, Color.red, lerpVal);
-
-            _spriteRenderer.color = target;
+            SetFlash(amount);
             yield return null;
         }
     }
@@ -212,9 +220,10 @@ public class BattleUnit : MonoBehaviour
     {
         if (_spriteRenderer == null) yield break;
 
-        int flashes = 2;
-        float singleFlashTime = 0.08f;
-        float whiteAmount = 0.7f;
+        int flashes = 1;
+        float singleFlashTime = 0.12f;
+        float maxFlash = 1.0f;
+        float flashSpeed = 12f;
 
         for (int i = 0; i < flashes; i++)
         {
@@ -222,13 +231,15 @@ public class BattleUnit : MonoBehaviour
             while (t < singleFlashTime)
             {
                 t += Time.deltaTime;
-                float lerp = Mathf.PingPong(t * 10f, 1f);
-                Color c = Color.Lerp(_originalColor, Color.red, lerp * whiteAmount);
-                _spriteRenderer.color = c;
+                float lerp = Mathf.PingPong(t * flashSpeed, 1f);
+                float amount = Mathf.Lerp(0f, maxFlash, lerp);
+
+                SetFlash(amount);
                 yield return null;
             }
-            _spriteRenderer.color = _originalColor;
         }
+
+        SetFlash(0f);
     }
     IEnumerator Die()
     {
@@ -265,19 +276,25 @@ public class BattleUnit : MonoBehaviour
         int prevHP = CurrentHP;
         int missing = data.maxHP - CurrentHP;
         int actualHeal = Mathf.Clamp(amount, 0, missing);
-        if (actualHeal <= 0)
-        {
-            Debug.Log($"{data.characterName} nie potrzebuje leczenia (HP={CurrentHP})");
-            return;
-        }
-        CurrentHP += actualHeal;
+        int shownHeal = Mathf.Max(actualHeal, 0);
 
         if (DamageTextManager.Instance != null)
         {
             Vector3 offset = Vector3.up * 0.5f;
             bool fromPlayerSide = data.isPlayer;
-            DamageTextManager.Instance.ShowDamageText(actualHeal, transform.position + offset, true, fromPlayerSide);
+            DamageTextManager.Instance.ShowDamageText(
+                shownHeal,
+                transform.position + offset,
+                true,
+                fromPlayerSide
+            );
         }
+        if (actualHeal <= 0)
+        {
+            Debug.Log($"{data.characterName} nie potrzebuje leczenia (HP={CurrentHP}), heal = 0");
+            return;
+        }
+        CurrentHP += actualHeal;
         Debug.Log($"{data.characterName} leczy {actualHeal} HP (HP={CurrentHP})");
         UpdateHpBar();
     }

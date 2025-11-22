@@ -15,7 +15,7 @@ public class BattleManager : MonoBehaviour
     public GameObject actionButtonsPanel;
     public GameObject targetButtonsPanel;
     public Button[] targetButtons;
-    public float enemyDecisionDelay = 2f;
+    float enemyDecisionDelay = 1f;
 
     [Header("Ustaw w inspectorze")]
     public BattlePosition[] positions;
@@ -35,6 +35,7 @@ public class BattleManager : MonoBehaviour
     private bool waitingForTargetChoice;
     private int chosenTargetIndex;
     private BattleUnit _highlightedUnit;
+    private bool playerCanceledTargetSelection;
     private void Awake()
     {
         Instance = this;
@@ -175,68 +176,94 @@ public class BattleManager : MonoBehaviour
         if (unit.IsPlayer)
         {
             yield return StartCoroutine(unit.StepOut());
-
-            Debug.Log($"(GRACZ) Tura: {unit.data.characterName}. Wybierz akcję...");
-            waitingForActionChoice = true;
-            ShowActionButtons(true);
-            ShowTargetButtons(false);
-            yield return new WaitUntil(() => waitingForActionChoice == false);
-
-            switch (chosenPlayerAction)
+            while (true)
             {
-                case BattleActionType.Attack:
-                    waitingForTargetChoice = true;
-                    ShowActionButtons(false);
-                    ShowTargetButtons(true);
-                    UpdateEnemyTargetButtons();
+                Debug.Log($"(GRACZ) Tura: {unit.data.characterName}. Wybierz akcję...");
+                waitingForActionChoice = true;
+                ShowActionButtons(true);
+                ShowTargetButtons(false);
+                yield return new WaitUntil(() => waitingForActionChoice == false);
+                playerCanceledTargetSelection = false;
 
-                    Debug.Log("Wybierz wroga (1–4)");
-                    yield return new WaitUntil(() => waitingForTargetChoice == false);
+                if (_highlightedUnit != null)
+                {
+                    _highlightedUnit.StopHighlight();
+                    _highlightedUnit = null;
+                }
+                switch (chosenPlayerAction)
+                {
+                    case BattleActionType.Attack:
+                        waitingForTargetChoice = true;
+                        ShowActionButtons(false);
+                        ShowTargetButtons(true);
+                        UpdateEnemyTargetButtons();
 
-                    BattleUnit enemyTarget = GetEnemyByIndex(chosenTargetIndex);
-                    if (enemyTarget != null)
-                        yield return StartCoroutine(PerformAttack(unit, enemyTarget));
-                    else
-                        Debug.Log("Wybrany wróg nie istnieje lub jest martwy.");
-                    break;
+                        Debug.Log("Wybierz wroga (1–4) albo cofnij.");
+                        yield return new WaitUntil(() => waitingForTargetChoice == false);
 
-                case BattleActionType.Heal:
-                    waitingForTargetChoice = true;
-                    ShowActionButtons(false);
-                    ShowTargetButtons(true);
+                        if (playerCanceledTargetSelection)
+                        {
+                            ShowTargetButtons(false);
+                            continue;
+                        }
+                        BattleUnit enemyTarget = GetEnemyByIndex(chosenTargetIndex);
+                        if (enemyTarget != null)
+                            yield return StartCoroutine(PerformAttack(unit, enemyTarget));
+                        else
+                            Debug.Log("Wybrany wróg nie istnieje lub jest martwy.");
+                        break;
 
-                    UpdateAllyTargetButtons();
+                    case BattleActionType.Heal:
+                        waitingForTargetChoice = true;
+                        ShowActionButtons(false);
+                        ShowTargetButtons(true);
+                        UpdateAllyTargetButtons();
 
-                    Debug.Log("Wybierz sojusznika do leczenia (1–4)");
-                    yield return new WaitUntil(() => waitingForTargetChoice == false);
+                        Debug.Log("Wybierz sojusznika do leczenia (1–4) albo cofnij.");
+                        yield return new WaitUntil(() => waitingForTargetChoice == false);
 
-                    BattleUnit allyTarget = GetAllyByIndex(chosenTargetIndex);
-                    if (allyTarget != null)
-                    {
-                        yield return StartCoroutine(PerformHeal(unit, allyTarget));
-                    }
-                    break;
+                        if (playerCanceledTargetSelection)
+                        {
+                            ShowTargetButtons(false);
+                            continue;
+                        }
+                        BattleUnit allyTarget = GetAllyByIndex(chosenTargetIndex);
+                        if (allyTarget != null)
+                        {
+                            yield return StartCoroutine(PerformHeal(unit, allyTarget));
+                        }
+                        break;
+                    case BattleActionType.Skip:
+                        Debug.Log($"{unit.data.characterName} pomija turę.");
+                        yield return new WaitForSeconds(0.5f);
+                        break;
+                }
+                ShowActionButtons(false);
+                ShowTargetButtons(false);
 
-                case BattleActionType.Skip:
-                    Debug.Log($"{unit.data.characterName} pomija turę.");
-                    yield return new WaitForSeconds(0.5f);
-                    break;
+                unit.StopHighlight();
+                yield return StartCoroutine(unit.ReturnToStart());
+                yield break;
             }
-            ShowActionButtons(false);
-            ShowTargetButtons(false);
-
-            unit.StopHighlight();
-            yield return StartCoroutine(unit.ReturnToStart());
-            yield break;
         }
         Debug.Log($"(WRÓG) Tura: {unit.data.characterName}. Czekam {enemyDecisionDelay}s...");
         ShowActionButtons(false);
         ShowTargetButtons(false);
         yield return new WaitForSeconds(enemyDecisionDelay);
 
+        bool canHeal = unit.data.healPower > 0;
+        var woundedAllies = _allUnits
+            .Where(u => u.IsPlayer == unit.IsPlayer && !u.IsDead && u.CurrentHP < u.data.maxHP)
+            .ToList();
+
         BattleActionType enemyAction = BattleActionType.Attack;
-        if (unit.CurrentHP < unit.data.maxHP / 3)
-            enemyAction = BattleActionType.Heal;
+        if (canHeal && woundedAllies.Count > 0)
+        {
+            // np. 60% szansy, że wybierze Heal zamiast Attack
+            float healChance = 0.6f;
+            if (Random.value < healChance)
+                enemyAction = BattleActionType.Heal;
+        }
 
         switch (enemyAction)
         {
@@ -255,13 +282,19 @@ public class BattleManager : MonoBehaviour
 
             case BattleActionType.Heal:
                 var allies = _allUnits
-                    .Where(u => u.IsPlayer == unit.IsPlayer && !u.IsDead)
-                    .ToList();
+                        .Where(u => u.IsPlayer == unit.IsPlayer && !u.IsDead && u.CurrentHP < u.data.maxHP)
+                        .OrderBy(u => (float)u.CurrentHP / u.data.maxHP)
+                        .ToList();
 
                 if (allies.Count > 0)
                 {
-                    var healTarget = allies[Random.Range(0, allies.Count)];
+                    var healTarget = allies[0];
+                    Debug.Log($"(WRÓG) {unit.data.characterName} leczy {healTarget.data.characterName}");
                     yield return StartCoroutine(PerformHeal(unit, healTarget));
+                }
+                else
+                {
+                    goto case BattleActionType.Attack;
                 }
                 break;
 
@@ -274,6 +307,23 @@ public class BattleManager : MonoBehaviour
         {
             unit.StopHighlight();
         }
+    }
+    public void OnTargetBackButton()
+    {
+        if (!waitingForTargetChoice)
+            return;
+
+        Debug.Log("Gracz cofa wybór celu, wracam do menu akcji.");
+        foreach (var u in _allUnits)
+            u.StopHighlight();
+
+        if (_highlightedUnit != null)
+        {
+            _highlightedUnit.StopHighlight();
+            _highlightedUnit = null;
+        }
+        playerCanceledTargetSelection = true;
+        waitingForTargetChoice = false;
     }
     IEnumerator PerformHeal(BattleUnit healer, BattleUnit target)
     {
