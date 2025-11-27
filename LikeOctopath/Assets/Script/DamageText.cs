@@ -16,12 +16,15 @@ public class DamageText : MonoBehaviour
     private Text _text;
     private Color _startColor;
     private Vector2 _direction = Vector2.up;
+
+    private bool _followWorldPos = false;
+    private Vector3 _worldPos;
     void Awake()
     {
         if (_text == null)
             _text = GetComponent<Text>();
     }
-    public void Init(int value, bool isHeal, Vector2 direction)
+    public void Init(int value, bool isHeal, Vector2 direction, Vector3 worldPos, bool isSpell = false)
     {
         if (_text == null)
             _text = GetComponent<Text>();
@@ -34,15 +37,22 @@ public class DamageText : MonoBehaviour
         else
         {
             _text.text = value.ToString();
-            _text.color = isHeal ? Color.green : Color.white;
+
+            if (isSpell)
+                _text.color = new Color(1f, 0.5f, 0f);
+            else
+                _text.color = isHeal ? Color.green : Color.white;
         }
 
         _startColor = _text.color;
         _direction = direction.normalized;
 
+        _followWorldPos = true;
+        _worldPos = worldPos;
+
         StartCoroutine(AnimRoutine());
     }
-    public void InitText(string text, Color color, Vector2 direction)
+    public void InitText(string text, Color color, Vector2 direction, Vector3 worldPos)
     {
         if (_text == null)
             _text = GetComponent<Text>();
@@ -53,6 +63,9 @@ public class DamageText : MonoBehaviour
         _startColor = color;
         _direction = direction.normalized;
 
+        _followWorldPos = true;
+        _worldPos = worldPos;
+
         StartCoroutine(AnimRoutine());
     }
     IEnumerator AnimRoutine()
@@ -60,8 +73,8 @@ public class DamageText : MonoBehaviour
         if (_text == null)
             _text = GetComponent<Text>();
 
-        RectTransform rt = _text.rectTransform;
-        Vector2 startPos = rt.anchoredPosition;
+        Transform t = _text.transform;
+        Vector3 startPos = t.position;
         float time = 0f;
 
         while (time < lifeTime)
@@ -79,14 +92,19 @@ public class DamageText : MonoBehaviour
                 Mathf.PerlinNoise(0f, angle) - 0.5f
             ).normalized * currentMag;
 
-            rt.anchoredPosition = startPos + moveOffset + shakeOffset;
+            Vector3 basePos = startPos;
+
+            if (_followWorldPos && Camera.main != null)
+            {
+                basePos = Camera.main.WorldToScreenPoint(_worldPos);
+            }
+            t.position = basePos + (Vector3)moveOffset + (Vector3)shakeOffset;
 
             float alpha = Mathf.Lerp(1f, 0f, lerp);
             _text.color = new Color(_startColor.r, _startColor.g, _startColor.b, alpha);
 
             yield return null;
         }
-
         Destroy(gameObject);
     }
 }

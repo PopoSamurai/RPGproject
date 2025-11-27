@@ -8,9 +8,9 @@ public class TurnOrderUI : MonoBehaviour
     public Image[] slots;
 
     [Header("Kolory")]
-    public Color currentTurnColor = Color.white;                 // aktualna tura
-    public Color futureTurnColor = new Color(1f, 1f, 1f, 0.6f);  // przysz³e tury
-    public Color enemyTint = new Color(1f, 0.85f, 0.85f, 1f);    // lekkie czerwone zabarwienie wrogów
+    public Color currentTurnColor = Color.white;
+    public Color futureTurnColor = new Color(1f, 1f, 1f, 0.6f); 
+    public Color enemyTint = new Color(1f, 0.85f, 0.85f, 1f);
     public Color playerTint = Color.white;
 
     public void Refresh(List<BattleUnit> order, BattleUnit currentUnit)

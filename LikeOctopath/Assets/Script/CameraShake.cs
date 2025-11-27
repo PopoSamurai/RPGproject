@@ -22,18 +22,20 @@ public class CameraShake : MonoBehaviour
     }
     IEnumerator ShakeRoutine(float duration, float magnitude)
     {
+        Vector3 basePos = transform.position;
         float elapsed = 0f;
-
         while (elapsed < duration)
         {
-            elapsed += Time.deltaTime;
+            elapsed += Time.unscaledDeltaTime;
 
-            Vector3 offset = Random.insideUnitSphere * magnitude;
-            transform.localPosition = _originalPos + offset;
+            Vector2 offset2D = Random.insideUnitCircle * magnitude;
+            Vector3 offset = new Vector3(offset2D.x, offset2D.y, 0f);
+
+            transform.position = basePos + offset;
 
             yield return null;
         }
-        transform.localPosition = _originalPos;
+        transform.position = basePos;
         _shakeRoutine = null;
     }
 }

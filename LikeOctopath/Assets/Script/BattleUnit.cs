@@ -6,7 +6,8 @@ public class BattleUnit : MonoBehaviour
     [Header("UI")]
     public Image hpBarFillImage;
     public Image elementIconImage; //element
-    public Text shieldText;
+    public Text shieldText; 
+    public Transform cameraFocusPoint;
 
     [Header("Weakness Icons")]
     public Image[] weaknessIconSlots;
@@ -227,7 +228,7 @@ public class BattleUnit : MonoBehaviour
         UpdateHpBar();
         UpdateShieldUI();
     }
-    public void ReceiveDamage(int amount, ElementType element = ElementType.None)
+    public void ReceiveDamage(int amount, ElementType element = ElementType.None, bool isSpell = false)
     {
         int prevHP = CurrentHP;
         int finalAmount = amount;
@@ -238,19 +239,29 @@ public class BattleUnit : MonoBehaviour
         {
             CurrentShield -= 1;
             if (CurrentShield < 0) CurrentShield = 0;
+
             if (CurrentShield == 0 && !IsBroken)
             {
                 IsBroken = true;
+                Debug.Log($"{data.characterName} wchodzi w stan BREAK!");
+
                 if (DamageTextManager.Instance != null)
                 {
                     Vector3 offset = Vector3.up * 0.3f;
                     bool fromPlayerSide = data.isPlayer;
+
                     DamageTextManager.Instance.ShowDamageText(
                         -1,
                         transform.position + offset,
                         false,
                         fromPlayerSide
                     );
+                }
+                if (BattleCameraController.Instance != null)
+                {
+                    Vector3 focusPos = GetCameraFocusPosition();
+                    string debugName = data != null ? data.characterName : name;
+                    BattleCameraController.Instance.PlayBreakZoom(focusPos, debugName);
                 }
             }
             UpdateShieldUI();
@@ -275,15 +286,18 @@ public class BattleUnit : MonoBehaviour
         {
             Vector3 offset = Vector3.up * 0.1f;
             bool fromPlayerSide = data.isPlayer;
-            DamageTextManager.Instance.ShowDamageText(actualDamage, transform.position + offset, false, fromPlayerSide);
+            DamageTextManager.Instance.ShowDamageText(
+                actualDamage,
+                transform.position + offset,
+                false,
+                fromPlayerSide,
+                isSpell
+            );
         }
-
         if (CameraShake.Instance != null && actualDamage > 0)
             CameraShake.Instance.Shake(0.08f, 0.05f);
 
-        Debug.Log($"{data.characterName} otrzymuje {actualDamage} DMG (HP={CurrentHP})");
         UpdateHpBar();
-
         StartCoroutine(HitFlash());
         StartCoroutine(HitPushback());
 
@@ -314,7 +328,6 @@ public class BattleUnit : MonoBehaviour
                     return 1.5f; // +50% dmg
             }
         }
-
         // Ressist
         if (data.elementalResistances != null)
         {
@@ -324,7 +337,6 @@ public class BattleUnit : MonoBehaviour
                     return 0.5f; // half dmg
             }
         }
-
         return 1f;
     }
     public void StartHighlight()
@@ -414,7 +426,6 @@ public class BattleUnit : MonoBehaviour
                 yield return null;
             }
         }
-
         SetFlash(0f);
     }
     IEnumerator Die()
@@ -450,8 +461,6 @@ public class BattleUnit : MonoBehaviour
     public void Defend()
     {
         IsDefending = true;
-        Debug.Log($"{data.characterName} przyjmuje pozycję obronną (Defend).");
-        // tu możesz później dodać animację, efekt itp.
     }
     public void Heal(int amount)
     {
@@ -471,13 +480,15 @@ public class BattleUnit : MonoBehaviour
                 fromPlayerSide
             );
         }
-        if (actualHeal <= 0)
-        {
-            Debug.Log($"{data.characterName} nie potrzebuje leczenia (HP={CurrentHP}), heal = 0");
-            return;
-        }
+        if (actualHeal <= 0) return;
         CurrentHP += actualHeal;
-        Debug.Log($"{data.characterName} leczy {actualHeal} HP (HP={CurrentHP})");
         UpdateHpBar();
+    }
+    public Vector3 GetCameraFocusPosition()
+    {
+        if (_spriteRenderer != null)
+            return _spriteRenderer.bounds.center;
+
+        return transform.position;
     }
 }

@@ -22,4 +22,7 @@ public class CharacterData : ScriptableObject
 
     [Header("Shield / Break")]
     public int maxShield = 0;
+
+    [Header("Spells")]
+    public SpellData[] knownSpells;
 }

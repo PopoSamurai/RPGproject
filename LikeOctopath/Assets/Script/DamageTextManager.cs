@@ -10,7 +10,7 @@ public class DamageTextManager : MonoBehaviour
     {
         Instance = this;
     }
-    public void ShowDamageText(int value, Vector3 worldPos, bool isHeal, bool fromPlayerSide)
+    public void ShowDamageText(int value, Vector3 worldPos, bool isHeal, bool fromPlayerSide, bool isSpell = false)
     {
         if (damageTextPrefab == null || canvas == null) return;
 
@@ -19,7 +19,7 @@ public class DamageTextManager : MonoBehaviour
         dt.transform.position = screenPos;
 
         Vector2 dir = fromPlayerSide ? Vector2.left : Vector2.right;
-        dt.Init(value, isHeal, dir);
+        dt.Init(value, isHeal, dir, worldPos, isSpell);
     }
     public void ShowCustomText(string text, Vector3 worldPos, Color color, bool fromPlayerSide)
     {
@@ -30,6 +30,6 @@ public class DamageTextManager : MonoBehaviour
         dt.transform.position = screenPos;
 
         Vector2 dir = fromPlayerSide ? Vector2.left : Vector2.right;
-        dt.InitText(text, color, dir);
+        dt.InitText(text, color, dir, worldPos);
     }
 }

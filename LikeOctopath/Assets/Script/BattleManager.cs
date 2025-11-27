@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-public enum BattleActionType { Attack, Heal, Defend, Skip }
+public enum BattleActionType { Attack, Heal, Defend, Skip, Spell }
 public class BattleManager : MonoBehaviour
 {
     private List<BattleUnit> _turnQueue = new List<BattleUnit>();
@@ -18,6 +18,8 @@ public class BattleManager : MonoBehaviour
     public Button[] targetButtons;
     float enemyDecisionDelay = 1f;
     public TurnOrderUI turnOrderUI;
+    public GameObject spellsButtonsPanel;
+    public Button[] spellButtons;
 
     [Header("Ustaw w inspectorze")]
     public BattlePosition[] positions;
@@ -38,6 +40,9 @@ public class BattleManager : MonoBehaviour
     private int chosenTargetIndex;
     private BattleUnit _highlightedUnit;
     private bool playerCanceledTargetSelection;
+    private bool waitingForSpellChoice;
+    private int chosenSpellIndex;
+    private bool playerCanceledSpellSelection;
     private void Awake()
     {
         Instance = this;
@@ -46,6 +51,7 @@ public class BattleManager : MonoBehaviour
     {
         SpawnUnits();
 
+        if (spellsButtonsPanel != null) spellsButtonsPanel.SetActive(false);
         if (actionButtonsPanel != null) actionButtonsPanel.SetActive(false);
         if (targetButtonsPanel != null) targetButtonsPanel.SetActive(false);
 
@@ -69,7 +75,6 @@ public class BattleManager : MonoBehaviour
             targetButtons[i].gameObject.SetActive(alive);
         }
     }
-
     void UpdateAllyTargetButtons()
     {
         if (targetButtons == null) return;
@@ -146,7 +151,6 @@ public class BattleManager : MonoBehaviour
                 if (turnOrderUI != null)
                     turnOrderUI.Refresh(_turnQueue, _currentUnit);
 
-                Debug.Log($"Tura: {_currentUnit.data.characterName}");
                 yield return StartCoroutine(HandleTurn(_currentUnit));
 
                 if (_turnQueue.Count > 0)
@@ -169,11 +173,11 @@ public class BattleManager : MonoBehaviour
             IEnumerator PerformAttack(BattleUnit attacker, BattleUnit target)
             {
                 if (target == null || target.IsDead) yield break;
-                Debug.Log($"{attacker.data.characterName} atakuje {target.data.characterName}");
+
                 yield return StartCoroutine(attacker.StepOut());
 
                 LastAttacker = attacker;
-                target.ReceiveDamage(attacker.data.attackPower, attacker.data.attackElement);
+                target.ReceiveDamage(attacker.data.attackPower, attacker.data.attackElement, false);
 
                 yield return new WaitForSeconds(0.2f);
 
@@ -207,7 +211,6 @@ public class BattleManager : MonoBehaviour
                     yield return StartCoroutine(unit.StepOut());
                     while (true)
                     {
-                        Debug.Log($"(GRACZ) Tura: {unit.data.characterName}. Wybierz akcję...");
                         waitingForActionChoice = true;
                         ShowActionButtons(true);
                         ShowTargetButtons(false);
@@ -227,7 +230,6 @@ public class BattleManager : MonoBehaviour
                                 ShowTargetButtons(true);
                                 UpdateEnemyTargetButtons();
 
-                                Debug.Log("Wybierz wroga (1–4) albo cofnij.");
                                 yield return new WaitUntil(() => waitingForTargetChoice == false);
 
                                 if (playerCanceledTargetSelection)
@@ -247,8 +249,6 @@ public class BattleManager : MonoBehaviour
                                 ShowActionButtons(false);
                                 ShowTargetButtons(true);
                                 UpdateAllyTargetButtons();
-
-                                Debug.Log("Wybierz sojusznika do leczenia (1–4) albo cofnij.");
                                 yield return new WaitUntil(() => waitingForTargetChoice == false);
 
                                 if (playerCanceledTargetSelection)
@@ -262,6 +262,58 @@ public class BattleManager : MonoBehaviour
                                     yield return StartCoroutine(PerformHeal(unit, allyTarget));
                                 }
                                 break;
+
+                            case BattleActionType.Spell:
+                                {
+                                    waitingForSpellChoice = true;
+                                    playerCanceledSpellSelection = false;
+
+                                    ShowActionButtons(false);
+                                    ShowTargetButtons(false);
+                                    ShowSpellButtons(true);
+                                    RefreshSpellButtons(unit);
+
+                                    yield return new WaitUntil(() => waitingForSpellChoice == false);
+                                    ShowSpellButtons(false);
+
+                                    if (playerCanceledSpellSelection)
+                                    {
+                                        continue;
+                                    }
+                                    var spells = unit.data.knownSpells;
+                                    if (spells == null ||
+                                        chosenSpellIndex < 0 ||
+                                        chosenSpellIndex >= spells.Length ||
+                                        spells[chosenSpellIndex] == null)
+                                    {
+                                        Debug.Log("Brak spella pod tym przyciskiem.");
+                                        break;
+                                    }
+                                    var chosenSpell = spells[chosenSpellIndex];
+                                    waitingForTargetChoice = true;
+                                    playerCanceledTargetSelection = false;
+
+                                    ShowTargetButtons(true);
+                                    UpdateEnemyTargetButtons();
+                                    yield return new WaitUntil(() => waitingForTargetChoice == false);
+                                    ShowTargetButtons(false);
+
+                                    if (playerCanceledTargetSelection)
+                                    {
+                                        continue;
+                                    }
+                                    BattleUnit enemyTarget1 = GetEnemyByIndex(chosenTargetIndex);
+                                    if (enemyTarget1 != null)
+                                    {
+                                        yield return StartCoroutine(PerformSpell(unit, enemyTarget1, chosenSpell));
+                                    }
+                                    else
+                                    {
+                                        Debug.Log("Wybrany wróg nie istnieje lub jest martwy.");
+                                    }
+
+                                    break;
+                                }
 
                             case BattleActionType.Defend:
                                 unit.Defend();
@@ -282,7 +334,6 @@ public class BattleManager : MonoBehaviour
                         yield break;
                     }
                 }
-                Debug.Log($"(WRÓG) Tura: {unit.data.characterName}. Czekam {enemyDecisionDelay}s...");
                 ShowActionButtons(false);
                 ShowTargetButtons(false);
                 yield return new WaitForSeconds(enemyDecisionDelay);
@@ -295,7 +346,7 @@ public class BattleManager : MonoBehaviour
                 BattleActionType enemyAction = BattleActionType.Attack;
                 if (canHeal && woundedAllies.Count > 0)
                 {
-                    // np. 60% szansy, że wybierze Heal zamiast Attack
+                    // np. 60% szansy na heal
                     float healChance = 0.6f;
                     if (Random.value < healChance)
                         enemyAction = BattleActionType.Heal;
@@ -325,7 +376,6 @@ public class BattleManager : MonoBehaviour
                         if (allies.Count > 0)
                         {
                             var healTarget = allies[0];
-                            Debug.Log($"(WRÓG) {unit.data.characterName} leczy {healTarget.data.characterName}");
                             yield return StartCoroutine(PerformHeal(unit, healTarget));
                         }
                         else
@@ -346,13 +396,45 @@ public class BattleManager : MonoBehaviour
             }
         }
     }
-    
+    IEnumerator PerformSpell(BattleUnit caster, BattleUnit target, SpellData spell)
+    {
+        if (target == null || target.IsDead) yield break;
+
+        yield return StartCoroutine(caster.StepOut());
+        LastAttacker = caster;
+        Debug.Log($"{caster.data.characterName} rzuca spella: {spell.spellName} w {target.data.characterName}");
+        target.ReceiveDamage(spell.power, caster.data.attackElement, true);
+
+        yield return new WaitForSeconds(0.3f);
+        UpdateEnemyTargetButtons();
+        UpdateAllyTargetButtons();
+
+        yield return StartCoroutine(caster.ReturnToStart());
+    }
+    void SelectSpell(int index)
+    {
+        if (!waitingForSpellChoice) return;
+
+        chosenSpellIndex = index;
+        waitingForSpellChoice = false;
+    }
+    public void OnSpellButton1() => SelectSpell(0);
+    public void OnSpellButton2() => SelectSpell(1);
+    public void OnSpellButton3() => SelectSpell(2);
+    public void OnSpellButton4() => SelectSpell(3);
+
+    public void OnSpellsBackButton()
+    {
+        if (!waitingForSpellChoice) return;
+
+        playerCanceledSpellSelection = true;
+        waitingForSpellChoice = false;
+    }
     public void OnTargetBackButton()
     {
         if (!waitingForTargetChoice)
             return;
 
-        Debug.Log("Gracz cofa wybór celu, wracam do menu akcji.");
         foreach (var u in _allUnits)
             u.StopHighlight();
 
@@ -367,8 +449,6 @@ public class BattleManager : MonoBehaviour
     IEnumerator PerformHeal(BattleUnit healer, BattleUnit target)
     {
         if (target == null || target.IsDead) yield break;
-        Debug.Log($"{healer.data.characterName} leczy {target.data.characterName}");
-
         DoHeal(healer, target);
         yield return new WaitForSeconds(0.3f);
         yield return StartCoroutine(healer.ReturnToStart());
@@ -383,14 +463,12 @@ public class BattleManager : MonoBehaviour
 
         var target = allies[Random.Range(0, allies.Count)];
         target.Heal(healer.data.healPower);
-        Debug.Log($"{healer.data.characterName} leczy {target.data.characterName}");
     }
     void DoHeal(BattleUnit healer, BattleUnit target)
     {
         if (target == null || target.IsDead) return;
 
         target.Heal(healer.data.healPower);
-        Debug.Log($"{healer.data.characterName} leczy {target.data.characterName}");
     }
     public void OnAttackButton()
     {
@@ -421,7 +499,8 @@ public class BattleManager : MonoBehaviour
         if (!waitingForTargetChoice) return;
         chosenTargetIndex = index;
 
-        if (chosenPlayerAction == BattleActionType.Attack)
+        if (chosenPlayerAction == BattleActionType.Attack ||
+            chosenPlayerAction == BattleActionType.Spell)
         {
             BattleUnit enemy = GetEnemyByIndex(index);
             if (enemy != null)
@@ -497,7 +576,8 @@ public class BattleManager : MonoBehaviour
         }
         BattleUnit unit = null;
 
-        if (chosenPlayerAction == BattleActionType.Attack)
+        if (chosenPlayerAction == BattleActionType.Attack ||
+            chosenPlayerAction == BattleActionType.Spell)
             unit = GetEnemyByIndex(index);
         else if (chosenPlayerAction == BattleActionType.Heal)
             unit = GetAllyByIndex(index);
@@ -524,6 +604,11 @@ public class BattleManager : MonoBehaviour
         if (actionButtonsPanel != null)
             actionButtonsPanel.SetActive(show);
     }
+    void ShowSpellButtons(bool show)
+    {
+        if (spellsButtonsPanel != null)
+            spellsButtonsPanel.SetActive(show);
+    }
     void ShowTargetButtons(bool show)
     {
         if (targetButtonsPanel != null)
@@ -546,5 +631,56 @@ public class BattleManager : MonoBehaviour
         if (ally == null || ally.IsDead || !ally.gameObject.activeSelf) return null;
 
         return ally;
+    }
+    void RefreshSpellButtons(BattleUnit unit)
+    {
+        Debug.Log("REFRESH SPELL BUTTONS");
+
+        if (spellButtons == null)
+        {
+            Debug.LogWarning("spellButtons == null");
+            return;
+        }
+        if (unit == null || unit.data == null)
+        {
+            Debug.LogWarning("unit albo unit.data == null");
+            return;
+        }
+        var spells = unit.data.knownSpells;
+        int spellsCount = spells != null ? spells.Length : 0;
+        Debug.Log("Ilość znanych spelli: " + spellsCount);
+
+        for (int i = 0; i < spellButtons.Length; i++)
+        {
+            var btn = spellButtons[i];
+            if (btn == null)
+            {
+                Debug.LogWarning("spellButtons[" + i + "] == null");
+                continue;
+            }
+
+            if (spells != null && i < spells.Length && spells[i] != null)
+            {
+                btn.gameObject.SetActive(true);
+
+                var txt = btn.GetComponentInChildren<Text>();
+                if (txt != null)
+                {
+                    txt.text = spells[i].spellName;
+                    Debug.Log($"Przycisk {i}: ustawiam tekst na {spells[i].spellName}");
+                }
+            }
+            else
+            {
+                btn.gameObject.SetActive(false);
+                Debug.Log("Przycisk " + i + " ukryty (brak spella)");
+            }
+        }
+    }
+    public void OnSpellsButton()
+    {
+        if (!waitingForActionChoice) return;
+        chosenPlayerAction = BattleActionType.Spell;
+        waitingForActionChoice = false;
     }
 }
