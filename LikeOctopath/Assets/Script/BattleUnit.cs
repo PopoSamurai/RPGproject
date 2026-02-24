@@ -34,15 +34,14 @@ public class BattleUnit : MonoBehaviour
 
     [Header("Hit effect")]
     public Material hitMaterial;
-    private Material _defaultMaterial;
+    public Material _defaultMaterial;
     private static readonly int FlashPropId = Shader.PropertyToID("_Flash");
 
     private Vector3 _startPosition;
     private SpriteRenderer _spriteRenderer;
     private Color _originalColor;
     private Coroutine highlightRoutine;
-
-    private void SetFlash(float value)
+    void SetFlash(float value)
     {
         if (_spriteRenderer == null) return;
         _spriteRenderer.material.SetFloat(FlashPropId, value);
@@ -170,14 +169,8 @@ public class BattleUnit : MonoBehaviour
 
         if (_spriteRenderer != null)
         {
-            _originalColor = _spriteRenderer.color;
-
-            if (hitMaterial != null)
-            {
-                _spriteRenderer.material = new Material(hitMaterial);
-            }
-
-            _defaultMaterial = _spriteRenderer.material;
+            _defaultMaterial = _spriteRenderer.sharedMaterial;
+            _spriteRenderer.material = new Material(_defaultMaterial);
             SetFlash(0f);
         }
         if (hpBarFillImage == null)
