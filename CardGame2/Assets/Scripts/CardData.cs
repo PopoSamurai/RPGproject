@@ -5,6 +5,7 @@ public enum CardType
     Character,
     Attack,
     Heal,
+    BuffAttack,
     Energy
 }
 [CreateAssetMenu(menuName = "Card Game/Card")]
@@ -23,4 +24,5 @@ public class CardData : ScriptableObject
     public int damageAmount;
     public int healAmount;
     public int energyAmount;
+    public int buffAttackAmount;
 }

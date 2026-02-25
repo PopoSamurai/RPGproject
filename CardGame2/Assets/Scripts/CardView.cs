@@ -48,7 +48,9 @@ public class CardView : MonoBehaviour,
     }
     public void OnBeginDrag(PointerEventData eventData)
     {
-        if (data.type != CardType.Character)
+        if (data.type == CardType.Attack
+         || data.type == CardType.Heal
+         || data.type == CardType.BuffAttack)
         {
             CardTargetLine.Instance.StartLine(GetComponent<RectTransform>());
             return;
@@ -72,7 +74,9 @@ public class CardView : MonoBehaviour,
     }
     public void OnEndDrag(PointerEventData eventData)
     {
-        if (data.type != CardType.Character)
+        if (data.type == CardType.Attack
+            || data.type == CardType.Heal
+            || data.type == CardType.BuffAttack)
         {
             CardTargetLine.Instance.StopLine();
 
@@ -83,24 +87,56 @@ public class CardView : MonoBehaviour,
                 Debug.Log($"[EFFECT] {data.cardName} used on {target.gameObject.name}");
                 FindObjectOfType<HandManager>().RemoveCard(this);
                 FindObjectOfType<ArcLayoutGroup>().UpdateLayout(true);
-
                 return;
             }
+
             Debug.Log("[TARGET] No valid target");
             return;
         }
         canvasGroup.blocksRaycasts = true;
         IsDragging = false;
 
+        if (data.type == CardType.Energy)
+        {
+            if (IsOutsideHand())
+            {
+                Debug.Log($"[ENERGY] Gained {data.energyAmount} energy");
+
+                var energySystem = FindObjectOfType<PlayerEnergySystem>();
+                energySystem.AddEnergy(data.energyAmount);
+                FindObjectOfType<HandManager>().RemoveCard(this);
+                FindObjectOfType<ArcLayoutGroup>().UpdateLayout(true);
+
+                Destroy(gameObject);
+                return;
+            }
+            else
+            {
+                ReturnToHand();
+                return;
+            }
+        }
         if (!WasPlayedOnBoard)
             ReturnToHand();
     }
+    bool IsOutsideHand()
+    {
+        var hand = FindObjectOfType<HandManager>().transform as RectTransform;
+        var cardRT = GetComponent<RectTransform>();
+
+        return !RectTransformUtility.RectangleContainsScreenPoint(
+            hand,
+            Input.mousePosition,
+            mainCanvas.worldCamera
+        );
+    }
     public void OnDrag(PointerEventData eventData)
     {
-        if (data.type != CardType.Character)
-        {
+        if (data.type == CardType.Attack
+            || data.type == CardType.Heal
+            || data.type == CardType.BuffAttack)
             return;
-        }
+
         transform.position = Input.mousePosition;
     }
     public void ReturnToHand()

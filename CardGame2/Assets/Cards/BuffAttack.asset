@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 26f36f371f182b745ab94f623a6f8341, type: 3}
-  m_Name: Energy
+  m_Name: BuffAttack
   m_EditorClassIdentifier: 
-  cardName: Energy
-  artwork: {fileID: -1341617782, guid: 66e9f4b3ecc76764988ed453bc885f4e, type: 3}
-  type: 4
+  cardName: MasterBuff
+  artwork: {fileID: -849520258, guid: 19dc445d0b0bd6e46b3d449b04a1f4f6, type: 3}
+  type: 3
   energyCost: 0
   hp: 0
   attack: 0
   damageAmount: 0
   healAmount: 0
   energyAmount: 1
-  buffAttackAmount: 0
+  buffAttackAmount: 3

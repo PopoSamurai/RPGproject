@@ -34,6 +34,12 @@ public class HandManager : MonoBehaviour
             FindObjectOfType<ArcLayoutGroup>().UpdateLayout();
         }
     }
+    public void ConsumeCard(CardView card)
+    {
+        hand.Remove(card);
+        Destroy(card.gameObject);
+        FindObjectOfType<ArcLayoutGroup>().UpdateLayout(true);
+    }
     public void RemoveCard(CardView card)
     {
         hand.Remove(card);

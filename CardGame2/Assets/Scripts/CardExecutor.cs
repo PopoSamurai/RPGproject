@@ -37,22 +37,34 @@ public class CardExecutor : MonoBehaviour
     void SpawnCharacterOnSlot(CardData card, BoardSlot slot)
     {
         Debug.Log("Spawn unit: " + card.cardName + " on slot " + slot.name);
-        var slotRT = slot.GetComponent<RectTransform>();
-        var target = slot.gameObject.AddComponent<BoardTarget>();
+        GameObject unitGO = new GameObject(card.cardName);
+        unitGO.transform.SetParent(slot.transform, false);
+
+        var rt = unitGO.AddComponent<RectTransform>();
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.offsetMin = Vector2.zero;
+        rt.offsetMax = Vector2.zero;
+
+        var img = unitGO.AddComponent<UnityEngine.UI.Image>();
+        img.sprite = card.artwork;
+        img.preserveAspect = true;
+
+        var unit = unitGO.AddComponent<Unit>();
+        unit.Init(card);
+        var target = unitGO.AddComponent<BoardTarget>();
 
         GameObject snap = new GameObject("SnapPoint");
-        snap.transform.SetParent(slot.transform, false);
-
+        snap.transform.SetParent(unitGO.transform, false);
         RectTransform snapRT = snap.AddComponent<RectTransform>();
         snapRT.anchorMin = new Vector2(0.5f, 1f);
         snapRT.anchorMax = new Vector2(0.5f, 1f);
         snapRT.pivot = new Vector2(0.5f, 0.5f);
-        snapRT.anchoredPosition = new Vector2(0, 10f);
-        snapRT.sizeDelta = Vector2.zero;
+        snapRT.anchoredPosition = new Vector2(0, 20f);
 
         target.snapPoint = snapRT;
 
-        Debug.Log($"[TARGET SYSTEM] BoardTarget added to slot {slot.name}");
+        Debug.Log($"[TARGET SYSTEM] Unit {card.cardName} is now targetable");
     }
     void PlaceCardOnSlot(CardView cardView, BoardSlot slot)
     {
