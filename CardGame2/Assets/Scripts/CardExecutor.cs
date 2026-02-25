@@ -27,52 +27,43 @@ public class CardExecutor : MonoBehaviour
             Debug.Log("FAIL: slot occupied");
             return false;
         }
+
         energySystem.UseEnergy(card.energyCost);
-        SpawnCharacterOnSlot(card, slot);
-        PlaceCardOnSlot(cardView, slot);
 
-        Debug.Log("SUCCESS: card played");
-        return true;
-    }
-    void SpawnCharacterOnSlot(CardData card, BoardSlot slot)
-    {
-        Debug.Log("Spawn unit: " + card.cardName + " on slot " + slot.name);
-        GameObject unitGO = new GameObject(card.cardName);
-        unitGO.transform.SetParent(slot.transform, false);
+        var unit = cardView.gameObject.GetComponent<Unit>();
+        if (unit == null)
+            unit = cardView.gameObject.AddComponent<Unit>();
+        unit.Init(cardView.data);
 
-        var rt = unitGO.AddComponent<RectTransform>();
-        rt.anchorMin = Vector2.zero;
-        rt.anchorMax = Vector2.one;
-        rt.offsetMin = Vector2.zero;
-        rt.offsetMax = Vector2.zero;
+        cardView.AttachedUnit = unit;
 
-        var img = unitGO.AddComponent<UnityEngine.UI.Image>();
-        img.sprite = card.artwork;
-        img.preserveAspect = true;
-
-        var unit = unitGO.AddComponent<Unit>();
         unit.Init(card);
-        var target = unitGO.AddComponent<BoardTarget>();
+
+        var boardTarget = cardView.gameObject.GetComponent<BoardTarget>();
+        if (boardTarget == null)
+            boardTarget = cardView.gameObject.AddComponent<BoardTarget>();
 
         GameObject snap = new GameObject("SnapPoint");
-        snap.transform.SetParent(unitGO.transform, false);
+        snap.transform.SetParent(cardView.transform, false);
         RectTransform snapRT = snap.AddComponent<RectTransform>();
         snapRT.anchorMin = new Vector2(0.5f, 1f);
         snapRT.anchorMax = new Vector2(0.5f, 1f);
         snapRT.pivot = new Vector2(0.5f, 0.5f);
         snapRT.anchoredPosition = new Vector2(0, 20f);
+        boardTarget.snapPoint = snapRT;
 
-        target.snapPoint = snapRT;
-
-        Debug.Log($"[TARGET SYSTEM] Unit {card.cardName} is now targetable");
+        PlaceCardOnSlot(cardView, slot);
+        cardView.UpdateStatsUI();
+        Debug.Log("SUCCESS: card played on slot");
+        return true;
     }
+
     void PlaceCardOnSlot(CardView cardView, BoardSlot slot)
     {
         var handManager = FindObjectOfType<HandManager>();
         handManager.hand.Remove(cardView);
 
         RectTransform rt = cardView.GetComponent<RectTransform>();
-
         rt.SetParent(slot.transform, false);
         rt.localPosition = Vector3.zero;
         rt.localRotation = Quaternion.identity;

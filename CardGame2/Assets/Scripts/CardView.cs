@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using static UnityEngine.GraphicsBuffer;
 public class CardView : MonoBehaviour,
     IPointerClickHandler,
     IBeginDragHandler,
@@ -8,6 +10,8 @@ public class CardView : MonoBehaviour,
     IEndDragHandler
 {
     public CardData data;
+    [HideInInspector]
+    public Unit AttachedUnit;
 
     [Header("UI")]
     public Image artworkImage;
@@ -32,6 +36,7 @@ public class CardView : MonoBehaviour,
     public bool WasPlayedOnBoard = false;
     void Awake()
     {
+        AttachedUnit = GetComponent<Unit>();
         canvasGroup = GetComponent<CanvasGroup>();
         mainCanvas = FindObjectOfType<Canvas>();
     }
@@ -72,6 +77,16 @@ public class CardView : MonoBehaviour,
         var hover = GetComponent<CardHoverUI>();
         if (hover) hover.enabled = false;
     }
+    public void UpdateStatsUI()
+    {
+        if (AttachedUnit != null)
+        {
+            if (attackText != null)
+                attackText.text = AttachedUnit.attack.ToString();
+            if (hpText != null)
+                hpText.text = AttachedUnit.currentHP.ToString();
+        }
+    }
     public void OnEndDrag(PointerEventData eventData)
     {
         if (data.type == CardType.Attack
@@ -79,17 +94,63 @@ public class CardView : MonoBehaviour,
             || data.type == CardType.BuffAttack)
         {
             CardTargetLine.Instance.StopLine();
+            var targetGO = TargetDetector.Instance.CurrentTarget;
 
-            var target = TargetDetector.Instance.CurrentTarget;
-
-            if (target != null)
+            if (targetGO == null)
             {
-                Debug.Log($"[EFFECT] {data.cardName} used on {target.gameObject.name}");
-                FindObjectOfType<HandManager>().RemoveCard(this);
+                List<RaycastResult> hits = new List<RaycastResult>();
+                EventSystem.current.RaycastAll(eventData, hits);
+
+                foreach (var hit in hits)
+                {
+                    var slot = hit.gameObject.GetComponent<BoardSlot>();
+                    if (slot != null && slot.transform.childCount > 0)
+                    {
+                        var boardTarget = slot.transform.GetChild(0).GetComponent<BoardTarget>();
+                        if (boardTarget != null)
+                        {
+                            targetGO = boardTarget;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (targetGO != null)
+            {
+                var boardTarget = targetGO.GetComponent<BoardTarget>();
+                var unit = boardTarget.GetComponent<Unit>();
+
+                if (unit != null)
+                {
+                    switch (data.type)
+                    {
+                        case CardType.Attack:
+                            unit.TakeDamage(data.damageAmount);
+                            Debug.Log($"[ATTACK] {data.cardName} dealt {data.damageAmount} dmg to {unit.name}");
+                            break;
+
+                        case CardType.Heal:
+                            unit.Heal(data.healAmount);
+                            Debug.Log($"[HEAL] {data.cardName} healed {data.healAmount} HP on {unit.name}");
+                            break;
+
+                        case CardType.BuffAttack:
+                            Debug.Log($"[BUFF] {data.cardName} buffed {unit.name} ATK by {data.buffAttackAmount}");
+                            var cardView = targetGO.GetComponent<CardView>();
+                            if (cardView != null && cardView.AttachedUnit != null)
+                            {
+                                cardView.AttachedUnit.AddAttack(data.buffAttackAmount);
+                                cardView.UpdateStatsUI();
+                            }
+                            break;
+                    }
+                }
+                var handManager = FindObjectOfType<HandManager>();
+                handManager.RemoveCard(this);
                 FindObjectOfType<ArcLayoutGroup>().UpdateLayout(true);
+
                 return;
             }
-
             Debug.Log("[TARGET] No valid target");
             return;
         }
@@ -191,6 +252,11 @@ public class CardView : MonoBehaviour,
             case CardType.Energy:
                 effectText.gameObject.SetActive(true);
                 effectText.text = $"+{data.energyAmount} Energy";
+                break;
+
+            case CardType.BuffAttack:
+                effectText.gameObject.SetActive(true);
+                effectText.text = $"Buff {data.buffAttackAmount} ATK";
                 break;
         }
     }

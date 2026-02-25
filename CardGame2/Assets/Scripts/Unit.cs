@@ -28,7 +28,7 @@ public class Unit : MonoBehaviour
     public void AddAttack(int amount)
     {
         attack += amount;
-        Debug.Log($"[UNIT] {name} buffed ATK +{amount}, ATK = {attack}");
+        Debug.Log("Dodaj atak" + attack);
     }
     void Die()
     {
