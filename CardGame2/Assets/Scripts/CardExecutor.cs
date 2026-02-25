@@ -37,6 +37,22 @@ public class CardExecutor : MonoBehaviour
     void SpawnCharacterOnSlot(CardData card, BoardSlot slot)
     {
         Debug.Log("Spawn unit: " + card.cardName + " on slot " + slot.name);
+        var slotRT = slot.GetComponent<RectTransform>();
+        var target = slot.gameObject.AddComponent<BoardTarget>();
+
+        GameObject snap = new GameObject("SnapPoint");
+        snap.transform.SetParent(slot.transform, false);
+
+        RectTransform snapRT = snap.AddComponent<RectTransform>();
+        snapRT.anchorMin = new Vector2(0.5f, 1f);
+        snapRT.anchorMax = new Vector2(0.5f, 1f);
+        snapRT.pivot = new Vector2(0.5f, 0.5f);
+        snapRT.anchoredPosition = new Vector2(0, 10f);
+        snapRT.sizeDelta = Vector2.zero;
+
+        target.snapPoint = snapRT;
+
+        Debug.Log($"[TARGET SYSTEM] BoardTarget added to slot {slot.name}");
     }
     void PlaceCardOnSlot(CardView cardView, BoardSlot slot)
     {

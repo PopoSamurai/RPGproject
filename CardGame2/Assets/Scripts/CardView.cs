@@ -48,6 +48,11 @@ public class CardView : MonoBehaviour,
     }
     public void OnBeginDrag(PointerEventData eventData)
     {
+        if (data.type != CardType.Character)
+        {
+            CardTargetLine.Instance.StartLine(GetComponent<RectTransform>());
+            return;
+        }
         IsDragging = true;
 
         originalParent = transform.parent;
@@ -67,16 +72,35 @@ public class CardView : MonoBehaviour,
     }
     public void OnEndDrag(PointerEventData eventData)
     {
+        if (data.type != CardType.Character)
+        {
+            CardTargetLine.Instance.StopLine();
+
+            var target = TargetDetector.Instance.CurrentTarget;
+
+            if (target != null)
+            {
+                Debug.Log($"[EFFECT] {data.cardName} used on {target.gameObject.name}");
+                FindObjectOfType<HandManager>().RemoveCard(this);
+                FindObjectOfType<ArcLayoutGroup>().UpdateLayout(true);
+
+                return;
+            }
+            Debug.Log("[TARGET] No valid target");
+            return;
+        }
         canvasGroup.blocksRaycasts = true;
         IsDragging = false;
 
         if (!WasPlayedOnBoard)
-        {
             ReturnToHand();
-        }
     }
     public void OnDrag(PointerEventData eventData)
     {
+        if (data.type != CardType.Character)
+        {
+            return;
+        }
         transform.position = Input.mousePosition;
     }
     public void ReturnToHand()

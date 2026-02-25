@@ -38,8 +38,6 @@ public class HandManager : MonoBehaviour
     {
         hand.Remove(card);
         Destroy(card.gameObject);
-
-        FillHandToMax();
         FindObjectOfType<ArcLayoutGroup>().UpdateLayout();
     }
 }
