@@ -26,7 +26,6 @@ public class CardView : MonoBehaviour,
     public Text effectText;
 
     private Transform originalParent;
-    private Vector3 originalPosition;
     private Canvas mainCanvas;
     private CanvasGroup canvasGroup;
 
@@ -119,6 +118,7 @@ public class CardView : MonoBehaviour,
             {
                 var boardTarget = targetGO.GetComponent<BoardTarget>();
                 var unit = boardTarget.GetComponent<Unit>();
+                var cardView = targetGO.GetComponent<CardView>();
 
                 if (unit != null)
                 {
@@ -126,17 +126,26 @@ public class CardView : MonoBehaviour,
                     {
                         case CardType.Attack:
                             unit.TakeDamage(data.damageAmount);
+                            if (cardView != null && cardView.AttachedUnit != null)
+                            {
+                                cardView.AttachedUnit.TakeDamage(data.attack);
+                                cardView.UpdateStatsUI();
+                            }
                             Debug.Log($"[ATTACK] {data.cardName} dealt {data.damageAmount} dmg to {unit.name}");
                             break;
 
                         case CardType.Heal:
                             unit.Heal(data.healAmount);
+                            if (cardView != null && cardView.AttachedUnit != null)
+                            {
+                                cardView.AttachedUnit.Heal(data.hp);
+                                cardView.UpdateStatsUI();
+                            }
                             Debug.Log($"[HEAL] {data.cardName} healed {data.healAmount} HP on {unit.name}");
                             break;
 
                         case CardType.BuffAttack:
                             Debug.Log($"[BUFF] {data.cardName} buffed {unit.name} ATK by {data.buffAttackAmount}");
-                            var cardView = targetGO.GetComponent<CardView>();
                             if (cardView != null && cardView.AttachedUnit != null)
                             {
                                 cardView.AttachedUnit.AddAttack(data.buffAttackAmount);

@@ -22,7 +22,7 @@ public class Unit : MonoBehaviour
     }
     public void Heal(int amount)
     {
-        currentHP = Mathf.Min(currentHP + amount, maxHP);
+        currentHP += amount;
         Debug.Log($"[UNIT] {name} healed {amount}, HP = {currentHP}");
     }
     public void AddAttack(int amount)
