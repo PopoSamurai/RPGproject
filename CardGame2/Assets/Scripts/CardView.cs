@@ -33,11 +33,43 @@ public class CardView : MonoBehaviour,
     private Vector2 originalAnchoredPos;
     public bool IsDragging { get; set; }
     public bool WasPlayedOnBoard = false;
+
+    [HideInInspector]
+    public BoardSlot CurrentSlot;
     void Awake()
     {
         AttachedUnit = GetComponent<Unit>();
         canvasGroup = GetComponent<CanvasGroup>();
         mainCanvas = FindObjectOfType<Canvas>();
+    }
+    public void ReturnToSlot()
+    {
+        if (CurrentSlot == null) return;
+
+        RectTransform rt = GetComponent<RectTransform>();
+        rt.SetParent(CurrentSlot.transform, false);
+        rt.localPosition = Vector3.zero;
+        rt.localRotation = Quaternion.identity;
+        rt.localScale = Vector3.one;
+
+        WasPlayedOnBoard = true;
+    }
+    public void ReturnToHand()
+    {
+        WasPlayedOnBoard = false;
+
+        transform.SetParent(originalParent, false);
+        transform.SetSiblingIndex(originalSiblingIndex);
+        transform.localRotation = Quaternion.identity;
+
+        var rt = GetComponent<RectTransform>();
+        rt.anchoredPosition = originalAnchoredPos;
+
+        var hover = GetComponent<CardHoverUI>();
+        if (hover) hover.enabled = true;
+
+        FindObjectOfType<ArcLayoutGroup>().UpdateLayout();
+        FindObjectOfType<ArcLayoutGroup>().UpdateLayout(instant: true);
     }
     private void Update()
     {
@@ -88,18 +120,18 @@ public class CardView : MonoBehaviour,
     }
     public void OnEndDrag(PointerEventData eventData)
     {
-        if (data.type == CardType.Attack
-            || data.type == CardType.Heal
-            || data.type == CardType.BuffAttack)
+        IsDragging = false;
+        canvasGroup.blocksRaycasts = true;
+
+        if (data.type == CardType.Attack || data.type == CardType.Heal || data.type == CardType.BuffAttack)
         {
             CardTargetLine.Instance.StopLine();
-            var targetGO = TargetDetector.Instance.CurrentTarget;
 
+            var targetGO = TargetDetector.Instance.CurrentTarget;
             if (targetGO == null)
             {
                 List<RaycastResult> hits = new List<RaycastResult>();
                 EventSystem.current.RaycastAll(eventData, hits);
-
                 foreach (var hit in hits)
                 {
                     var slot = hit.gameObject.GetComponent<BoardSlot>();
@@ -119,64 +151,42 @@ public class CardView : MonoBehaviour,
                 var boardTarget = targetGO.GetComponent<BoardTarget>();
                 var unit = boardTarget.GetComponent<Unit>();
                 var cardView = targetGO.GetComponent<CardView>();
-
                 if (unit != null)
                 {
                     switch (data.type)
                     {
                         case CardType.Attack:
                             unit.TakeDamage(data.damageAmount);
-                            if (cardView != null && cardView.AttachedUnit != null)
-                            {
-                                cardView.AttachedUnit.TakeDamage(data.attack);
-                                cardView.UpdateStatsUI();
-                            }
-                            Debug.Log($"[ATTACK] {data.cardName} dealt {data.damageAmount} dmg to {unit.name}");
+                            cardView?.AttachedUnit?.TakeDamage(data.attack);
+                            cardView?.UpdateStatsUI();
                             break;
-
                         case CardType.Heal:
                             unit.Heal(data.healAmount);
-                            if (cardView != null && cardView.AttachedUnit != null)
-                            {
-                                cardView.AttachedUnit.Heal(data.hp);
-                                cardView.UpdateStatsUI();
-                            }
-                            Debug.Log($"[HEAL] {data.cardName} healed {data.healAmount} HP on {unit.name}");
+                            cardView?.AttachedUnit?.Heal(data.hp);
+                            cardView?.UpdateStatsUI();
                             break;
-
                         case CardType.BuffAttack:
-                            Debug.Log($"[BUFF] {data.cardName} buffed {unit.name} ATK by {data.buffAttackAmount}");
-                            if (cardView != null && cardView.AttachedUnit != null)
-                            {
-                                cardView.AttachedUnit.AddAttack(data.buffAttackAmount);
-                                cardView.UpdateStatsUI();
-                            }
+                            cardView?.AttachedUnit?.AddAttack(data.buffAttackAmount);
+                            cardView?.UpdateStatsUI();
                             break;
                     }
                 }
-                var handManager = FindObjectOfType<HandManager>();
-                handManager.RemoveCard(this);
-                FindObjectOfType<ArcLayoutGroup>().UpdateLayout(true);
 
+                FindObjectOfType<HandManager>().RemoveCard(this);
+                FindObjectOfType<ArcLayoutGroup>().UpdateLayout(true);
                 return;
             }
             Debug.Log("[TARGET] No valid target");
             return;
         }
-        canvasGroup.blocksRaycasts = true;
-        IsDragging = false;
-
         if (data.type == CardType.Energy)
         {
             if (IsOutsideHand())
             {
-                Debug.Log($"[ENERGY] Gained {data.energyAmount} energy");
-
                 var energySystem = FindObjectOfType<PlayerEnergySystem>();
                 energySystem.AddEnergy(data.energyAmount);
                 FindObjectOfType<HandManager>().RemoveCard(this);
                 FindObjectOfType<ArcLayoutGroup>().UpdateLayout(true);
-
                 Destroy(gameObject);
                 return;
             }
@@ -186,8 +196,74 @@ public class CardView : MonoBehaviour,
                 return;
             }
         }
-        if (!WasPlayedOnBoard)
-            ReturnToHand();
+        BoardSlot targetSlot = null;
+        List<RaycastResult> rayHits = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventData, rayHits);
+
+        foreach (var hit in rayHits)
+        {
+            var slot = hit.gameObject.GetComponent<BoardSlot>();
+            if (slot != null)
+            {
+                targetSlot = slot;
+                break;
+            }
+        }
+        if (targetSlot != null)
+        {
+            if (!targetSlot.occupied && CurrentSlot == null)
+            {
+                CardExecutor.Instance.TryPlayUnitCard(this, targetSlot, true);
+            }
+            else if (CurrentSlot != null)
+            {
+                var targetCard = targetSlot.transform.childCount > 0 ?
+                    targetSlot.transform.GetChild(0).GetComponent<CardView>() : null;
+
+                if (targetCard != null)
+                {
+                    var oldSlot = CurrentSlot;
+
+                    RectTransform rt1 = GetComponent<RectTransform>();
+                    RectTransform rt2 = targetCard.GetComponent<RectTransform>();
+
+                    rt1.SetParent(targetSlot.transform, false);
+                    rt1.localPosition = Vector3.zero;
+                    rt1.localRotation = Quaternion.identity;
+                    rt1.localScale = Vector3.one;
+
+                    rt2.SetParent(oldSlot.transform, false);
+                    rt2.localPosition = Vector3.zero;
+                    rt2.localRotation = Quaternion.identity;
+                    rt2.localScale = Vector3.one;
+
+                    targetCard.CurrentSlot = oldSlot;
+                    CurrentSlot = targetSlot;
+
+                    oldSlot.occupied = true;
+                    targetSlot.occupied = true;
+                }
+                else
+                {
+                    CardExecutor.Instance.TryPlayUnitCard(this, targetSlot, false);
+                }
+            }
+            else
+            {
+                ReturnToHand();
+            }
+        }
+        else
+        {
+            if (CurrentSlot != null)
+            {
+                ReturnToSlot();
+            }
+            else
+            {
+                ReturnToHand();
+            }
+        }
     }
     bool IsOutsideHand()
     {
@@ -208,23 +284,6 @@ public class CardView : MonoBehaviour,
             return;
 
         transform.position = Input.mousePosition;
-    }
-    public void ReturnToHand()
-    {
-        WasPlayedOnBoard = false;
-
-        transform.SetParent(originalParent, false);
-        transform.SetSiblingIndex(originalSiblingIndex);
-        transform.localRotation = Quaternion.identity;
-
-        var rt = GetComponent<RectTransform>();
-        rt.anchoredPosition = originalAnchoredPos;
-
-        var hover = GetComponent<CardHoverUI>();
-        if (hover) hover.enabled = true;
-
-        FindObjectOfType<ArcLayoutGroup>().UpdateLayout();
-        FindObjectOfType<ArcLayoutGroup>().UpdateLayout(instant: true);
     }
     public void Init(CardData cardData)
     {

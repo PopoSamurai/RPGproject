@@ -5,8 +5,6 @@ public class BoardSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPoi
     public bool occupied;
     public void OnDrop(PointerEventData eventData)
     {
-        if (occupied) return;
-
         var cardView = eventData.pointerDrag?.GetComponent<CardView>();
         if (cardView == null) return;
 
@@ -15,21 +13,25 @@ public class BoardSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPoi
             cardView.WasPlayedOnBoard = false;
             return;
         }
+        if (occupied)
+        {
+            cardView.ReturnToSlot();
+            return;
+        }
 
-        bool success = CardExecutor.Instance.TryPlayUnitCard(cardView, this);
+        bool firstTime = cardView.CurrentSlot == null;
+        bool success = CardExecutor.Instance.TryPlayUnitCard(cardView, this, firstTime);
 
         if (!success)
-        {
-            cardView.WasPlayedOnBoard = false;
-        }
+            cardView.ReturnToSlot();
     }
     public void OnPointerEnter(PointerEventData eventData)
     {
-        Debug.Log("ENTER SLOT: " + name);
+        // 
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        Debug.Log("EXIT SLOT: " + name);
+        // 
     }
 }

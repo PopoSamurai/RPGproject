@@ -7,10 +7,9 @@ public class CardExecutor : MonoBehaviour
     {
         Instance = this;
     }
-    public bool TryPlayUnitCard(CardView cardView, BoardSlot slot)
+    public bool TryPlayUnitCard(CardView cardView, BoardSlot slot, bool isFirstTime)
     {
         var card = cardView.data;
-        Debug.Log("TRY PLAY CARD: " + card.cardName);
 
         if (card.type != CardType.Character)
         {
@@ -27,17 +26,25 @@ public class CardExecutor : MonoBehaviour
             Debug.Log("FAIL: slot occupied");
             return false;
         }
+        if (isFirstTime)
+        {
+            energySystem.UseEnergy(card.energyCost);
 
-        energySystem.UseEnergy(card.energyCost);
+            var unit = cardView.gameObject.GetComponent<Unit>();
+            if (unit == null)
+            {
+                unit = cardView.gameObject.AddComponent<Unit>();
+                unit.Init(card);
+                cardView.AttachedUnit = unit;
+            }
+        }
+        PlaceCardOnSlot(cardView, slot);
 
-        var unit = cardView.gameObject.GetComponent<Unit>();
-        if (unit == null)
-            unit = cardView.gameObject.AddComponent<Unit>();
-        unit.Init(cardView.data);
+        if (cardView.CurrentSlot != null && cardView.CurrentSlot != slot)
+            cardView.CurrentSlot.occupied = false;
 
-        cardView.AttachedUnit = unit;
-
-        unit.Init(card);
+        cardView.CurrentSlot = slot;
+        cardView.UpdateStatsUI();
 
         var boardTarget = cardView.gameObject.GetComponent<BoardTarget>();
         if (boardTarget == null)
@@ -54,10 +61,8 @@ public class CardExecutor : MonoBehaviour
 
         PlaceCardOnSlot(cardView, slot);
         cardView.UpdateStatsUI();
-        Debug.Log("SUCCESS: card played on slot");
         return true;
     }
-
     void PlaceCardOnSlot(CardView cardView, BoardSlot slot)
     {
         var handManager = FindObjectOfType<HandManager>();
@@ -81,8 +86,6 @@ public class CardExecutor : MonoBehaviour
         slot.occupied = true;
 
         FindObjectOfType<ArcLayoutGroup>().UpdateLayout(true);
-
-        Debug.Log("CARD PARENT = " + rt.parent.name);
     }
     public void UseCard(CardData card, GameObject target)
     {
