@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using static UnityEngine.GraphicsBuffer;
 public class CardView : MonoBehaviour,
     IPointerClickHandler,
     IBeginDragHandler,
@@ -36,6 +35,7 @@ public class CardView : MonoBehaviour,
 
     [HideInInspector]
     public BoardSlot CurrentSlot;
+    public SlotOwner owner;
     void Awake()
     {
         AttachedUnit = GetComponent<Unit>();
@@ -203,8 +203,9 @@ public class CardView : MonoBehaviour,
         foreach (var hit in rayHits)
         {
             var slot = hit.gameObject.GetComponent<BoardSlot>();
-            if (slot != null)
+            if (slot != null && slot.owner != SlotOwner.Player)
             {
+                Debug.Log("WRACAJ");
                 targetSlot = slot;
                 break;
             }
@@ -213,15 +214,25 @@ public class CardView : MonoBehaviour,
         {
             if (!targetSlot.occupied && CurrentSlot == null)
             {
-                CardExecutor.Instance.TryPlayUnitCard(this, targetSlot, true);
+                CardExecutor.Instance.TryPlayUnitCard(this, targetSlot, true, false);
             }
             else if (CurrentSlot != null)
             {
+                if (targetSlot.owner != SlotOwner.Player)
+                {
+                    ReturnToSlot();
+                    return;
+                }
                 var targetCard = targetSlot.transform.childCount > 0 ?
                     targetSlot.transform.GetChild(0).GetComponent<CardView>() : null;
 
                 if (targetCard != null)
                 {
+                    if (targetCard.owner != SlotOwner.Player)
+                    {
+                        ReturnToSlot();
+                        return;
+                    }
                     var oldSlot = CurrentSlot;
 
                     RectTransform rt1 = GetComponent<RectTransform>();
@@ -245,7 +256,7 @@ public class CardView : MonoBehaviour,
                 }
                 else
                 {
-                    CardExecutor.Instance.TryPlayUnitCard(this, targetSlot, false);
+                    CardExecutor.Instance.TryPlayUnitCard(this, targetSlot, false, false);
                 }
             }
             else

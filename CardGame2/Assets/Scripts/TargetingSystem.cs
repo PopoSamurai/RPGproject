@@ -14,7 +14,7 @@ public class TargetingSystem : MonoBehaviour
     }
     public void SelectTarget(GameObject target)
     {
-        CardExecutor.Instance.UseCard(pendingCard, target);
+        CardExecutor.Instance.UseCard(pendingCard, target, false);
         pendingCard = null;
     }
 }

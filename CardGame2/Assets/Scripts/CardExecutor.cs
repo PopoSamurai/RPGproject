@@ -7,8 +7,13 @@ public class CardExecutor : MonoBehaviour
     {
         Instance = this;
     }
-    public bool TryPlayUnitCard(CardView cardView, BoardSlot slot, bool isFirstTime)
+    public bool TryPlayUnitCard(CardView cardView, BoardSlot slot, bool isFirstTime, bool isAI)
     {
+        if (!isAI && slot.owner == SlotOwner.Enemy)
+        {
+            Debug.Log("Player tried to play on enemy slot");
+            return false;
+        }
         var card = cardView.data;
 
         if (card.type != CardType.Character)
@@ -28,9 +33,11 @@ public class CardExecutor : MonoBehaviour
         }
         if (isFirstTime)
         {
-            energySystem.UseEnergy(card.energyCost);
+            if (!isAI)
+                energySystem.UseEnergy(card.energyCost);
 
             var unit = cardView.gameObject.GetComponent<Unit>();
+
             if (unit == null)
             {
                 unit = cardView.gameObject.AddComponent<Unit>();
@@ -87,15 +94,18 @@ public class CardExecutor : MonoBehaviour
 
         FindObjectOfType<ArcLayoutGroup>().UpdateLayout(true);
     }
-    public void UseCard(CardData card, GameObject target)
+    public void UseCard(CardData card, GameObject target, bool isAI)
     {
-        if (!energySystem.HasEnoughEnergy(card.energyCost))
+        if (!isAI)
         {
-            Debug.Log("Not enough energy!");
-            return;
-        }
-        energySystem.UseEnergy(card.energyCost);
+            if (!energySystem.HasEnoughEnergy(card.energyCost))
+            {
+                Debug.Log("Not enough energy!");
+                return;
+            }
 
+            energySystem.UseEnergy(card.energyCost);
+        }
         switch (card.type)
         {
             case CardType.Character:
@@ -120,7 +130,7 @@ public class CardExecutor : MonoBehaviour
         Debug.Log("Clicked card: " + card.data.cardName);
         if (card.data.type == CardType.Energy)
         {
-            UseCard(card.data, null);
+            UseCard(card.data, null, false);
         }
         else
         {
