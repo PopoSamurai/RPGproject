@@ -84,6 +84,9 @@ public class CardView : MonoBehaviour,
     }
     public void OnBeginDrag(PointerEventData eventData)
     {
+        if (WasPlayedOnBoard || CurrentSlot != null)
+            return;
+
         if (data.type == CardType.Attack
          || data.type == CardType.Heal
          || data.type == CardType.BuffAttack)
@@ -120,6 +123,9 @@ public class CardView : MonoBehaviour,
     }
     public void OnEndDrag(PointerEventData eventData)
     {
+        if (WasPlayedOnBoard || CurrentSlot != null)
+            return;
+
         IsDragging = false;
         canvasGroup.blocksRaycasts = true;
 
@@ -200,64 +206,11 @@ public class CardView : MonoBehaviour,
         List<RaycastResult> rayHits = new List<RaycastResult>();
         EventSystem.current.RaycastAll(eventData, rayHits);
 
-        foreach (var hit in rayHits)
-        {
-            var slot = hit.gameObject.GetComponent<BoardSlot>();
-            if (slot != null && slot.owner != SlotOwner.Player)
-            {
-                Debug.Log("WRACAJ");
-                targetSlot = slot;
-                break;
-            }
-        }
         if (targetSlot != null)
         {
             if (!targetSlot.occupied && CurrentSlot == null)
             {
                 CardExecutor.Instance.TryPlayUnitCard(this, targetSlot, true, false);
-            }
-            else if (CurrentSlot != null)
-            {
-                if (targetSlot.owner != SlotOwner.Player)
-                {
-                    ReturnToSlot();
-                    return;
-                }
-                var targetCard = targetSlot.transform.childCount > 0 ?
-                    targetSlot.transform.GetChild(0).GetComponent<CardView>() : null;
-
-                if (targetCard != null)
-                {
-                    if (targetCard.owner != SlotOwner.Player)
-                    {
-                        ReturnToSlot();
-                        return;
-                    }
-                    var oldSlot = CurrentSlot;
-
-                    RectTransform rt1 = GetComponent<RectTransform>();
-                    RectTransform rt2 = targetCard.GetComponent<RectTransform>();
-
-                    rt1.SetParent(targetSlot.transform, false);
-                    rt1.localPosition = Vector3.zero;
-                    rt1.localRotation = Quaternion.identity;
-                    rt1.localScale = Vector3.one;
-
-                    rt2.SetParent(oldSlot.transform, false);
-                    rt2.localPosition = Vector3.zero;
-                    rt2.localRotation = Quaternion.identity;
-                    rt2.localScale = Vector3.one;
-
-                    targetCard.CurrentSlot = oldSlot;
-                    CurrentSlot = targetSlot;
-
-                    oldSlot.occupied = true;
-                    targetSlot.occupied = true;
-                }
-                else
-                {
-                    CardExecutor.Instance.TryPlayUnitCard(this, targetSlot, false, false);
-                }
             }
             else
             {
@@ -289,6 +242,9 @@ public class CardView : MonoBehaviour,
     }
     public void OnDrag(PointerEventData eventData)
     {
+        if (WasPlayedOnBoard || CurrentSlot != null)
+            return;
+
         if (data.type == CardType.Attack
             || data.type == CardType.Heal
             || data.type == CardType.BuffAttack)
