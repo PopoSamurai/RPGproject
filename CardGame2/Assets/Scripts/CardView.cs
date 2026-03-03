@@ -84,6 +84,9 @@ public class CardView : MonoBehaviour,
     }
     public void OnBeginDrag(PointerEventData eventData)
     {
+        if (owner == SlotOwner.Enemy)
+            return;
+
         if (data.type == CardType.Attack
          || data.type == CardType.Heal
          || data.type == CardType.BuffAttack)
@@ -199,82 +202,116 @@ public class CardView : MonoBehaviour,
         BoardSlot targetSlot = null;
         List<RaycastResult> rayHits = new List<RaycastResult>();
         EventSystem.current.RaycastAll(eventData, rayHits);
-
         foreach (var hit in rayHits)
         {
             var slot = hit.gameObject.GetComponent<BoardSlot>();
-            if (slot != null && slot.owner != SlotOwner.Player)
+            if (slot != null && slot.owner == SlotOwner.Player)
             {
                 Debug.Log("WRACAJ");
                 targetSlot = slot;
                 break;
             }
         }
-        if (targetSlot != null)
+        if (targetSlot != null && targetSlot.owner != SlotOwner.Player)
         {
-            if (!targetSlot.occupied && CurrentSlot == null)
+            ReturnToHand();
+            return;
+        }
+        if (targetSlot == null)
+        {
+            if (CurrentSlot != null)
+                ReturnToSlot();
+            else
+                ReturnToHand();
+            return;
+        }
+        // blokada swapa z wrogiem
+        if (targetSlot.owner != SlotOwner.Player)
+        {
+            if (CurrentSlot != null)
+                ReturnToSlot();
+            else
+                ReturnToHand();
+            return;
+        }
+        if (CurrentSlot == null)
+        {
+            if (!targetSlot.occupied)
             {
-                CardExecutor.Instance.TryPlayUnitCard(this, targetSlot, true, false);
-            }
-            else if (CurrentSlot != null)
-            {
-                if (targetSlot.owner != SlotOwner.Player)
-                {
-                    ReturnToSlot();
-                    return;
-                }
-                var targetCard = targetSlot.transform.childCount > 0 ?
-                    targetSlot.transform.GetChild(0).GetComponent<CardView>() : null;
+                bool success = CardExecutor.Instance.TryPlayUnitCard(this, targetSlot, true, false);
 
-                if (targetCard != null)
-                {
-                    if (targetCard.owner != SlotOwner.Player)
-                    {
-                        ReturnToSlot();
-                        return;
-                    }
-                    var oldSlot = CurrentSlot;
-
-                    RectTransform rt1 = GetComponent<RectTransform>();
-                    RectTransform rt2 = targetCard.GetComponent<RectTransform>();
-
-                    rt1.SetParent(targetSlot.transform, false);
-                    rt1.localPosition = Vector3.zero;
-                    rt1.localRotation = Quaternion.identity;
-                    rt1.localScale = Vector3.one;
-
-                    rt2.SetParent(oldSlot.transform, false);
-                    rt2.localPosition = Vector3.zero;
-                    rt2.localRotation = Quaternion.identity;
-                    rt2.localScale = Vector3.one;
-
-                    targetCard.CurrentSlot = oldSlot;
-                    CurrentSlot = targetSlot;
-
-                    oldSlot.occupied = true;
-                    targetSlot.occupied = true;
-                }
-                else
-                {
-                    CardExecutor.Instance.TryPlayUnitCard(this, targetSlot, false, false);
-                }
+                if (!success)
+                    ReturnToHand();
             }
             else
             {
                 ReturnToHand();
             }
+            return;
+        }
+        if (targetSlot == CurrentSlot)
+        {
+            ReturnToSlot();
+            return;
+        }
+        if (!targetSlot.occupied)
+        {
+            MoveToSlot(targetSlot);
+            return;
+        }
+        CardView otherCard =
+            targetSlot.transform.GetChild(0).GetComponent<CardView>();
+
+        if (otherCard != null && otherCard.owner == SlotOwner.Player)
+        {
+            SwapWith(otherCard);
         }
         else
         {
-            if (CurrentSlot != null)
-            {
-                ReturnToSlot();
-            }
-            else
-            {
-                ReturnToHand();
-            }
+            ReturnToSlot();
         }
+    }
+    void MoveToSlot(BoardSlot newSlot)
+    {
+        CurrentSlot.occupied = false;
+
+        RectTransform rt = GetComponent<RectTransform>();
+        rt.SetParent(newSlot.transform, true);
+
+        rt.localScale = Vector3.one;
+        rt.localPosition = Vector3.zero;
+
+        newSlot.occupied = true;
+        CurrentSlot = newSlot;
+    }
+    void SwapWith(CardView other)
+    {
+        if (other.owner != SlotOwner.Player)
+            return;
+
+        if (other.CurrentSlot.owner != SlotOwner.Player)
+            return;
+
+        BoardSlot mySlot = CurrentSlot;
+        BoardSlot otherSlot = other.CurrentSlot;
+
+        RectTransform myRT = GetComponent<RectTransform>();
+        RectTransform otherRT = other.GetComponent<RectTransform>();
+
+        myRT.SetParent(otherSlot.transform, true);
+        otherRT.SetParent(mySlot.transform, true);
+
+        myRT.localScale = Vector3.one;
+        otherRT.localScale = Vector3.one;
+
+        myRT.localPosition = Vector3.zero;
+        otherRT.localPosition = Vector3.zero;
+
+        CurrentSlot = otherSlot;
+        other.CurrentSlot = mySlot;
+
+        mySlot.occupied = true;
+        otherSlot.occupied = true;
     }
     bool IsOutsideHand()
     {
@@ -289,6 +326,9 @@ public class CardView : MonoBehaviour,
     }
     public void OnDrag(PointerEventData eventData)
     {
+        if (owner == SlotOwner.Enemy)
+            return;
+
         if (data.type == CardType.Attack
             || data.type == CardType.Heal
             || data.type == CardType.BuffAttack)
