@@ -9,9 +9,9 @@ public class CardExecutor : MonoBehaviour
     }
     public bool TryPlayUnitCard(CardView cardView, BoardSlot slot, bool isFirstTime, bool isAI)
     {
-        if (!isAI && slot.owner == SlotOwner.Enemy)
+        if (!isAI && (slot.owner == SlotOwner.Enemy || cardView.owner != SlotOwner.Player))
         {
-            Debug.Log("Player tried to play on enemy slot");
+            Debug.Log("X INVALID PLAY");
             return false;
         }
         var card = cardView.data;

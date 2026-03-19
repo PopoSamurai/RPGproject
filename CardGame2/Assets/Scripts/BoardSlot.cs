@@ -23,7 +23,15 @@ public class BoardSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPoi
         var cardView = eventData.pointerDrag?.GetComponent<CardView>();
 
         if (cardView == null) return;
-        if (cardView.WasPlayedOnBoard) return;
+
+        if (cardView.owner != SlotOwner.Player)
+            return;
+
+        if (owner != SlotOwner.Player)
+        {
+            cardView.ReturnToSlot();
+            return;
+        }
 
         if (cardView.IsDragging)
             return;

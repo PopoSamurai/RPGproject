@@ -39,8 +39,13 @@ public class CardView : MonoBehaviour,
 
     private int dragStartIndex = -1;
     private BoardLane dragStartLane;
+    public bool IsLocked => owner == SlotOwner.Enemy;
     void Awake()
     {
+        if (owner == SlotOwner.Enemy && canvasGroup != null)
+        {
+            canvasGroup.blocksRaycasts = false;
+        }
         AttachedUnit = GetComponent<Unit>();
         canvasGroup = GetComponent<CanvasGroup>();
         mainCanvas = FindObjectOfType<Canvas>();
@@ -87,8 +92,14 @@ public class CardView : MonoBehaviour,
     }
     public void OnBeginDrag(PointerEventData eventData)
     {
-        if (owner == SlotOwner.Enemy)
+        if (owner != SlotOwner.Player)
+        {
+            IsDragging = false;
+
+            if (canvasGroup != null)
+                canvasGroup.blocksRaycasts = true;
             return;
+        }
 
         if (data.type == CardType.Attack
          || data.type == CardType.Heal
@@ -131,6 +142,11 @@ public class CardView : MonoBehaviour,
     }
     public void OnEndDrag(PointerEventData eventData)
     {
+        if (owner != SlotOwner.Player)
+        {
+            ReturnToSlot();
+            return;
+        }
         IsDragging = false;
         canvasGroup.blocksRaycasts = true;
 
@@ -265,6 +281,11 @@ public class CardView : MonoBehaviour,
         }
         if (targetCard != null && !shouldInsertBetween)
         {
+            if (targetCard.owner == SlotOwner.Enemy)
+            {
+                ReturnToSlot();
+                return;
+            }
             SwapCards(this, targetCard);
             return;
         }
@@ -276,6 +297,16 @@ public class CardView : MonoBehaviour,
     }
     void SwapCards(CardView a, CardView b)
     {
+        if (a.owner == SlotOwner.Enemy || b.owner == SlotOwner.Enemy)
+        {
+            a.ReturnToSlot();
+            return;
+        }
+        if (a.IsLocked || b.IsLocked)
+        {
+            a.ReturnToSlot();
+            return;
+        }
         var slotA = a.CurrentSlot;
         var slotB = b.CurrentSlot;
 
@@ -313,7 +344,7 @@ public class CardView : MonoBehaviour,
     }
     public void OnDrag(PointerEventData eventData)
     {
-        if (owner == SlotOwner.Enemy)
+        if (owner != SlotOwner.Player)
             return;
 
         if (data.type == CardType.Attack
