@@ -9,28 +9,48 @@ public class BoardSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPoi
 {
     public bool occupied;
     public SlotOwner owner;
+
+    public BoardLane line;
+    public int indexInLine; // 0 = front, 2 = back
+
+    void Start()
+    {
+        if (line == null)
+            Debug.LogError($"{name} has NO LINE!");
+    }
     public void OnDrop(PointerEventData eventData)
     {
         var cardView = eventData.pointerDrag?.GetComponent<CardView>();
+
         if (cardView == null) return;
+        if (cardView.WasPlayedOnBoard) return;
 
-        if (cardView.WasPlayedOnBoard)
+        if (cardView.IsDragging)
             return;
-
         if (cardView.data.type != CardType.Character)
         {
             cardView.WasPlayedOnBoard = false;
             return;
         }
-
-        if (occupied)
+        BoardLane line = GetComponentInParent<BoardLane>();
+        if (line == null)
         {
+            Debug.LogError("[OnDrop] Slot nie nale¿y do ¿adnej linii!");
             cardView.ReturnToHand();
             return;
         }
-
-        bool firstTime = cardView.CurrentSlot == null;
-        bool success = CardExecutor.Instance.TryPlayUnitCard(cardView, this, firstTime, false);
+        if (occupied)
+        {
+            Debug.Log("Slot occupied!");
+            cardView.ReturnToHand();
+            return;
+        }
+        bool success = CardExecutor.Instance.TryPlayUnitCard(
+            cardView,
+            this,
+            true,
+            false
+        ); 
 
         if (!success)
             cardView.ReturnToHand();

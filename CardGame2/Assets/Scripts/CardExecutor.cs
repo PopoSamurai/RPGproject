@@ -26,11 +26,6 @@ public class CardExecutor : MonoBehaviour
             Debug.Log("FAIL: not enough energy");
             return false;
         }
-        if (slot.occupied)
-        {
-            Debug.Log("FAIL: slot occupied");
-            return false;
-        }
         if (isFirstTime)
         {
             if (!isAI)
@@ -45,7 +40,6 @@ public class CardExecutor : MonoBehaviour
                 cardView.AttachedUnit = unit;
             }
         }
-        PlaceCardOnSlot(cardView, slot);
 
         if (cardView.CurrentSlot != null && cardView.CurrentSlot != slot)
             cardView.CurrentSlot.occupied = false;
@@ -53,19 +47,23 @@ public class CardExecutor : MonoBehaviour
         cardView.CurrentSlot = slot;
         cardView.UpdateStatsUI();
 
-        var boardTarget = cardView.gameObject.GetComponent<BoardTarget>();
+        var boardTarget = cardView.GetComponent<BoardTarget>();
         if (boardTarget == null)
             boardTarget = cardView.gameObject.AddComponent<BoardTarget>();
 
-        GameObject snap = new GameObject("SnapPoint");
-        snap.transform.SetParent(cardView.transform, false);
-        RectTransform snapRT = snap.AddComponent<RectTransform>();
-        snapRT.anchorMin = new Vector2(0.5f, 1f);
-        snapRT.anchorMax = new Vector2(0.5f, 1f);
-        snapRT.pivot = new Vector2(0.5f, 0.5f);
-        snapRT.anchoredPosition = new Vector2(0, 20f);
-        boardTarget.snapPoint = snapRT;
+        if (boardTarget.snapPoint == null)
+        {
+            GameObject snap = new GameObject("SnapPoint");
+            snap.transform.SetParent(cardView.transform, false);
 
+            RectTransform snapRT = snap.AddComponent<RectTransform>();
+            snapRT.anchorMin = new Vector2(0.5f, 1f);
+            snapRT.anchorMax = new Vector2(0.5f, 1f);
+            snapRT.pivot = new Vector2(0.5f, 0.5f);
+            snapRT.anchoredPosition = new Vector2(0, 20f);
+
+            boardTarget.snapPoint = snapRT;
+        }
         PlaceCardOnSlot(cardView, slot);
         cardView.UpdateStatsUI();
         return true;
@@ -77,9 +75,9 @@ public class CardExecutor : MonoBehaviour
 
         RectTransform rt = cardView.GetComponent<RectTransform>();
         rt.SetParent(slot.transform, false);
+        rt.localScale = Vector3.one;
         rt.localPosition = Vector3.zero;
         rt.localRotation = Quaternion.identity;
-        rt.localScale = Vector3.one;
 
         cardView.IsDragging = false;
         cardView.WasPlayedOnBoard = true;

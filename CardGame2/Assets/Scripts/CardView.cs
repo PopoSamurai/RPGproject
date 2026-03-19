@@ -36,6 +36,9 @@ public class CardView : MonoBehaviour,
     [HideInInspector]
     public BoardSlot CurrentSlot;
     public SlotOwner owner;
+
+    private int dragStartIndex = -1;
+    private BoardLane dragStartLane;
     void Awake()
     {
         AttachedUnit = GetComponent<Unit>();
@@ -108,6 +111,11 @@ public class CardView : MonoBehaviour,
         transform.rotation = Quaternion.identity;
         canvasGroup.blocksRaycasts = false;
 
+        dragStartLane = CurrentSlot?.line;
+        dragStartIndex = dragStartLane != null
+            ? dragStartLane.GetCardIndex(this)
+            : -1;
+
         var hover = GetComponent<CardHoverUI>();
         if (hover) hover.enabled = false;
     }
@@ -129,7 +137,6 @@ public class CardView : MonoBehaviour,
         if (data.type == CardType.Attack || data.type == CardType.Heal || data.type == CardType.BuffAttack)
         {
             CardTargetLine.Instance.StopLine();
-
             var targetGO = TargetDetector.Instance.CurrentTarget;
             if (targetGO == null)
             {
@@ -199,25 +206,20 @@ public class CardView : MonoBehaviour,
                 return;
             }
         }
-        BoardSlot targetSlot = null;
+        BoardLane targetLane = null;
         List<RaycastResult> rayHits = new List<RaycastResult>();
         EventSystem.current.RaycastAll(eventData, rayHits);
+
         foreach (var hit in rayHits)
         {
-            var slot = hit.gameObject.GetComponent<BoardSlot>();
-            if (slot != null && slot.owner == SlotOwner.Player)
+            var lane = hit.gameObject.GetComponentInParent<BoardLane>();
+            if (lane != null && lane.owner == SlotOwner.Player)
             {
-                Debug.Log("WRACAJ");
-                targetSlot = slot;
+                targetLane = lane;
                 break;
             }
         }
-        if (targetSlot != null && targetSlot.owner != SlotOwner.Player)
-        {
-            ReturnToHand();
-            return;
-        }
-        if (targetSlot == null)
+        if (targetLane == null)
         {
             if (CurrentSlot != null)
                 ReturnToSlot();
@@ -225,8 +227,7 @@ public class CardView : MonoBehaviour,
                 ReturnToHand();
             return;
         }
-        // blokada swapa z wrogiem
-        if (targetSlot.owner != SlotOwner.Player)
+        if (targetLane.IsFull())
         {
             if (CurrentSlot != null)
                 ReturnToSlot();
@@ -234,84 +235,70 @@ public class CardView : MonoBehaviour,
                 ReturnToHand();
             return;
         }
+        int insertIndex = targetLane.GetInsertIndex(transform.position);
+        BoardSlot targetSlot = targetLane.slots[insertIndex];
+        float dist = Mathf.Abs(transform.position.x - targetSlot.transform.position.x);
+        bool isOnSlotCenter = dist < 30f;
+        bool shouldInsertBetween = !isOnSlotCenter;
+        BoardLane oldLane = CurrentSlot?.line;
+
+        var targetCard = targetSlot.transform.childCount > 0
+            ? targetSlot.transform.GetChild(0).GetComponent<CardView>()
+            : null;
+
         if (CurrentSlot == null)
         {
-            if (!targetSlot.occupied)
-            {
-                bool success = CardExecutor.Instance.TryPlayUnitCard(this, targetSlot, true, false);
+            bool success = CardExecutor.Instance.TryPlayUnitCard(
+                this,
+                targetLane.slots[0],
+                true,
+                false
+            );
 
-                if (!success)
-                    ReturnToHand();
-            }
-            else
+            if (!success)
             {
                 ReturnToHand();
+                return;
             }
+            targetLane.InsertCard(this, insertIndex);
             return;
         }
-        if (targetSlot == CurrentSlot)
+        if (targetCard != null && !shouldInsertBetween)
         {
-            ReturnToSlot();
+            SwapCards(this, targetCard);
             return;
         }
-        if (!targetSlot.occupied)
-        {
-            MoveToSlot(targetSlot);
-            return;
-        }
-        CardView otherCard =
-            targetSlot.transform.GetChild(0).GetComponent<CardView>();
+        if (CurrentSlot != null)
+            CurrentSlot.occupied = false;
 
-        if (otherCard != null && otherCard.owner == SlotOwner.Player)
-        {
-            SwapWith(otherCard);
-        }
-        else
-        {
-            ReturnToSlot();
-        }
+        oldLane?.CompactLine();
+        targetLane.InsertCard(this, insertIndex);
     }
-    void MoveToSlot(BoardSlot newSlot)
+    void SwapCards(CardView a, CardView b)
     {
-        CurrentSlot.occupied = false;
+        var slotA = a.CurrentSlot;
+        var slotB = b.CurrentSlot;
 
-        RectTransform rt = GetComponent<RectTransform>();
-        rt.SetParent(newSlot.transform, true);
+        if (slotA == null || slotB == null) return;
 
-        rt.localScale = Vector3.one;
-        rt.localPosition = Vector3.zero;
+        var rtA = a.GetComponent<RectTransform>();
+        var rtB = b.GetComponent<RectTransform>();
 
-        newSlot.occupied = true;
-        CurrentSlot = newSlot;
-    }
-    void SwapWith(CardView other)
-    {
-        if (other.owner != SlotOwner.Player)
-            return;
+        rtA.SetParent(slotB.transform, false);
+        rtB.SetParent(slotA.transform, false);
 
-        if (other.CurrentSlot.owner != SlotOwner.Player)
-            return;
+        rtA.localPosition = Vector3.zero;
+        rtB.localPosition = Vector3.zero;
+        rtA.localScale = Vector3.one;
+        rtB.localScale = Vector3.one;
 
-        BoardSlot mySlot = CurrentSlot;
-        BoardSlot otherSlot = other.CurrentSlot;
+        a.CurrentSlot = slotB;
+        b.CurrentSlot = slotA;
 
-        RectTransform myRT = GetComponent<RectTransform>();
-        RectTransform otherRT = other.GetComponent<RectTransform>();
+        slotA.occupied = true;
+        slotB.occupied = true;
 
-        myRT.SetParent(otherSlot.transform, true);
-        otherRT.SetParent(mySlot.transform, true);
-
-        myRT.localScale = Vector3.one;
-        otherRT.localScale = Vector3.one;
-
-        myRT.localPosition = Vector3.zero;
-        otherRT.localPosition = Vector3.zero;
-
-        CurrentSlot = otherSlot;
-        other.CurrentSlot = mySlot;
-
-        mySlot.occupied = true;
-        otherSlot.occupied = true;
+        Debug.Log($"[SWAP] {a.name} <-> {b.name}");
     }
     bool IsOutsideHand()
     {

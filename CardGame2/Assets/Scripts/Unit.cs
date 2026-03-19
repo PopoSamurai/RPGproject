@@ -1,10 +1,20 @@
+using System.Collections;
 using UnityEngine;
 public class Unit : MonoBehaviour
 {
     public CardData sourceCard;
     public int maxHP;
     public int currentHP;
-    public int attack;
+    public int attack; 
+    public int counter;
+    public int baseCounter = 3;
+    public bool IsReady => counter <= 0;
+    public void Tick()
+    {
+        counter--;
+
+        Debug.Log($"{name} counter = {counter}");
+    }
     public void Init(CardData data)
     {
         sourceCard = data;
@@ -30,9 +40,49 @@ public class Unit : MonoBehaviour
         attack += amount;
         Debug.Log("Dodaj atak" + attack);
     }
+    public void PerformAttack()
+    {
+        var card = GetComponent<CardView>();
+        if (card == null || card.CurrentSlot == null) return;
+
+        var target = BoardSystem.Instance.GetFrontTarget(card.CurrentSlot);
+
+        if (target != null)
+        {
+            target.TakeDamage(attack);
+            Debug.Log($"{name} attacks {target.name} for {attack}");
+        }
+    }
     void Die()
     {
-        Debug.Log($"[UNIT] {name} died");
+        var card = GetComponent<CardView>();
+
+        if (card != null && card.CurrentSlot != null)
+        {
+            var slot = card.CurrentSlot;
+
+            if (slot.line != null)
+            {
+                slot.line.HandleUnitDeath(slot.indexInLine);
+            }
+            else
+            {
+                Debug.LogError("LINE STILL NULL!");
+            }
+        }
+        StartCoroutine(DieRoutine());
+        Destroy(gameObject);
+    }
+    IEnumerator DieRoutine()
+    {
+        yield return new WaitForSeconds(0.2f);
+        var card = GetComponent<CardView>();
+
+        if (card != null && card.CurrentSlot != null)
+        {
+            var slot = card.CurrentSlot;
+            slot.line?.HandleUnitDeath(slot.indexInLine);
+        }
         Destroy(gameObject);
     }
 }

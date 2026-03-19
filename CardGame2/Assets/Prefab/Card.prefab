@@ -1184,8 +1184,8 @@ RectTransform:
   - {fileID: 2932104052729579962}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 215.7194, y: 297}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -1254,6 +1254,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   data: {fileID: 0}
+  AttachedUnit: {fileID: 0}
   artworkImage: {fileID: 7766246429649492338}
   nameText: {fileID: 9211422261419573608}
   costText: {fileID: 5441185535090104953}
@@ -1263,6 +1264,8 @@ MonoBehaviour:
   attackText: {fileID: 4664291390990643777}
   effectText: {fileID: 9146676079097993076}
   WasPlayedOnBoard: 0
+  CurrentSlot: {fileID: 0}
+  owner: 0
 --- !u!225 &2111089405660164234
 CanvasGroup:
   m_ObjectHideFlags: 0
