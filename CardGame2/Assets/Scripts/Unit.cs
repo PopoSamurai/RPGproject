@@ -9,6 +9,7 @@ public class Unit : MonoBehaviour
     public int counter;
     public int baseCounter = 3;
     public bool IsReady => counter <= 0;
+    public bool isDead = false;
     public void Tick()
     {
         counter--;
@@ -55,27 +56,15 @@ public class Unit : MonoBehaviour
     }
     void Die()
     {
-        var card = GetComponent<CardView>();
+        if (isDead) return;
+        isDead = true;
 
-        if (card != null && card.CurrentSlot != null)
-        {
-            var slot = card.CurrentSlot;
-
-            if (slot.line != null)
-            {
-                slot.line.HandleUnitDeath(slot.indexInLine);
-            }
-            else
-            {
-                Debug.LogError("LINE STILL NULL!");
-            }
-        }
         StartCoroutine(DieRoutine());
-        Destroy(gameObject);
     }
     IEnumerator DieRoutine()
     {
         yield return new WaitForSeconds(0.2f);
+
         var card = GetComponent<CardView>();
 
         if (card != null && card.CurrentSlot != null)
@@ -83,6 +72,7 @@ public class Unit : MonoBehaviour
             var slot = card.CurrentSlot;
             slot.line?.HandleUnitDeath(slot.indexInLine);
         }
+
         Destroy(gameObject);
     }
 }

@@ -20,6 +20,7 @@ public class CardView : MonoBehaviour,
     [Header("Groups")]
     public GameObject HPStat;
     public GameObject AttackStat;
+    public GameObject EnergyStat;
     public Text hpText;
     public Text attackText;
     public Text effectText;
@@ -46,6 +47,7 @@ public class CardView : MonoBehaviour,
         {
             canvasGroup.blocksRaycasts = false;
         }
+        if (owner == SlotOwner.Enemy) EnergyStat.SetActive(false);
         AttachedUnit = GetComponent<Unit>();
         canvasGroup = GetComponent<CanvasGroup>();
         mainCanvas = FindObjectOfType<Canvas>();
@@ -243,14 +245,7 @@ public class CardView : MonoBehaviour,
                 ReturnToHand();
             return;
         }
-        if (targetLane.IsFull())
-        {
-            if (CurrentSlot != null)
-                ReturnToSlot();
-            else
-                ReturnToHand();
-            return;
-        }
+
         int insertIndex = targetLane.GetInsertIndex(transform.position);
         BoardSlot targetSlot = targetLane.slots[insertIndex];
         float dist = Mathf.Abs(transform.position.x - targetSlot.transform.position.x);
@@ -287,6 +282,11 @@ public class CardView : MonoBehaviour,
                 return;
             }
             SwapCards(this, targetCard);
+            return;
+        }
+        if (targetLane.IsFull())
+        {
+            ReturnToSlot();
             return;
         }
         if (CurrentSlot != null)

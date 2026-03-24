@@ -46,7 +46,7 @@ public class BoardLane : MonoBehaviour
             if (slot.transform.childCount > 0)
             {
                 var card = slot.transform.GetChild(0).GetComponent<CardView>();
-                if (card != null && card.owner == SlotOwner.Player)
+                if (card != null && card.owner == SlotOwner.Player || card.owner == SlotOwner.Enemy)
                     cards.Add(card);
             }
             slot.occupied = false;
