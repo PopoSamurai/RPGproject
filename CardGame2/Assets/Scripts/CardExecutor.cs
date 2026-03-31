@@ -36,15 +36,21 @@ public class CardExecutor : MonoBehaviour
             if (unit == null)
             {
                 unit = cardView.gameObject.AddComponent<Unit>();
-                unit.Init(card);
-                cardView.AttachedUnit = unit;
             }
+            unit.Init(card);
+            cardView.BindUnit(unit);
         }
-
         if (cardView.CurrentSlot != null && cardView.CurrentSlot != slot)
             cardView.CurrentSlot.occupied = false;
 
         cardView.CurrentSlot = slot;
+
+        var unit1 = cardView.AttachedUnit;
+        if (unit1 != null)
+        {
+            unit1.CurrentSlot = slot;
+            unit1.owner = cardView.owner;
+        }
         cardView.UpdateStatsUI();
 
         var boardTarget = cardView.GetComponent<BoardTarget>();

@@ -1,14 +1,37 @@
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+
+[System.Serializable]
+public class EnemySpawn
+{
+    public CardData unit;
+    public int turn;
+    public int laneIndex;
+    public bool isLeader;
+}
 public class BattleSystem : MonoBehaviour
 {
     public static BattleSystem Instance;
+    public CardData playerLeaderData;
+    public BoardSlot playerLeaderSlot;
+
+    public GameObject playerCardPrefab;
+    public GameObject enemyCardPrefab;
+
+    public List<EnemySpawn> enemySpawns;
+    private int currentTurn = 0;
 
     void Awake()
     {
         Instance = this;
+        StartBattle();
     }
-
+    public void StartBattle()
+    {
+        SpawnPlayerLeader();
+    }
     public void ExecuteTurn()
     {
         StartCoroutine(TurnRoutine());
@@ -22,41 +45,41 @@ public class BattleSystem : MonoBehaviour
             unit.Tick();
         }
     }
-    IEnumerator ResolveAttacks()
+    IEnumerator ResolveCombatLoop()
     {
-        foreach (var line in BoardSystem.Instance.playerLines)
+        Debug.Log("[COMBAT] START");
+
+        while (true)
         {
-            foreach (var slot in line.slots)
+            var readyUnits = FindObjectsOfType<Unit>()
+                .Where(u => u.IsReady && !u.isDead && u.CurrentSlot != null)
+                .OrderBy(u => u.CurrentSlot.line.laneIndex)
+                .ThenBy(u => u.CurrentSlot.indexInLine)
+                .ToList();
+
+            if (readyUnits.Count == 0)
+                break;
+
+            foreach (var unit in readyUnits)
             {
-                if (!slot.occupied) continue;
+                Debug.Log($"[COMBAT] {unit.name} attacks");
+                yield return StartCoroutine(unit.PerformAttackRoutine());
 
-                var unit = slot.GetComponentInChildren<Unit>();
-
-                if (unit != null && unit.IsReady)
-                {
-                    unit.PerformAttack();
-                    unit.counter = unit.baseCounter;
-
-                    yield return new WaitForSeconds(0.2f);
-                }
+                unit.counter = unit.baseCounter;
+                unit.IsReady = false;
+                yield return new WaitForSeconds(0.2f);
             }
         }
-        foreach (var line in BoardSystem.Instance.enemyLines)
+    }
+    public void OnLeaderDied(Unit leader)
+    {
+        if (leader.owner == SlotOwner.Player)
         {
-            foreach (var slot in line.slots)
-            {
-                if (!slot.occupied) continue;
-
-                var unit = slot.GetComponentInChildren<Unit>();
-
-                if (unit != null && unit.IsReady)
-                {
-                    unit.PerformAttack();
-                    unit.counter = unit.baseCounter;
-
-                    yield return new WaitForSeconds(0.2f);
-                }
-            }
+            Debug.Log("PLAYER LOSES");
+        }
+        else
+        {
+            Debug.Log("PLAYER WINS");
         }
     }
     void CleanupBoard()
@@ -69,17 +92,94 @@ public class BattleSystem : MonoBehaviour
     }
     public IEnumerator TurnRoutine()
     {
-        // Tick counterów
+        currentTurn++;
+        SpawnEnemiesForTurn();
         TickAllUnits();
 
         yield return new WaitForSeconds(0.3f);
+        yield return StartCoroutine(ResolveCombatLoop());
+    }
+    void SpawnEnemiesForTurn()
+    {
+        foreach (var spawn in enemySpawns)
+        {
+            if (spawn.turn == currentTurn)
+            {
+                var lane = BoardSystem.Instance.enemyLines[spawn.laneIndex];
+                var slot = lane.GetFirstFreeSlot();
 
-        // Ataki
-        yield return StartCoroutine(ResolveAttacks());
+                if (slot != null)
+                {
+                    SpawnEnemy(spawn, slot);
+                }
+            }
+        }
+    }
+    void SpawnEnemy(EnemySpawn spawn, BoardSlot slot)
+    {
+        var go = Instantiate(enemyCardPrefab);
 
-        yield return new WaitForSeconds(0.3f);
+        var unit = go.GetComponentInChildren<Unit>();
+        var view = go.GetComponentInChildren<CardView>();
 
-        // Cleanup (œmierci + przesuniêcia)
-        CleanupBoard();
+        view.Init(spawn.unit);
+        unit.Init(spawn.unit);
+        view.BindUnit(unit);
+
+        unit.owner = SlotOwner.Enemy;
+        unit.isLeader = spawn.isLeader;
+        CardExecutor.Instance.TryPlayUnitCard(view, slot, true, true);
+
+        slot.line?.Collapse();
+    }
+    void SpawnPlayerLeader()
+    {
+        SpawnLeader(playerLeaderData, playerLeaderSlot, SlotOwner.Player);
+        playerLeaderSlot.line?.Collapse();
+    }
+    void SpawnLeader(CardData data, BoardSlot slot, SlotOwner owner)
+    {
+        GameObject prefab = owner == SlotOwner.Player
+            ? playerCardPrefab
+            : enemyCardPrefab;
+
+        if (prefab == null)
+        {
+            Debug.LogError("Prefab jest NULL!");
+            return;
+        }
+        if (slot == null)
+        {
+            Debug.LogError("Slot lidera jest NULL!");
+            return;
+        }
+        if (data == null)
+        {
+            Debug.LogError("CardData lidera jest NULL!");
+            return;
+        }
+        var go = Instantiate(prefab);
+        var unit = go.GetComponentInChildren<Unit>(true);
+        var view = go.GetComponentInChildren<CardView>();
+        Debug.Log($"SpawnLeader prefab name: {prefab?.name}");
+        if (unit == null)
+        {
+            Debug.LogError($"Prefab {prefab.name} NIE MA komponentu Unit!");
+            Destroy(go);
+            return;
+        }
+        if (view == null)
+        {
+            Debug.LogError($"Prefab {prefab.name} NIE MA komponentu CardView!");
+            Destroy(go);
+            return;
+        }
+        view.Init(data);
+        unit.Init(data);
+        view.BindUnit(unit);
+        unit.isLeader = true;
+        unit.owner = owner;
+        CardExecutor.Instance.TryPlayUnitCard(view, slot, true, true);
+        slot.line?.Collapse();
     }
 }

@@ -48,9 +48,13 @@ public class CardView : MonoBehaviour,
             canvasGroup.blocksRaycasts = false;
         }
         if (owner == SlotOwner.Enemy) EnergyStat.SetActive(false);
-        AttachedUnit = GetComponent<Unit>();
         canvasGroup = GetComponent<CanvasGroup>();
         mainCanvas = FindObjectOfType<Canvas>();
+    }
+    public void BindUnit(Unit unit)
+    {
+        AttachedUnit = unit;
+        UpdateStatsUI();
     }
     public void ReturnToSlot()
     {
@@ -94,6 +98,9 @@ public class CardView : MonoBehaviour,
     }
     public void OnBeginDrag(PointerEventData eventData)
     {
+        if (!TurnManager.Instance.IsPlayerTurn)
+            return;
+
         if (owner != SlotOwner.Player)
         {
             IsDragging = false;
@@ -134,16 +141,19 @@ public class CardView : MonoBehaviour,
     }
     public void UpdateStatsUI()
     {
-        if (AttachedUnit != null)
-        {
-            if (attackText != null)
-                attackText.text = AttachedUnit.attack.ToString();
-            if (hpText != null)
-                hpText.text = AttachedUnit.currentHP.ToString();
-        }
+        if (AttachedUnit == null) return;
+
+        attackText.text = AttachedUnit.attack.ToString();
+        hpText.text = AttachedUnit.currentHP.ToString();
     }
     public void OnEndDrag(PointerEventData eventData)
     {
+        if (!TurnManager.Instance.IsPlayerTurn)
+        {
+            ReturnToSlot();
+            return;
+        }
+
         if (owner != SlotOwner.Player)
         {
             ReturnToSlot();
@@ -259,6 +269,12 @@ public class CardView : MonoBehaviour,
 
         if (CurrentSlot == null)
         {
+            if (targetLane.IsFull())
+            {
+                ReturnToHand();
+                return;
+            }
+
             bool success = CardExecutor.Instance.TryPlayUnitCard(
                 this,
                 targetLane.slots[0],
@@ -271,6 +287,7 @@ public class CardView : MonoBehaviour,
                 ReturnToHand();
                 return;
             }
+
             targetLane.InsertCard(this, insertIndex);
             return;
         }
@@ -310,6 +327,12 @@ public class CardView : MonoBehaviour,
         var slotA = a.CurrentSlot;
         var slotB = b.CurrentSlot;
 
+        var unitA = a.AttachedUnit;
+        var unitB = b.AttachedUnit;
+
+        if (unitA != null) unitA.CurrentSlot = slotB;
+        if (unitB != null) unitB.CurrentSlot = slotA;
+
         if (slotA == null || slotB == null) return;
 
         var rtA = a.GetComponent<RectTransform>();
@@ -344,6 +367,9 @@ public class CardView : MonoBehaviour,
     }
     public void OnDrag(PointerEventData eventData)
     {
+        if (!TurnManager.Instance.IsPlayerTurn)
+            return;
+
         if (owner != SlotOwner.Player)
             return;
 

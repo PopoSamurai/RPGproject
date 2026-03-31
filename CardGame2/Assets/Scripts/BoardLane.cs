@@ -5,9 +5,24 @@ public class BoardLane : MonoBehaviour
 {
     public List<BoardSlot> slots = new List<BoardSlot>();
     public SlotOwner owner;
+    public int laneIndex;
+    public int CompareTo(BoardLane other)
+    {
+        return laneIndex.CompareTo(other.laneIndex);
+    }
     void Awake()
     {
         slots.Clear();
+        var parent = transform.parent;
+
+        for (int i = 0; i < parent.childCount; i++)
+        {
+            if (parent.GetChild(i) == transform)
+            {
+                laneIndex = i;
+                break;
+            }
+        }
         for (int i = 0; i < transform.childCount; i++)
         {
             var slot = transform.GetChild(i).GetComponent<BoardSlot>();
@@ -41,41 +56,40 @@ public class BoardLane : MonoBehaviour
     public void CompactLine()
     {
         List<CardView> cards = new List<CardView>();
+
         foreach (var slot in slots)
         {
             if (slot.transform.childCount > 0)
             {
                 var card = slot.transform.GetChild(0).GetComponent<CardView>();
-                if (card != null && card.owner == SlotOwner.Player || card.owner == SlotOwner.Enemy)
+
+                if (card != null && (card.owner == SlotOwner.Player || card.owner == SlotOwner.Enemy))
                     cards.Add(card);
             }
+
             slot.occupied = false;
         }
-        int playerIndex = 0;
+        int index = 0;
 
         for (int i = 0; i < slots.Count; i++)
         {
+            if (index >= cards.Count)
+                break;
+
             var slot = slots[i];
+            var card = cards[index++];
 
-            if (slot.transform.childCount > 0)
-            {
-                var existing = slot.transform.GetChild(0).GetComponent<CardView>();
-                if (existing != null && existing.owner == SlotOwner.Enemy)
-                {
-                    existing.CurrentSlot = slot;
-                    slot.occupied = true;
-                    continue;
-                }
-            }
-            if (playerIndex >= cards.Count)
-                continue;
-
-            var card = cards[playerIndex++];
             card.CurrentSlot = slot;
+
+            var unit = card.AttachedUnit;
+            if (unit != null)
+            {
+                unit.CurrentSlot = slot;
+            }
             slot.occupied = true;
 
             var rt = card.GetComponent<RectTransform>();
-            rt.SetParent(slot.transform);
+            rt.SetParent(slot.transform, false);
             rt.localPosition = Vector3.zero;
             rt.localRotation = Quaternion.identity;
             rt.localScale = Vector3.one;
@@ -84,6 +98,7 @@ public class BoardLane : MonoBehaviour
     public void Collapse()
     {
         List<CardView> cards = new List<CardView>();
+
         foreach (var slot in slots)
         {
             if (slot.transform.childCount > 0)
@@ -92,22 +107,30 @@ public class BoardLane : MonoBehaviour
                 if (card != null)
                     cards.Add(card);
             }
+        }
+        foreach (var slot in slots)
+        {
             slot.occupied = false;
         }
-
         for (int i = 0; i < cards.Count; i++)
         {
-            var targetSlot = slots[i];
             var card = cards[i];
+            var slot = slots[i];
 
-            card.CurrentSlot = targetSlot;
-            targetSlot.occupied = true;
-
-            var rt = card.GetComponent<RectTransform>();
-            rt.SetParent(targetSlot.transform, false);
-            rt.anchoredPosition = Vector2.zero;
+            RectTransform rt = card.GetComponent<RectTransform>();
+            rt.SetParent(slot.transform, false);
+            rt.localPosition = Vector3.zero;
             rt.localRotation = Quaternion.identity;
             rt.localScale = Vector3.one;
+
+            slot.occupied = true;
+            card.CurrentSlot = slot;
+
+            var unit = card.AttachedUnit;
+            if (unit != null)
+            {
+                unit.CurrentSlot = slot;
+            }
         }
     }
     public int GetInsertIndex(Vector3 worldPos)
@@ -176,6 +199,12 @@ public class BoardLane : MonoBehaviour
 
             var c = cards[playerIndex++];
             c.CurrentSlot = slot;
+
+            var unit = c.AttachedUnit;
+            if (unit != null)
+            {
+                unit.CurrentSlot = slot;
+            }
             slot.occupied = true;
 
             var rt = c.GetComponent<RectTransform>();

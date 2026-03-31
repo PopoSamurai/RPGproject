@@ -20,6 +20,9 @@ public class BoardSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPoi
     }
     public void OnDrop(PointerEventData eventData)
     {
+        if (!TurnManager.Instance.IsPlayerTurn)
+            return;
+
         var cardView = eventData.pointerDrag?.GetComponent<CardView>();
 
         if (cardView == null) return;

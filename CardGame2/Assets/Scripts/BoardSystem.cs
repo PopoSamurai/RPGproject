@@ -24,15 +24,49 @@ public class BoardSystem : MonoBehaviour
     }
     public Unit GetFrontTarget(BoardSlot attackerSlot)
     {
-        var enemyLinesList = attackerSlot.owner == SlotOwner.Player
-            ? enemyLines
-            : playerLines;
+        if (attackerSlot == null)
+        {
+            Debug.Log("[TARGET] attackerSlot is NULL");
+            return null;
+        }
+        var enemyLine = GetOppositeLine(attackerSlot.line);
 
-        var enemyLine = enemyLinesList
-            .FirstOrDefault(l => l == attackerSlot.line);
+        if (enemyLine == null)
+        {
+            Debug.Log("[TARGET] No enemy line");
+            return null;
+        }
+        for (int i = 0; i < enemyLine.slots.Count; i++)
+        {
+            var slot = enemyLine.slots[i];
 
-        if (enemyLine == null) return null;
+            if (slot.occupied)
+            {
+                var unit = slot.GetComponentInChildren<Unit>();
 
-        return enemyLine.GetFrontUnit();
+                if (unit != null)
+                {
+                    Debug.Log($"[TARGET] Found target: {unit.name}");
+                    return unit;
+                }
+            }
+        }
+        Debug.Log("[TARGET] No target in line");
+        return null;
+    }
+    public BoardLane GetOppositeLine(BoardLane line)
+    {
+        if (playerLines.Contains(line))
+        {
+            int index = playerLines.IndexOf(line);
+            return enemyLines[index];
+        }
+        if (enemyLines.Contains(line))
+        {
+            int index = enemyLines.IndexOf(line);
+            return playerLines[index];
+        }
+        Debug.Log("[GetOppositeLine] Line not found!");
+        return null;
     }
 }

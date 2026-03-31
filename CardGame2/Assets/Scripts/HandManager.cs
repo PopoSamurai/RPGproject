@@ -7,6 +7,7 @@ public class HandManager : MonoBehaviour
     public List<CardData> deck = new List<CardData>();
     public List<CardView> hand = new List<CardView>();
     public int maxHandSize = 6;
+    public ArcLayoutGroup layout;
     public void DrawCard()
     {
         if (deck.Count == 0) return;
@@ -19,31 +20,36 @@ public class HandManager : MonoBehaviour
         view.Init(data);
 
         hand.Add(view);
-        FindObjectOfType<ArcLayoutGroup>().UpdateLayout();
+        layout.UpdateLayout();
     }
     void Start()
     {
+        layout = GetComponentInChildren<ArcLayoutGroup>();
         FillHandToMax();
-        FindObjectOfType<ArcLayoutGroup>().UpdateLayout();
+        layout.UpdateLayout();
     }
     public void FillHandToMax()
     {
         while (hand.Count < maxHandSize)
         {
             DrawCard();
-            FindObjectOfType<ArcLayoutGroup>().UpdateLayout();
+            layout.UpdateLayout();
         }
     }
     public void ConsumeCard(CardView card)
     {
         hand.Remove(card);
         Destroy(card.gameObject);
-        FindObjectOfType<ArcLayoutGroup>().UpdateLayout(true);
+        layout.UpdateLayout(true);
     }
     public void RemoveCard(CardView card)
     {
         hand.Remove(card);
         Destroy(card.gameObject);
         FindObjectOfType<ArcLayoutGroup>().UpdateLayout();
+    }
+    public void RefreshLayout()
+    {
+        layout.UpdateLayout();
     }
 }
