@@ -22,7 +22,7 @@ public class BattleSystem : MonoBehaviour
 
     public List<EnemySpawn> enemySpawns;
     private int currentTurn = 0;
-
+    public GameObject hitEffectPrefab;
     void Awake()
     {
         Instance = this;
@@ -81,14 +81,6 @@ public class BattleSystem : MonoBehaviour
         {
             Debug.Log("PLAYER WINS");
         }
-    }
-    void CleanupBoard()
-    {
-        foreach (var line in BoardSystem.Instance.playerLines)
-            line.Collapse();
-
-        foreach (var line in BoardSystem.Instance.enemyLines)
-            line.Collapse();
     }
     public IEnumerator TurnRoutine()
     {

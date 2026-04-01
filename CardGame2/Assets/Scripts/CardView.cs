@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -364,6 +365,16 @@ public class CardView : MonoBehaviour,
             Input.mousePosition,
             mainCanvas.worldCamera
         );
+    }
+    public IEnumerator FlashHP()
+    {
+        if (hpText == null)
+            yield break;
+
+        Color original = hpText.color;
+        hpText.color = Color.red;
+        yield return new WaitForSeconds(0.15f);
+        hpText.color = original;
     }
     public void OnDrag(PointerEventData eventData)
     {

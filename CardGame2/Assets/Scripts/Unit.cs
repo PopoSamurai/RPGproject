@@ -69,37 +69,95 @@ public class Unit : MonoBehaviour
     }
     public IEnumerator PerformAttackRoutine()
     {
-        var layout = GetComponentInParent<ArcLayoutGroup>();
-        if (layout != null)
-        {
-            layout.enabled = false;
-        }
+        var attackerView = GetComponent<CardView>();
         var target = BoardSystem.Instance.GetFrontTarget(CurrentSlot);
-        if (target == null) yield break;
 
-        Vector3 startPos = transform.position;
-        transform.SetAsLastSibling();
-        Vector3 attackPos = target.transform.position + (startPos - target.transform.position).normalized * 0.2f;
+        if (target == null)
+            yield break;
+
+        var targetView = target.GetComponent<CardView>();
+
+        RectTransform attackerRT = attackerView.GetComponent<RectTransform>();
+        RectTransform targetRT = targetView.GetComponent<RectTransform>();
+        Transform originalParent = attackerRT.parent;
+        Vector3 originalScale = attackerRT.localScale;
+
+        var rootCanvas = FindObjectOfType<Canvas>();
+        attackerRT.SetParent(rootCanvas.transform, true);
+        attackerRT.SetAsLastSibling();
+
+        Vector3 startPos = attackerRT.position;
+        Vector3 dir = (targetRT.position - attackerRT.position).normalized;
+        float stopDistance = 80f;
+
+        Vector3 targetPos = targetRT.position - dir * stopDistance;
+
         float t = 0;
-        while (t < 1f)
+        float duration = 0.2f;
+
+        while (t < duration)
         {
-            t += Time.deltaTime * 10f;
-            transform.position = Vector3.Lerp(startPos, attackPos, t);
+            t += Time.deltaTime;
+            attackerRT.position = Vector3.Lerp(startPos, targetPos, t / duration);
             yield return null;
         }
         target.TakeDamage(attack);
-        StartCoroutine(target.HitPush(startPos));
-
-        yield return new WaitForSeconds(0.1f);
-        t = 0;
-        while (t < 1f)
+        if (targetView != null)
         {
-            t += Time.deltaTime * 10f;
-            transform.position = Vector3.Lerp(attackPos, startPos, t);
+            StartCoroutine(targetView.FlashHP());
+        }
+        //efect
+        var canvas = FindObjectOfType<Canvas>();
+
+        if (BattleSystem.Instance.hitEffectPrefab != null)
+        {
+            GameObject fx = Instantiate(
+                BattleSystem.Instance.hitEffectPrefab,
+                targetRT.position,
+                Quaternion.identity,
+                canvas.transform
+            );
+
+            RectTransform fxRT = fx.GetComponent<RectTransform>();
+            fxRT.position = targetRT.position;
+
+            Destroy(fx, 0.5f);
+        }
+        StartCoroutine(HitPause());
+        Vector3 enemyStart = targetRT.position;
+        float direction = (owner == SlotOwner.Player) ? 1f : -1f;
+        Vector3 enemyBack = enemyStart + Vector3.right * 30f * direction;
+        t = 0;
+        while (t < 0.1f)
+        {
+            t += Time.deltaTime;
+            targetRT.position = Vector3.Lerp(enemyStart, enemyBack, t / 0.1f);
             yield return null;
         }
-
-        transform.localScale = Vector3.one;
+        t = 0;
+        while (t < 0.1f)
+        {
+            t += Time.deltaTime;
+            targetRT.position = Vector3.Lerp(enemyBack, enemyStart, t / 0.1f);
+            yield return null;
+        }
+        t = 0;
+        while (t < duration)
+        {
+            t += Time.deltaTime;
+            attackerRT.position = Vector3.Lerp(targetPos, startPos, t / duration);
+            yield return null;
+        }
+        attackerRT.SetParent(originalParent, false);
+        attackerRT.localScale = originalScale;
+        attackerRT.localPosition = Vector3.zero;
+        attackerRT.localRotation = Quaternion.identity;
+    }
+    IEnumerator HitPause()
+    {
+        Time.timeScale = 0f;
+        yield return new WaitForSecondsRealtime(0.05f);
+        Time.timeScale = 1f;
     }
     public IEnumerator HitPush(Vector3 attackerPos)
     {
