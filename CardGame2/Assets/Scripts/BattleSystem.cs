@@ -23,6 +23,7 @@ public class BattleSystem : MonoBehaviour
     public List<EnemySpawn> enemySpawns;
     private int currentTurn = 0;
     public GameObject hitEffectPrefab;
+    public Vector3 LastAttackerPosition;
     void Awake()
     {
         Instance = this;
@@ -64,6 +65,10 @@ public class BattleSystem : MonoBehaviour
             {
                 Debug.Log($"[COMBAT] {unit.name} attacks");
                 yield return StartCoroutine(unit.PerformAttackRoutine());
+                yield return new WaitUntil(() =>
+                {
+                    return FindObjectsOfType<Unit>().All(u => !u.IsAnimating);
+                });
 
                 unit.counter = unit.baseCounter;
                 unit.IsReady = false;
@@ -173,5 +178,22 @@ public class BattleSystem : MonoBehaviour
         unit.owner = owner;
         CardExecutor.Instance.TryPlayUnitCard(view, slot, true, true);
         slot.line?.Collapse();
+    }
+    public IEnumerator ScreenShake(float duration = 0.1f, float strength = 10f)
+    {
+        Vector3 original = Camera.main.transform.position;
+
+        float t = 0;
+        while (t < duration)
+        {
+            t += Time.deltaTime;
+            float x = Random.Range(-strength, strength);
+            float y = Random.Range(-strength, strength);
+
+            Camera.main.transform.position = original + new Vector3(x, y, 0);
+            yield return null;
+        }
+
+        Camera.main.transform.position = original;
     }
 }
