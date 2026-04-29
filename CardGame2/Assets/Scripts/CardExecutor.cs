@@ -2,7 +2,6 @@ using UnityEngine;
 public class CardExecutor : MonoBehaviour
 {
     public static CardExecutor Instance;
-    public PlayerEnergySystem energySystem;
     void Awake()
     {
         Instance = this;
@@ -11,26 +10,16 @@ public class CardExecutor : MonoBehaviour
     {
         if (!isAI && (slot.owner == SlotOwner.Enemy || cardView.owner != SlotOwner.Player))
         {
-            Debug.Log("X INVALID PLAY");
             return false;
         }
         var card = cardView.data;
 
         if (card.type != CardType.Character)
         {
-            Debug.Log("FAIL: not a unit card");
-            return false;
-        }
-        if (!energySystem.HasEnoughEnergy(card.energyCost))
-        {
-            Debug.Log("FAIL: not enough energy");
             return false;
         }
         if (isFirstTime)
         {
-            if (!isAI)
-                energySystem.UseEnergy(card.energyCost);
-
             var unit = cardView.gameObject.GetComponent<Unit>();
 
             if (unit == null)
@@ -102,13 +91,7 @@ public class CardExecutor : MonoBehaviour
     {
         if (!isAI)
         {
-            if (!energySystem.HasEnoughEnergy(card.energyCost))
-            {
-                Debug.Log("Not enough energy!");
-                return;
-            }
-
-            energySystem.UseEnergy(card.energyCost);
+            return;
         }
         switch (card.type)
         {
@@ -123,23 +106,12 @@ public class CardExecutor : MonoBehaviour
             case CardType.Heal:
                 HealTarget(target, card.healAmount);
                 break;
-
-            case CardType.Energy:
-                energySystem.AddEnergy(card.energyAmount);
-                break;
         }
     }
     public void OnCardClicked(CardView card)
     {
         Debug.Log("Clicked card: " + card.data.cardName);
-        if (card.data.type == CardType.Energy)
-        {
-            UseCard(card.data, null, false);
-        }
-        else
-        {
-            TargetingSystem.Instance.StartTargeting(card.data);
-        }
+        TargetingSystem.Instance.StartTargeting(card.data);
     }
     void SpawnCharacter(CardData card)
     {

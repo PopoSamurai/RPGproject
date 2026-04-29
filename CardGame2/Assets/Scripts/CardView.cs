@@ -21,9 +21,12 @@ public class CardView : MonoBehaviour,
     [Header("Groups")]
     public GameObject HPStat;
     public GameObject AttackStat;
-    public GameObject EnergyStat;
+    public GameObject CounterStat;
+    public GameObject color;
+    public Sprite CounterYellow, CounterRed;
     public Text hpText;
     public Text attackText;
+    public Text counterText;
     public Text effectText;
 
     private Transform originalParent;
@@ -44,13 +47,20 @@ public class CardView : MonoBehaviour,
     public bool IsLocked => owner == SlotOwner.Enemy;
     void Awake()
     {
+        color.gameObject.GetComponent<Image>().sprite = CounterYellow;
         if (owner == SlotOwner.Enemy && canvasGroup != null)
         {
             canvasGroup.blocksRaycasts = false;
         }
-        if (owner == SlotOwner.Enemy) EnergyStat.SetActive(false);
         canvasGroup = GetComponent<CanvasGroup>();
         mainCanvas = FindObjectOfType<Canvas>();
+
+        if (data && data.type == CardType.Character)
+        {
+            UpdateStatsUI();
+            CounterStat.SetActive(true);
+        }
+        else CounterStat.SetActive(false);
     }
     public void BindUnit(Unit unit)
     {
@@ -142,10 +152,25 @@ public class CardView : MonoBehaviour,
     }
     public void UpdateStatsUI()
     {
-        if (AttachedUnit == null) return;
+        if (AttachedUnit != null)
+        {
+            attackText.text = AttachedUnit.attack.ToString();
+            hpText.text = AttachedUnit.currentHP.ToString();
+            counterText.text = AttachedUnit.counter.ToString();
 
-        attackText.text = AttachedUnit.attack.ToString();
-        hpText.text = AttachedUnit.currentHP.ToString();
+            if (AttachedUnit.counter == 1)
+                color.GetComponent<Image>().sprite = CounterRed;
+            else
+                color.GetComponent<Image>().sprite = CounterYellow;
+        }
+        else if (data != null)
+        {
+            attackText.text = data.attack.ToString();
+            hpText.text = data.hp.ToString();
+            counterText.text = data.couner.ToString();
+
+            color.GetComponent<Image>().sprite = CounterYellow;
+        }
     }
     public void OnEndDrag(PointerEventData eventData)
     {
@@ -217,23 +242,6 @@ public class CardView : MonoBehaviour,
             }
             Debug.Log("[TARGET] No valid target");
             return;
-        }
-        if (data.type == CardType.Energy)
-        {
-            if (IsOutsideHand())
-            {
-                var energySystem = FindObjectOfType<PlayerEnergySystem>();
-                energySystem.AddEnergy(data.energyAmount);
-                FindObjectOfType<HandManager>().RemoveCard(this);
-                FindObjectOfType<ArcLayoutGroup>().UpdateLayout(true);
-                Destroy(gameObject);
-                return;
-            }
-            else
-            {
-                ReturnToHand();
-                return;
-            }
         }
         BoardLane targetLane = null;
         List<RaycastResult> rayHits = new List<RaycastResult>();
@@ -352,19 +360,6 @@ public class CardView : MonoBehaviour,
 
         slotA.occupied = true;
         slotB.occupied = true;
-
-        Debug.Log($"[SWAP] {a.name} <-> {b.name}");
-    }
-    bool IsOutsideHand()
-    {
-        var hand = FindObjectOfType<HandManager>().transform as RectTransform;
-        var cardRT = GetComponent<RectTransform>();
-
-        return !RectTransformUtility.RectangleContainsScreenPoint(
-            hand,
-            Input.mousePosition,
-            mainCanvas.worldCamera
-        );
     }
     public IEnumerator FlashHP()
     {
@@ -397,13 +392,14 @@ public class CardView : MonoBehaviour,
 
         nameText.text = data.cardName;
         artworkImage.sprite = data.artwork;
-        costText.text = data.energyCost.ToString();
 
         if (data.type != CardType.Character)
         {
             HPStat.gameObject.SetActive(false);
             AttackStat.gameObject.SetActive(false);
+            CounterStat.SetActive(false);
         }
+        else CounterStat.SetActive(true);
         switch (data.type)
         {
             case CardType.Character:
@@ -423,15 +419,11 @@ public class CardView : MonoBehaviour,
                 effectText.text = $"Heal {data.healAmount}";
                 break;
 
-            case CardType.Energy:
-                effectText.gameObject.SetActive(true);
-                effectText.text = $"+{data.energyAmount} Energy";
-                break;
-
             case CardType.BuffAttack:
                 effectText.gameObject.SetActive(true);
                 effectText.text = $"Buff {data.buffAttackAmount} ATK";
                 break;
         }
+        UpdateStatsUI();
     }
 }

@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-
 [System.Serializable]
 public class EnemySpawn
 {
@@ -48,8 +47,6 @@ public class BattleSystem : MonoBehaviour
     }
     IEnumerator ResolveCombatLoop()
     {
-        Debug.Log("[COMBAT] START");
-
         while (true)
         {
             var readyUnits = FindObjectsOfType<Unit>()
@@ -63,15 +60,25 @@ public class BattleSystem : MonoBehaviour
 
             foreach (var unit in readyUnits)
             {
-                Debug.Log($"[COMBAT] {unit.name} attacks");
+                if (unit == null || unit.isDead)
+                    continue;
+
                 yield return StartCoroutine(unit.PerformAttackRoutine());
+
+                if (unit == null || unit.isDead)
+                    continue;
+
+                unit.ResetCounter();
+
                 yield return new WaitUntil(() =>
                 {
-                    return FindObjectsOfType<Unit>().All(u => !u.IsAnimating);
+                    return FindObjectsOfType<Unit>()
+                        .All(u => u != null && !u.IsAnimating);
                 });
 
-                unit.counter = unit.baseCounter;
-                unit.IsReady = false;
+                if (unit != null)
+                    unit.IsReady = false;
+
                 yield return new WaitForSeconds(0.2f);
             }
         }
@@ -140,34 +147,21 @@ public class BattleSystem : MonoBehaviour
             ? playerCardPrefab
             : enemyCardPrefab;
 
-        if (prefab == null)
-        {
-            Debug.LogError("Prefab jest NULL!");
-            return;
-        }
-        if (slot == null)
-        {
-            Debug.LogError("Slot lidera jest NULL!");
-            return;
-        }
-        if (data == null)
-        {
-            Debug.LogError("CardData lidera jest NULL!");
-            return;
-        }
+        if (prefab == null) return;
+        if (slot == null) return;
+        if (data == null) return;
+
         var go = Instantiate(prefab);
         var unit = go.GetComponentInChildren<Unit>(true);
         var view = go.GetComponentInChildren<CardView>();
-        Debug.Log($"SpawnLeader prefab name: {prefab?.name}");
+
         if (unit == null)
         {
-            Debug.LogError($"Prefab {prefab.name} NIE MA komponentu Unit!");
             Destroy(go);
             return;
         }
         if (view == null)
         {
-            Debug.LogError($"Prefab {prefab.name} NIE MA komponentu CardView!");
             Destroy(go);
             return;
         }
@@ -182,7 +176,6 @@ public class BattleSystem : MonoBehaviour
     public IEnumerator ScreenShake(float duration = 0.1f, float strength = 10f)
     {
         Vector3 original = Camera.main.transform.position;
-
         float t = 0;
         while (t < duration)
         {

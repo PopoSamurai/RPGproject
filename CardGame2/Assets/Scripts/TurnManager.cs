@@ -1,5 +1,5 @@
 using System.Collections;
-using System.Linq;
+using UnityEngine.UI;
 using UnityEngine;
 public enum Turn
 {
@@ -11,6 +11,8 @@ public class TurnManager : MonoBehaviour
     public static TurnManager Instance;
     public Turn currentTurn;
     public float enemyPlayDelay = 1f;
+    public int turnNumber = 0;
+    public GameObject turnText;
     public bool IsPlayerTurn => currentTurn == Turn.Player;
     void Awake()
     {
@@ -20,15 +22,20 @@ public class TurnManager : MonoBehaviour
     {
         StartPlayerTurn();
     }
+    public void UpdateTurn()
+    {
+        turnNumber++;
+        turnText.GetComponent<Text>().text = "Turn " + turnNumber.ToString();
+    }
     public void StartPlayerTurn()
     {
+        UpdateTurn();
         currentTurn = Turn.Player;
-        Debug.Log("Player turn started");
         FindObjectOfType<HandManager>().FillHandToMax();
     }
     public void EndPlayerTurn()
     {
-        Debug.Log("Player turn ended");
+        UpdateTurn();
         StartCoroutine(EnemyTurnRoutine());
     }
     IEnumerator EnemyTurnRoutine()
@@ -41,7 +48,6 @@ public class TurnManager : MonoBehaviour
     }
     void EndEnemyTurn()
     {
-        Debug.Log("Enemy turn ended");
         StartPlayerTurn();
     }
 }

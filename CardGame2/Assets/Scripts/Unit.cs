@@ -7,7 +7,6 @@ public class Unit : MonoBehaviour
     public int currentHP;
     public int attack; 
     public int counter;
-    public int baseCounter = 3;
     public bool IsReady;
     public bool isDead = false;
 
@@ -18,20 +17,35 @@ public class Unit : MonoBehaviour
     public bool IsAnimating = false;
     public void Tick()
     {
-        counter--;
-
-        if (counter <= 0)
+        if (counter > 1)
         {
-            counter = 0;
+            counter--;
+        }
+        else if (counter == 1)
+        {
             IsReady = true;
         }
+        var view = GetComponent<CardView>();
+        if (view != null)
+        {
+            view.UpdateStatsUI();
+        }
+    }
+    public void ResetCounter()
+    {
+        if (sourceCard != null)
+        {
+            counter = sourceCard.couner;
+            IsReady = false;
 
-        Debug.Log($"[TICK] {name} counter={counter}, ready={IsReady}");
+            var view = GetComponent<CardView>();
+            if (view != null)
+                view.UpdateStatsUI();
+        }
     }
     private void Start()
     {
         IsReady = false;
-        counter = baseCounter;
     }
     public void Init(CardData data)
     {
@@ -39,11 +53,16 @@ public class Unit : MonoBehaviour
         maxHP = data.hp;
         currentHP = data.hp;
         attack = data.attack;
+
+        if (data.type == CardType.Character)
+        {
+            counter = data.couner;
+            IsReady = false;
+        }
     }
     public void TakeDamage(int dmg)
     {
         currentHP -= dmg;
-        Debug.Log($"{name} took {dmg} damage");
         SpawnDamageText(dmg);
 
         if (currentHP <= 0)
@@ -62,12 +81,10 @@ public class Unit : MonoBehaviour
     public void Heal(int amount)
     {
         currentHP += amount;
-        Debug.Log($"[UNIT] {name} healed {amount}, HP = {currentHP}");
     }
     public void AddAttack(int amount)
     {
         attack += amount;
-        Debug.Log("Dodaj atak" + attack);
     }
     public IEnumerator PerformAttackRoutine()
     {
