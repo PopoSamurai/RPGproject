@@ -76,7 +76,7 @@ public class Unit : MonoBehaviour
     }
     void SpawnDamageText(int dmg)
     {
-        Debug.Log($"DAMAGE POPUP: {dmg}");
+        //Debug.Log($"DAMAGE POPUP: {dmg}");
     }
     public void Heal(int amount)
     {

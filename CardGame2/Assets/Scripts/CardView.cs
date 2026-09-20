@@ -45,6 +45,13 @@ public class CardView : MonoBehaviour,
     private int dragStartIndex = -1;
     private BoardLane dragStartLane;
     public bool IsLocked => owner == SlotOwner.Enemy;
+    //
+    [Header("FX")]
+    private int displayedCounter = -1;
+    public float counterPulseScale = 1.25f;
+    public float cardPulseScale = 1.08f;
+    [Header("Counter FX")]
+    public RectTransform counterVisual;
     void Awake()
     {
         color.gameObject.GetComponent<Image>().sprite = CounterYellow;
@@ -152,6 +159,10 @@ public class CardView : MonoBehaviour,
     }
     public void UpdateStatsUI()
     {
+        int newCounter = AttachedUnit != null
+        ? AttachedUnit.counter
+        : data.couner;
+
         if (AttachedUnit != null)
         {
             attackText.text = AttachedUnit.attack.ToString();
@@ -171,6 +182,53 @@ public class CardView : MonoBehaviour,
 
             color.GetComponent<Image>().sprite = CounterYellow;
         }
+        if (displayedCounter != -1 && displayedCounter != newCounter)
+        {
+            if (newCounter == 1)
+            {
+                StartCoroutine(PulseWholeCard());
+            }
+        }
+        displayedCounter = newCounter;
+    }
+    Coroutine cardRoutine;
+    IEnumerator PulseWholeCard()
+    {
+        if (cardRoutine != null)
+            StopCoroutine(cardRoutine);
+
+        RectTransform rt = GetComponent<RectTransform>();
+        Vector3 start = Vector3.one;
+        Vector3 target = Vector3.one * 1.08f;
+        float duration = 0.12f;
+        float t = 0;
+        while (t < duration)
+        {
+            t += Time.deltaTime;
+
+            float lerp = t / duration;
+
+            rt.localScale = Vector3.Lerp(
+                start,
+                target,
+                lerp
+            );
+            yield return null;
+        }
+        t = 0;
+        while (t < duration)
+        {
+            t += Time.deltaTime;
+            float lerp = t / duration;
+
+            rt.localScale = Vector3.Lerp(
+                target,
+                start,
+                lerp
+            );
+            yield return null;
+        }
+        rt.localScale = Vector3.one;
     }
     public void OnEndDrag(PointerEventData eventData)
     {
@@ -179,7 +237,6 @@ public class CardView : MonoBehaviour,
             ReturnToSlot();
             return;
         }
-
         if (owner != SlotOwner.Player)
         {
             ReturnToSlot();

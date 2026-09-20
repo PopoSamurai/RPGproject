@@ -8,7 +8,6 @@ public class BoardSystem : MonoBehaviour
 
     public List<BoardLane> playerLines;
     public List<BoardLane> enemyLines;
-
     void Awake()
     {
         Instance = this;
@@ -26,14 +25,12 @@ public class BoardSystem : MonoBehaviour
     {
         if (attackerSlot == null)
         {
-            Debug.Log("[TARGET] attackerSlot is NULL");
             return null;
         }
         var enemyLine = GetOppositeLine(attackerSlot.line);
 
         if (enemyLine == null)
         {
-            Debug.Log("[TARGET] No enemy line");
             return null;
         }
         for (int i = 0; i < enemyLine.slots.Count; i++)
@@ -46,12 +43,10 @@ public class BoardSystem : MonoBehaviour
 
                 if (unit != null)
                 {
-                    Debug.Log($"[TARGET] Found target: {unit.name}");
                     return unit;
                 }
             }
         }
-        Debug.Log("[TARGET] No target in line");
         return null;
     }
     public BoardLane GetOppositeLine(BoardLane line)
@@ -66,7 +61,6 @@ public class BoardSystem : MonoBehaviour
             int index = enemyLines.IndexOf(line);
             return playerLines[index];
         }
-        Debug.Log("[GetOppositeLine] Line not found!");
         return null;
     }
 }
