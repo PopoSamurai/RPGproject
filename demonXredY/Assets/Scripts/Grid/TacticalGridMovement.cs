@@ -4,7 +4,7 @@ using UnityEngine;
 public class TacticalGridMovement : MonoBehaviour
 {
     [Header("Grid")]
-    public Transform player;
+    private Transform actingUnit;
     public Camera gameCamera;
     public Vector3 origin = Vector3.zero;
     public float cellSize = 1f;
@@ -21,9 +21,9 @@ public class TacticalGridMovement : MonoBehaviour
     public float blockingCheckHeight = 0.5f;
 
     [Header("Movement")]
-    public int movementRange = 5;
+    private int movementRange = 5;
     public float maxStepHeight = 1.1f;
-    public float moveSpeed = 4f;
+    private float moveSpeed = 4f;
 
     [Header("Jump action")]
     [Min(1)] public int maxJumpGapCells = 1;
@@ -31,18 +31,17 @@ public class TacticalGridMovement : MonoBehaviour
     public float jumpArcHeight = 1.25f;
 
     [Header("Pickup / Throw")]
-    public Transform carryableUnit;
     public int throwRange = 3;
-    [Min(1)] public int carryStrength = 5;
+    [Min(1)] private int carryStrength = 5;
     public GameObject pickupTilePrefab;
     public float throwArcHeight = 2f;
     public float carryHeight = 1.5f;
 
     [Header("Attack")]
-    public bool isArcher = false;
+    private bool isArcher = false;
     public string enemyTag = "enemy";
-    [Min(1)] public int archerAttackRange = 4;
-    [Min(1)] public int attackDamage = 1;
+    [Min(1)] private int archerAttackRange = 4;
+    [Min(1)] private int attackDamage = 1;
 
     public GameObject attackTilePrefab;
     public GameObject movementTilePrefab;
@@ -59,6 +58,25 @@ public class TacticalGridMovement : MonoBehaviour
     private readonly Dictionary<Vector2Int, Transform> attackTargets = new Dictionary<Vector2Int, Transform>();
     private readonly Dictionary<Vector2Int, Transform> pickupTargets = new Dictionary<Vector2Int, Transform>();
     private readonly Dictionary<Vector2Int, Cell> cells = new Dictionary<Vector2Int, Cell>();
+
+    public TacticalTurnManager turnManager;
+    public bool IsBusy => isMoving || isCarrying;
+    private TacticalUnit CurrentUnit => actingUnit == null ? null : actingUnit.GetComponent<TacticalUnit>();
+    private bool PlayerCanControl => turnManager != null && turnManager.ActiveUnit != null && turnManager.ActiveUnit.isPlayerControlled && turnManager.ActiveUnit.IsActiveUnit && CurrentUnit == turnManager.ActiveUnit;
+
+    public void SetActiveUnit(TacticalUnit unit)
+    {
+        DeselectUnit();
+        actingUnit = unit != null && unit.isPlayerControlled ? unit.transform : null;
+        if (actingUnit == null) return;
+        movementRange = unit.movementRange;
+        moveSpeed = unit.moveSpeed;
+        carryStrength = unit.strength;
+        attackDamage = unit.attackDamage;
+        isArcher = unit.isArcher;
+        archerAttackRange = unit.attackRange;
+        SelectUnit(unit);
+    }
 
     private bool isSelected;
     private bool isJumpMode;
@@ -91,7 +109,7 @@ public class TacticalGridMovement : MonoBehaviour
     {
         if (unit == null) return;
 
-        player = unit;
+        actingUnit = unit;
         isSelected = true;
 
         isJumpMode = false;
@@ -116,39 +134,64 @@ public class TacticalGridMovement : MonoBehaviour
         }
         if (cellSize <= 0f || gridWidth <= 0 || gridDepth <= 0)
         {
-            Debug.LogError("Nieprawid³owe ustawienia siatki.");
+            Debug.LogError("NieprawidÅ‚owe ustawienia siatki.");
             enabled = false;
             return;
         }
 
         BuildGrid();
-        ClearMovementTiles(); // Na pocz¹tku gry zasiêg jest ukryty.
+        ClearMovementTiles(); // Na poczÄ…tku gry zasiÄ™g jest ukryty.
     }
 
     private void Update()
     {
-        if (isMoving || player == null || gameCamera == null) return;
-
-        if (isSelected && Input.GetKeyDown(KeyCode.F) && !isCarrying)
-        {
-            isAttackMode = !isAttackMode;
-            isJumpMode = false;
-            RefreshMovementTiles();
-            Debug.Log(isAttackMode ? "Tryb ATAKU: kliknij czerwone pole pod wrogiem." : "Tryb ataku wy³¹czony.");
-        }
-
-        if (isSelected && Input.GetKeyDown(KeyCode.J) && !isCarrying && !isAttackMode)
-        {
-            isJumpMode = !isJumpMode;
-            RefreshMovementTiles();
-            Debug.Log(isJumpMode ? "Tryb SKOKU: wybierz podœwietlone pole l¹dowania." : "Tryb CHODZENIA.");
-        }
-
-        if (isSelected && Input.GetKeyDown(KeyCode.E) && !isCarrying && !isAttackMode)
-            EnterPickupMode();
+        if (isMoving || actingUnit == null || gameCamera == null || !PlayerCanControl) return;
 
         if (Input.GetMouseButtonDown(0)) HandleClick();
         if (isSelected && Input.GetKeyDown(KeyCode.Escape)) DeselectUnit();
+    }
+
+    // Podlacz te metody do UI Button -> On Click().
+    public void OnAttackButton()
+    {
+        if (!PlayerCanControl || isMoving || isCarrying || CurrentUnit.hasActed) return;
+        isSelected = true;
+        isAttackMode = !isAttackMode;
+        isPickupMode = false;
+        isJumpMode = false;
+        RefreshMovementTiles();
+    }
+
+    // Pierwsze klikniecie: wybierz obiekt do podniesienia.
+    // Po podniesieniu: kliknij pole lub jednostke, w ktora rzucasz.
+    public void OnThrowButton()
+    {
+        if (!PlayerCanControl || isMoving || CurrentUnit.hasActed) return;
+        isSelected = true;
+        isAttackMode = false;
+        isJumpMode = false;
+        if (!isCarrying) { isPickupMode = !isPickupMode; RefreshMovementTiles(); }
+        else RefreshMovementTiles();
+    }
+
+    public void OnMoveButton()
+    {
+        if (!PlayerCanControl || isMoving || isCarrying) return;
+        isSelected = true;
+        isAttackMode = false;
+        isPickupMode = false;
+        isJumpMode = false;
+        RefreshMovementTiles();
+    }
+
+    public void OnJumpButton()
+    {
+        if (!PlayerCanControl || isMoving || isCarrying || CurrentUnit.RemainingMovement <= 0) return;
+        isSelected = true;
+        isAttackMode = false;
+        isPickupMode = false;
+        isJumpMode = !isJumpMode;
+        RefreshMovementTiles();
     }
 
     private void HandleClick()
@@ -159,7 +202,7 @@ public class TacticalGridMovement : MonoBehaviour
         if (hit.normal.y < 0.5f) return;
 
         Vector2Int clickedCoord = WorldToGrid(hit.point);
-        Vector2Int playerCoord = WorldToGrid(player.position);
+        Vector2Int playerCoord = WorldToGrid(actingUnit.position);
 
         if (!isCarrying &&
             !isAttackMode &&
@@ -168,27 +211,28 @@ public class TacticalGridMovement : MonoBehaviour
         {
             TacticalUnit clickedUnit = FindUnitAtCell(clickedCoord);
 
-            if (clickedUnit != null && clickedUnit.isPlayerControlled)
+            if (clickedUnit != null && clickedUnit == turnManager.ActiveUnit)
             {
                 SelectUnit(clickedUnit);
                 return;
             }
         }
-        if (clickedCoord == playerCoord)
+        if (clickedCoord == playerCoord && !isCarrying && !isAttackMode && !isPickupMode)
         {
-            SelectUnit(player);
+            SelectUnit(actingUnit);
             return;
         }
 
-        if (!isSelected) return;
+        if (!isSelected || !PlayerCanControl) return;
 
         if (isPickupMode)
         {
+            if (CurrentUnit.hasActed) return;
             if (!pickupTargets.TryGetValue(clickedCoord, out Transform selectedObject) || selectedObject == null)
                 return;
             if (!CanCarry(selectedObject))
             {
-                Debug.Log("Ten obiekt jest zbyt ciê¿ki, by go podnieœæ.");
+                Debug.Log("Ten obiekt jest zbyt ciÄ™Å¼ki, by go podnieÅ›Ä‡.");
                 return;
             }
 
@@ -200,6 +244,7 @@ public class TacticalGridMovement : MonoBehaviour
 
         if (isAttackMode)
         {
+            if (CurrentUnit.hasActed) return;
             if (!attackTargets.TryGetValue(clickedCoord, out Transform enemy) || enemy == null) return;
             if (!IsEnemyInAttackRange(enemy)) return;
             ClearMovementTiles();
@@ -211,20 +256,21 @@ public class TacticalGridMovement : MonoBehaviour
 
         if (isCarrying)
         {
+            if (CurrentUnit.hasActed) return;
             if (!throwCells.Contains(clickedCoord))
                 return;
 
-            // Klikniêto przeciwnika.
+            // KlikniÄ™to przeciwnika.
             if (throwEnemyTargets.TryGetValue(
                 clickedCoord, out Transform enemy) && enemy != null)
             {
                 if (!TryGetThrowLandingCell(
-                    WorldToGrid(player.position),
+                    WorldToGrid(actingUnit.position),
                     WorldToGrid(enemy.position),
                     out Cell landingCell))
                 {
                     Debug.Log(
-                        "Nie mo¿na rzuciæ istot¹. " +
+                        "Nie moÅ¼na rzuciÄ‡ istotÄ…. " +
                         "Brak wolnego pola przed przeciwnikiem.");
                     return;
                 }
@@ -237,18 +283,18 @@ public class TacticalGridMovement : MonoBehaviour
 
                 return;
             }
-            // Klikniêto w³asn¹ jednostkê.
+            // KlikniÄ™to wÅ‚asnÄ… jednostkÄ™.
             if (throwFriendlyTargets.TryGetValue(
                 clickedCoord, out Transform friendly) &&
                 friendly != null)
             {
                 if (!TryGetThrowLandingCell(
-                    WorldToGrid(player.position),
+                    WorldToGrid(actingUnit.position),
                     WorldToGrid(friendly.position),
                     out Cell landingCell))
                 {
                     Debug.Log(
-                        "Nie mo¿na rzuciæ jednostk¹. " +
+                        "Nie moÅ¼na rzuciÄ‡ jednostkÄ…. " +
                         "Brak wolnego pola przed celem.");
                     return;
                 }
@@ -261,7 +307,7 @@ public class TacticalGridMovement : MonoBehaviour
 
                 return;
             }
-            // Klikniêto zwyk³e, wolne pole.
+            // KlikniÄ™to zwykÅ‚e, wolne pole.
             if (IsCellBlocked(clickedCoord))
                 return;
 
@@ -288,7 +334,7 @@ public class TacticalGridMovement : MonoBehaviour
             return;
         }
 
-        if (!reachableCells.Contains(clickedCoord) || IsCellBlocked(clickedCoord)) return;
+        if (CurrentUnit.RemainingMovement <= 0 || !reachableCells.Contains(clickedCoord) || IsCellBlocked(clickedCoord)) return;
         List<Cell> path = FindWalkPath(playerCoord, clickedCoord);
         if (path == null || path.Count == 0) return;
 
@@ -358,7 +404,7 @@ public class TacticalGridMovement : MonoBehaviour
 
         while (elapsed < duration)
         {
-            // Jeœli przeciwnik zniknie podczas animacji, nie przerywamy lotu.
+            // JeÅ›li przeciwnik zniknie podczas animacji, nie przerywamy lotu.
             elapsed += Time.deltaTime;
 
             float t = Mathf.Clamp01(elapsed / duration);
@@ -388,7 +434,7 @@ public class TacticalGridMovement : MonoBehaviour
         if (carriedBody != null)
             carriedBody.isKinematic = false;
 
-        // Obra¿enia po zakoñczeniu rzutu.
+        // ObraÅ¼enia po zakoÅ„czeniu rzutu.
         if (enemy != null)
         {
             enemy.gameObject.SendMessage(
@@ -397,12 +443,13 @@ public class TacticalGridMovement : MonoBehaviour
                 SendMessageOptions.DontRequireReceiver);
 
             Debug.Log(
-                $"Rzut istot¹ trafi³ {enemy.name}. " +
-                $"Obra¿enia: {attackDamage}.");
+                $"Rzut istotÄ… trafiÅ‚ {enemy.name}. " +
+                $"ObraÅ¼enia: {attackDamage}.");
         }
 
         isCarrying = false;
         isMoving = false;
+        if (CurrentUnit != null) CurrentUnit.hasActed = true;
         carriedObject = null;
 
         ClearMovementTiles();
@@ -412,21 +459,21 @@ public class TacticalGridMovement : MonoBehaviour
         isAttackMode = false;
         isPickupMode = false;
 
-        Debug.Log("Rzut na przeciwnika zakoñczony.");
+        Debug.Log("Rzut na przeciwnika zakoÅ„czony.");
     }
     private void RefreshMovementTiles()
     {
         ClearMovementTiles();
-        if (player == null || movementTilePrefab == null) return;
+        if (actingUnit == null || movementTilePrefab == null || !PlayerCanControl) return;
 
-        Vector2Int start = WorldToGrid(player.position);
+        Vector2Int start = WorldToGrid(actingUnit.position);
         if (!cells.ContainsKey(start)) return;
 
         if (isCarrying) BuildThrowTargets(start);
         else if (isPickupMode) BuildPickupTargets(start);
-        else if (isAttackMode) BuildAttackTargets(start);
-        else if (isJumpMode) BuildJumpTargets(start);
-        else BuildWalkTargets(start);
+        else if (isAttackMode && !CurrentUnit.hasActed) BuildAttackTargets(start);
+        else if (isJumpMode && CurrentUnit.RemainingMovement > 0) BuildJumpTargets(start);
+        else if (CurrentUnit.RemainingMovement > 0) BuildWalkTargets(start);
 
         if (isPickupMode)
         {
@@ -479,31 +526,21 @@ public class TacticalGridMovement : MonoBehaviour
         attackTargets.Clear();
         pickupCells.Clear();
         pickupTargets.Clear();
-        GameObject[] enemies;
-        try { enemies = GameObject.FindGameObjectsWithTag(enemyTag); }
-        catch (UnityException)
+        foreach (TacticalUnit target in FindObjectsOfType<TacticalUnit>())
         {
-            Debug.LogError($"Nie istnieje tag '{enemyTag}'. Dodaj go w Tags and Layers albo zmieñ Enemy Tag w Inspectorze.");
-            return;
-        }
-
-        foreach (GameObject enemyObject in enemies)
-        {
-            if (enemyObject == null || !enemyObject.activeInHierarchy) continue;
-            Transform enemy = enemyObject.transform;
-            Vector2Int enemyCoord = WorldToGrid(enemy.position);
-            int distance = Mathf.Abs(enemyCoord.x - start.x) + Mathf.Abs(enemyCoord.y - start.y);
-            int allowedRange = isArcher ? archerAttackRange : 1;
-            if (distance < 1 || distance > allowedRange || !cells.ContainsKey(enemyCoord)) continue;
-            attackCells.Add(enemyCoord);
-            attackTargets[enemyCoord] = enemy;
+            if (!target.IsAlive || target.isPlayerControlled == CurrentUnit.isPlayerControlled) continue;
+            Vector2Int coord = WorldToGrid(target.transform.position);
+            int distance = Mathf.Abs(coord.x - start.x) + Mathf.Abs(coord.y - start.y);
+            if (distance < 1 || distance > (isArcher ? archerAttackRange : 1) || !cells.ContainsKey(coord)) continue;
+            attackCells.Add(coord);
+            attackTargets[coord] = target.transform;
         }
     }
 
     private bool IsEnemyInAttackRange(Transform enemy)
     {
         if (enemy == null) return false;
-        Vector2Int playerCoord = WorldToGrid(player.position);
+        Vector2Int playerCoord = WorldToGrid(actingUnit.position);
         Vector2Int enemyCoord = WorldToGrid(enemy.position);
         int distance = Mathf.Abs(enemyCoord.x - playerCoord.x) + Mathf.Abs(enemyCoord.y - playerCoord.y);
         return distance >= 1 && distance <= (isArcher ? archerAttackRange : 1);
@@ -513,9 +550,10 @@ public class TacticalGridMovement : MonoBehaviour
     {
         if (enemy == null) return;
         int damage = attackDamage;
-        // Enemy mo¿e mieæ w³asny komponent z metod¹ public void ApplyDamage(int damage).
+        // Enemy moÅ¼e mieÄ‡ wÅ‚asny komponent z metodÄ… public void ApplyDamage(int damage).
         enemy.gameObject.SendMessage("ApplyDamage", damage, SendMessageOptions.DontRequireReceiver);
-        Debug.Log($"{(isArcher ? "Strza³ z ³uku" : "Atak wrêcz")}: {enemy.name}, obra¿enia: {damage}.");
+        if (CurrentUnit != null) CurrentUnit.hasActed = true;
+        Debug.Log($"{(isArcher ? "StrzaÅ‚ z Å‚uku" : "Atak wrÄ™cz")}: {enemy.name}, obraÅ¼enia: {damage}.");
     }
 
     private void TintTileRed(GameObject tile)
@@ -523,7 +561,7 @@ public class TacticalGridMovement : MonoBehaviour
         Renderer[] renderers = tile.GetComponentsInChildren<Renderer>();
         foreach (Renderer rend in renderers)
         {
-            // material tworzy instancjê materia³u dla tego konkretnego podœwietlenia.
+            // material tworzy instancjÄ™ materiaÅ‚u dla tego konkretnego podÅ›wietlenia.
             rend.material.color = Color.red;
         }
     }
@@ -546,7 +584,7 @@ public class TacticalGridMovement : MonoBehaviour
                 float heightDifference = Mathf.Abs(cells[next].surfaceY - cells[current].surfaceY);
                 if (heightDifference > maxStepHeight) continue;
                 int newDistance = distance[current] + 1;
-                if (newDistance > movementRange) continue;
+                if (newDistance > (CurrentUnit != null && CurrentUnit.isPlayerControlled ? CurrentUnit.RemainingMovement : movementRange)) continue;
                 distance[next] = newDistance;
                 queue.Enqueue(next);
             }
@@ -561,21 +599,21 @@ public class TacticalGridMovement : MonoBehaviour
         jumpCells.Clear();
         if (!cells.TryGetValue(start, out Cell startCell)) return;
 
-        // To jest osobna akcja: l¹dowanie musi byæ w linii prostej,
-        // a pomiêdzy startem i celem musi istnieæ co najmniej jedno pole bez Walkable.
+        // To jest osobna akcja: lÄ…dowanie musi byÄ‡ w linii prostej,
+        // a pomiÄ™dzy startem i celem musi istnieÄ‡ co najmniej jedno pole bez Walkable.
         foreach (Vector2Int dir in directions)
         {
             for (int gap = 1; gap <= maxJumpGapCells; gap++)
             {
                 int landingDistance = gap + 1;
-                if (landingDistance > movementRange) break;
+                if (landingDistance > (CurrentUnit != null && CurrentUnit.isPlayerControlled ? CurrentUnit.RemainingMovement : movementRange)) break;
 
                 Vector2Int landing = start + dir * landingDistance;
                 bool clearGap = true;
                 for (int i = 1; i <= gap; i++)
                 {
                     Vector2Int middle = start + dir * i;
-                    // Skok jest przeznaczony do pokonywania pól bez Walkable,
+                    // Skok jest przeznaczony do pokonywania pÃ³l bez Walkable,
                     // np. wody lub dziury. Nie przeskakujemy przez inne pola terenu.
                     if (cells.ContainsKey(middle))
                     {
@@ -601,7 +639,7 @@ public class TacticalGridMovement : MonoBehaviour
         if (!cells.TryGetValue(coord, out Cell cell)) return true;
         Vector3 center = GridToWorld(coord);
         center.y = cell.surfaceY + blockingCheckHeight;
-        // Sprawdzamy wszystkie warstwy, bo przeciwnicy mog¹ nie mieæ osobnej warstwy.
+        // Sprawdzamy wszystkie warstwy, bo przeciwnicy mogÄ… nie mieÄ‡ osobnej warstwy.
         // Pole blokuje obiekt z Blocking Mask LUB obiekt oznaczony tagiem Enemy.
         Collider[] obstacles = Physics.OverlapBox(
             center,
@@ -611,15 +649,15 @@ public class TacticalGridMovement : MonoBehaviour
         foreach (Collider obstacle in obstacles)
         {
             if (obstacle == null) continue;
-            // W³asne i wrogie jednostki blokuj¹ zajêt¹ kratkê.
+            // WÅ‚asne i wrogie jednostki blokujÄ… zajÄ™tÄ… kratkÄ™.
             TacticalUnit occupiedUnit =
                 obstacle.GetComponentInParent<TacticalUnit>();
 
             if (occupiedUnit != null)
             {
-                if (player != null &&
-                    (occupiedUnit.transform == player ||
-                     occupiedUnit.transform.IsChildOf(player)))
+                if (actingUnit != null &&
+                    (occupiedUnit.transform == actingUnit ||
+                     occupiedUnit.transform.IsChildOf(actingUnit)))
                     continue;
 
                 if (isCarrying &&
@@ -631,9 +669,7 @@ public class TacticalGridMovement : MonoBehaviour
                 return true;
             }
 
-            if (player != null && (obstacle.transform == player || obstacle.transform.IsChildOf(player)))
-                continue;
-            if (isCarrying && carryableUnit != null && (obstacle.transform == carryableUnit || obstacle.transform.IsChildOf(carryableUnit)))
+            if (actingUnit != null && (obstacle.transform == actingUnit || obstacle.transform.IsChildOf(actingUnit)))
                 continue;
 
             bool onBlockingLayer = (blockingMask.value & (1 << obstacle.gameObject.layer)) != 0;
@@ -651,8 +687,7 @@ public class TacticalGridMovement : MonoBehaviour
         foreach (Collider obstacle in obstacles)
         {
             if (obstacle == null) continue;
-            if (player != null && (obstacle.transform == player || obstacle.transform.IsChildOf(player))) continue;
-            if (isCarrying && carryableUnit != null && (obstacle.transform == carryableUnit || obstacle.transform.IsChildOf(carryableUnit))) continue;
+            if (actingUnit != null && (obstacle.transform == actingUnit || obstacle.transform.IsChildOf(actingUnit))) continue;
 
             bool onBlockingLayer = (blockingMask.value & (1 << obstacle.gameObject.layer)) != 0;
             if (onBlockingLayer || IsEnemyCollider(obstacle)) return true;
@@ -664,7 +699,7 @@ public class TacticalGridMovement : MonoBehaviour
     {
         if (obstacle == null) return false;
 
-        // Tag mo¿e znajdowaæ siê na obiekcie g³ównym, a Collider na obiekcie potomnym.
+        // Tag moÅ¼e znajdowaÄ‡ siÄ™ na obiekcie gÅ‚Ã³wnym, a Collider na obiekcie potomnym.
         Transform current = obstacle.transform;
         while (current != null)
         {
@@ -674,7 +709,7 @@ public class TacticalGridMovement : MonoBehaviour
             }
             catch (UnityException)
             {
-                // Jeœli tag nie istnieje, pomijamy sprawdzanie tagu.
+                // JeÅ›li tag nie istnieje, pomijamy sprawdzanie tagu.
                 return false;
             }
             current = current.parent;
@@ -689,9 +724,9 @@ public class TacticalGridMovement : MonoBehaviour
         isAttackMode = false;
         RefreshMovementTiles();
         if (pickupCells.Count == 0)
-            Debug.Log("Nie ma obok ¿adnych obiektów, które mo¿esz podnieœæ.");
+            Debug.Log("Nie ma obok Å¼adnych obiektÃ³w, ktÃ³re moÅ¼esz podnieÅ›Ä‡.");
         else
-            Debug.Log("Wybierz podœwietlone pole pod jednostk¹ lub skrzyni¹, któr¹ chcesz podnieœæ.");
+            Debug.Log("Wybierz podÅ›wietlone pole pod jednostkÄ… lub skrzyniÄ…, ktÃ³rÄ… chcesz podnieÅ›Ä‡.");
     }
 
     private void BuildPickupTargets(Vector2Int start)
@@ -713,7 +748,7 @@ public class TacticalGridMovement : MonoBehaviour
             {
                 if (hit == null) continue;
                 Transform candidate = FindCarryableRoot(hit.transform);
-                if (candidate == null || candidate == player || candidate.IsChildOf(player)) continue;
+                if (candidate == null || candidate == actingUnit || candidate.IsChildOf(actingUnit)) continue;
                 if (isCarrying && carriedObject == candidate) continue;
                 if (!IsCarryableObject(candidate) || !CanCarry(candidate)) continue;
 
@@ -722,24 +757,12 @@ public class TacticalGridMovement : MonoBehaviour
                 break;
             }
         }
-
-        // Obs³uga obiektu przypisanego w Inspectorze, jeœli znajduje siê obok.
-        if (carryableUnit != null)
-        {
-            Vector2Int coord = WorldToGrid(carryableUnit.position);
-            int distance = Mathf.Abs(coord.x - start.x) + Mathf.Abs(coord.y - start.y);
-            if (distance == 1 && cells.ContainsKey(coord) && CanCarry(carryableUnit))
-            {
-                pickupTargets[coord] = carryableUnit;
-                pickupCells.Add(coord);
-            }
-        }
     }
 
     private Transform FindCarryableRoot(Transform candidate)
     {
         Transform current = candidate;
-        while (current != null && current != player)
+        while (current != null && current != actingUnit)
         {
             if (IsCarryableObject(current)) return current;
             current = current.parent;
@@ -749,12 +772,12 @@ public class TacticalGridMovement : MonoBehaviour
 
     private bool IsCarryableObject(Transform candidate)
     {
-        if (candidate == null || candidate == player || candidate.IsChildOf(player)) return false;
+        if (candidate == null || candidate == actingUnit || candidate.IsChildOf(actingUnit)) return false;
 
-        // Skrzynki i obiekty na Blocking Mask mo¿na podnosiæ.
+        // Skrzynki i obiekty na Blocking Mask moÅ¼na podnosiÄ‡.
         if ((blockingMask.value & (1 << candidate.gameObject.layer)) != 0) return true;
 
-        // Wrogowie mog¹ byæ podnoszeni po tagu enemy, tak¿e gdy tag jest na rodzicu.
+        // Wrogowie mogÄ… byÄ‡ podnoszeni po tagu enemy, takÅ¼e gdy tag jest na rodzicu.
         Transform current = candidate;
         while (current != null)
         {
@@ -768,8 +791,8 @@ public class TacticalGridMovement : MonoBehaviour
             current = current.parent;
         }
 
-        // Zgodnoœæ z wczeœniej przypisanym Carryable Unit.
-        return carryableUnit != null && (candidate == carryableUnit || candidate.IsChildOf(carryableUnit));
+        // ZgodnoÅ›Ä‡ z wczeÅ›niej przypisanym Carryable Unit.
+        return false;
     }
 
     private bool CanCarry(Transform candidate)
@@ -799,8 +822,8 @@ public class TacticalGridMovement : MonoBehaviour
             carriedBottomOffset = Mathf.Max(carriedBottomOffset, carriedObject.position.y - col.bounds.min.y);
 
         isCarrying = true;
-        carriedObject.SetParent(player, true);
-        carriedObject.position = player.position + Vector3.up * carryHeight;
+        carriedObject.SetParent(actingUnit, true);
+        carriedObject.position = actingUnit.position + Vector3.up * carryHeight;
         foreach (Collider col in carriedColliders) col.enabled = false;
 
         Rigidbody carriedBody = carriedObject.GetComponent<Rigidbody>();
@@ -809,7 +832,7 @@ public class TacticalGridMovement : MonoBehaviour
         isJumpMode = false;
         isPickupMode = false;
         RefreshMovementTiles();
-        Debug.Log($"Podniesiono: {carriedObject.name}. Kliknij podœwietlone pole, aby rzuciæ.");
+        Debug.Log($"Podniesiono: {carriedObject.name}. Kliknij podÅ›wietlone pole, aby rzuciÄ‡.");
     }
     private void BuildThrowTargets(Vector2Int start)
     {
@@ -867,9 +890,9 @@ public class TacticalGridMovement : MonoBehaviour
             throwCells.Add(enemyCoord);
             throwEnemyTargets[enemyCoord] = enemy;
         }
-        // Wyszukiwanie pozosta³ych jednostek, w które mo¿na rzuciæ.
+        // Wyszukiwanie pozostaÅ‚ych jednostek, w ktÃ³re moÅ¼na rzuciÄ‡.
         Collider[] allColliders = Physics.OverlapBox(
-            player.position,
+            actingUnit.position,
             new Vector3(throwRange * cellSize, 3f, throwRange * cellSize),
             Quaternion.identity,
             ~0,
@@ -886,7 +909,7 @@ public class TacticalGridMovement : MonoBehaviour
             if (candidate == null)
                 continue;
 
-            if (candidate == player || candidate.IsChildOf(player))
+            if (candidate == actingUnit || candidate.IsChildOf(actingUnit))
                 continue;
 
             if (candidate == carriedObject ||
@@ -905,7 +928,7 @@ public class TacticalGridMovement : MonoBehaviour
             if (distance < 1 || distance > throwRange)
                 continue;
 
-            // Przeciwnicy s¹ obs³ugiwani przez osobny s³ownik.
+            // Przeciwnicy sÄ… obsÅ‚ugiwani przez osobny sÅ‚ownik.
             if (throwEnemyTargets.ContainsKey(coord))
                 continue;
 
@@ -948,11 +971,12 @@ public class TacticalGridMovement : MonoBehaviour
 
         isCarrying = false;
         isMoving = false;
+        if (CurrentUnit != null) CurrentUnit.hasActed = true;
         carriedObject = null;
         ClearMovementTiles();
         isSelected = false;
         isJumpMode = false;
-        Debug.Log("Rzut zakoñczony.");
+        Debug.Log("Rzut zakoÅ„czony.");
     }
 
     private void TintTile(GameObject tile, Color color)
@@ -966,15 +990,15 @@ public class TacticalGridMovement : MonoBehaviour
     }
     private void SelectUnit(TacticalUnit unit)
     {
-        if (unit == null || !unit.IsAlive || !unit.isPlayerControlled)
+        if (unit == null || !unit.IsAlive || !unit.isPlayerControlled || !PlayerCanControl || unit != turnManager.ActiveUnit)
             return;
 
         if (isCarrying || isMoving)
             return;
 
-        player = unit.transform;
+        actingUnit = unit.transform;
 
-        // Statystyki kontrolera pochodz¹ od zaznaczonej jednostki.
+        // Statystyki kontrolera pochodzÄ… od zaznaczonej jednostki.
         movementRange = unit.movementRange;
         moveSpeed = unit.moveSpeed;
         carryStrength = unit.strength;
@@ -992,7 +1016,7 @@ public class TacticalGridMovement : MonoBehaviour
         Debug.Log(
             $"Wybrano: {unit.name} | " +
             $"HP: {unit.CurrentHealth}/{unit.maxHealth} | " +
-            $"Si³a: {unit.strength} | " +
+            $"SiÅ‚a: {unit.strength} | " +
             $"Atak: {unit.attackDamage} | " +
             $"Ruch: {unit.movementRange}"
         );
@@ -1050,13 +1074,13 @@ public class TacticalGridMovement : MonoBehaviour
     private Vector3 CellWorldPosition(Cell cell)
     {
         Vector3 target = GridToWorld(cell.coord);
-        Collider playerCollider = player.GetComponentInChildren<Collider>();
+        Collider playerCollider = actingUnit.GetComponentInChildren<Collider>();
         if (playerCollider != null)
         {
-            Vector3 colliderCenterOffset = playerCollider.bounds.center - player.position;
+            Vector3 colliderCenterOffset = playerCollider.bounds.center - actingUnit.position;
             target.x -= colliderCenterOffset.x;
             target.z -= colliderCenterOffset.z;
-            float pivotToBottom = player.position.y - playerCollider.bounds.min.y;
+            float pivotToBottom = actingUnit.position.y - playerCollider.bounds.min.y;
             target.y = cell.surfaceY + pivotToBottom;
         }
         else target.y = cell.surfaceY;
@@ -1103,7 +1127,7 @@ public class TacticalGridMovement : MonoBehaviour
                 if (!cells.ContainsKey(next) || distance.ContainsKey(next) || IsCellBlocked(next)) continue;
                 if (Mathf.Abs(cells[next].surfaceY - cells[current].surfaceY) > maxStepHeight) continue;
                 int nextDistance = distance[current] + 1;
-                if (nextDistance > movementRange) continue;
+                if (nextDistance > (CurrentUnit != null && CurrentUnit.isPlayerControlled ? CurrentUnit.RemainingMovement : movementRange)) continue;
                 distance[next] = nextDistance;
                 previous[next] = current;
                 queue.Enqueue(next);
@@ -1126,7 +1150,7 @@ public class TacticalGridMovement : MonoBehaviour
         isMoving = true;
         foreach (Cell cell in path)
         {
-            Vector3 startPosition = player.position;
+            Vector3 startPosition = actingUnit.position;
             Vector3 targetPosition = CellWorldPosition(cell);
             float distance = Vector3.Distance(startPosition, targetPosition);
             float duration = Mathf.Max(distance / moveSpeed, 0.01f);
@@ -1139,21 +1163,23 @@ public class TacticalGridMovement : MonoBehaviour
                 float t = Mathf.Clamp01(elapsed / duration);
                 Vector3 position = Vector3.Lerp(startPosition, targetPosition, t);
                 position.y += arc * Mathf.Sin(t * Mathf.PI);
-                player.position = position;
+                actingUnit.position = position;
                 yield return null;
             }
-            player.position = targetPosition;
+            actingUnit.position = targetPosition;
         }
         isMoving = false;
+        if (CurrentUnit != null) CurrentUnit.SpendMovement(path.Count);
         ClearMovementTiles();
-        isSelected = false;
+        isSelected = CurrentUnit != null && CurrentUnit.isPlayerControlled;
         isJumpMode = false;
+        if (isSelected) RefreshMovementTiles();
     }
 
     private IEnumerator JumpToCell(Cell targetCell)
     {
         isMoving = true;
-        Vector3 startPosition = player.position;
+        Vector3 startPosition = actingUnit.position;
         Vector3 targetPosition = CellWorldPosition(targetCell);
         float distance = Vector3.Distance(startPosition, targetPosition);
         float duration = Mathf.Max(distance / moveSpeed, 0.15f);
@@ -1164,14 +1190,198 @@ public class TacticalGridMovement : MonoBehaviour
             float t = Mathf.Clamp01(elapsed / duration);
             Vector3 position = Vector3.Lerp(startPosition, targetPosition, t);
             position.y += Mathf.Sin(t * Mathf.PI) * jumpArcHeight;
-            player.position = position;
+            actingUnit.position = position;
             yield return null;
         }
-        player.position = targetPosition;
+        actingUnit.position = targetPosition;
         isMoving = false;
+        if (CurrentUnit != null) CurrentUnit.SpendMovement(Mathf.Abs(WorldToGrid(startPosition).x - targetCell.coord.x) + Mathf.Abs(WorldToGrid(startPosition).y - targetCell.coord.y));
         ClearMovementTiles();
-        isSelected = false;
+        isSelected = CurrentUnit != null && CurrentUnit.isPlayerControlled;
         isJumpMode = false;
+        if (isSelected) RefreshMovementTiles();
+    }
+
+
+    // AI: szukanie trasy po chodzeniu i skokach przez przerwy w platformach.
+    private class AIPlanStep
+    {
+        public Vector2Int coord;
+        public bool jump;
+        public int cost;
+        public AIPlanStep(Vector2Int coord, bool jump, int cost)
+        { this.coord = coord; this.jump = jump; this.cost = cost; }
+    }
+
+    private List<AIPlanStep> FindAIPlan(Vector2Int start, Vector2Int goal, int budget, int range)
+    {
+        if (!cells.ContainsKey(start)) return null;
+        var distances = new Dictionary<Vector2Int, int> { [start] = 0 };
+        var previous = new Dictionary<Vector2Int, Vector2Int>();
+        var jumps = new Dictionary<Vector2Int, bool>();
+        var costs = new Dictionary<Vector2Int, int>();
+        var frontier = new List<Vector2Int> { start };
+        while (frontier.Count > 0)
+        {
+            int bestIndex = 0;
+            for (int i = 1; i < frontier.Count; i++)
+                if (distances[frontier[i]] < distances[frontier[bestIndex]]) bestIndex = i;
+            Vector2Int current = frontier[bestIndex];
+            frontier.RemoveAt(bestIndex);
+            int currentCost = distances[current];
+            foreach (Vector2Int dir in directions)
+            {
+                for (int distance = 1; distance <= maxJumpGapCells + 1; distance++)
+                {
+                    Vector2Int next = current + dir * distance;
+                    if (!cells.ContainsKey(next) || IsCellBlocked(next)) continue;
+                    bool jump = distance > 1;
+                    if (jump)
+                    {
+                        bool validGap = true;
+                        for (int k = 1; k < distance; k++)
+                        {
+                            Vector2Int mid = current + dir * k;
+                            if (cells.ContainsKey(mid) || IsBlockingVolumeAt(mid)) { validGap = false; break; }
+                        }
+                        if (!validGap || Mathf.Abs(cells[next].surfaceY - cells[current].surfaceY) > maxJumpHeight) continue;
+                    }
+                    else if (Mathf.Abs(cells[next].surfaceY - cells[current].surfaceY) > maxStepHeight) continue;
+                    int newCost = currentCost + distance;
+                    if (newCost > budget || (distances.ContainsKey(next) && distances[next] <= newCost)) continue;
+                    distances[next] = newCost;
+                    previous[next] = current;
+                    jumps[next] = jump;
+                    costs[next] = distance;
+                    if (!frontier.Contains(next)) frontier.Add(next);
+                }
+            }
+        }
+        Vector2Int destination = start;
+        int bestScore = int.MaxValue;
+        foreach (var entry in distances)
+        {
+            Vector2Int cell = entry.Key;
+            int dist = Mathf.Abs(cell.x - goal.x) + Mathf.Abs(cell.y - goal.y);
+            int score = Mathf.Max(0, dist - range) * 100 + entry.Value;
+            if (score < bestScore) { bestScore = score; destination = cell; }
+        }
+        if (destination == start) return null;
+        var plan = new List<AIPlanStep>();
+        Vector2Int cursor = destination;
+        while (cursor != start)
+        {
+            plan.Add(new AIPlanStep(cursor, jumps[cursor], costs[cursor]));
+            cursor = previous[cursor];
+        }
+        plan.Reverse();
+        return plan;
+    }
+
+    // Rzut tylko wtedy, gdy AI ma obok siebie obiekt/jednostkÄ™, ktÃ³rÄ… moÅ¼e unieÅ›Ä‡,
+    // a gracz jest w zasiÄ™gu rzutu. Wykorzystuje istniejÄ…cÄ… animacjÄ™ rzucania.
+    private IEnumerator EnemyTryThrow(TacticalUnit enemy, TacticalUnit target)
+    {
+        if (enemy == null || target == null || enemy.hasActed || isCarrying) yield break;
+        Vector2Int originCell = WorldToGrid(enemy.transform.position);
+        Vector2Int targetCell = WorldToGrid(target.transform.position);
+        int dist = Mathf.Abs(originCell.x - targetCell.x) + Mathf.Abs(originCell.y - targetCell.y);
+        if (dist < 1 || dist > throwRange) yield break;
+
+        Cell landing = null;
+        foreach (Vector2Int dir in directions)
+        {
+            Vector2Int adjacent = targetCell + dir;
+            if (adjacent == originCell) continue;
+            if (cells.TryGetValue(adjacent, out Cell candidate) && !IsCellBlocked(adjacent))
+            { landing = candidate; break; }
+        }
+        if (landing == null) yield break;
+
+        Transform objectToThrow = null;
+        foreach (Vector2Int dir in directions)
+        {
+            Vector2Int neighbor = originCell + dir;
+            if (!cells.ContainsKey(neighbor)) continue;
+            Collider[] hits = Physics.OverlapBox(
+                new Vector3(GridToWorld(neighbor).x, cells[neighbor].surfaceY + blockingCheckHeight, GridToWorld(neighbor).z),
+                new Vector3(cellSize * 0.4f, blockingCheckHeight + 0.5f, cellSize * 0.4f),
+                Quaternion.identity, ~0, QueryTriggerInteraction.Ignore);
+            foreach (Collider hit in hits)
+            {
+                Transform candidate = FindCarryableRoot(hit.transform);
+                if (candidate == null || candidate == enemy.transform || candidate == target.transform) continue;
+                TacticalUnit unit = candidate.GetComponent<TacticalUnit>();
+                if (unit != null && (!unit.IsAlive || unit.IsActiveUnit || unit.isPlayerControlled)) continue;
+                if (!CanCarry(candidate)) continue;
+                objectToThrow = candidate;
+                break;
+            }
+            if (objectToThrow != null) break;
+        }
+        if (objectToThrow == null) yield break;
+        PickUpObject(objectToThrow);
+        yield return new WaitForSeconds(0.2f);
+        yield return StartCoroutine(ThrowAtEnemy(target.transform, landing));
+        enemy.hasActed = true;
+    }
+
+    public IEnumerator RunEnemyTurn(TacticalUnit enemy)
+    {
+        if (enemy == null || !enemy.IsAlive) yield break;
+        actingUnit = enemy.transform;
+        movementRange = enemy.movementRange;
+        moveSpeed = enemy.moveSpeed;
+        carryStrength = enemy.strength;
+        attackDamage = enemy.attackDamage;
+        isArcher = enemy.isArcher;
+        archerAttackRange = enemy.attackRange;
+        isSelected = false;
+        yield return new WaitForSeconds(0.3f);
+
+        TacticalUnit target = null;
+        int nearest = int.MaxValue;
+        Vector2Int start = WorldToGrid(enemy.transform.position);
+        foreach (TacticalUnit candidate in FindObjectsOfType<TacticalUnit>())
+        {
+            if (candidate == null || !candidate.IsAlive || !candidate.isPlayerControlled) continue;
+            Vector2Int pos = WorldToGrid(candidate.transform.position);
+            int d = Mathf.Abs(start.x - pos.x) + Mathf.Abs(start.y - pos.y);
+            if (d < nearest) { nearest = d; target = candidate; }
+        }
+        if (target == null) { actingUnit = null; yield break; }
+
+        int range = enemy.isArcher ? enemy.attackRange : 1;
+        if (nearest > range)
+        {
+            List<AIPlanStep> plan = FindAIPlan(start, WorldToGrid(target.transform.position), enemy.RemainingMovement, range);
+            if (plan != null)
+            {
+                foreach (AIPlanStep step in plan)
+                {
+                    if (!enemy.IsAlive || !target.IsAlive || enemy.RemainingMovement < step.cost) break;
+                    if (IsCellBlocked(step.coord)) break;
+                    if (step.jump)
+                        yield return StartCoroutine(JumpToCell(cells[step.coord]));
+                    else
+                        yield return StartCoroutine(FollowPath(new List<Cell> { cells[step.coord] }));
+                    Vector2Int now = WorldToGrid(enemy.transform.position);
+                    Vector2Int goal = WorldToGrid(target.transform.position);
+                    if (Mathf.Abs(now.x - goal.x) + Mathf.Abs(now.y - goal.y) <= range) break;
+                }
+            }
+        }
+        if (enemy.IsAlive && target.IsAlive && !enemy.hasActed)
+        {
+            yield return StartCoroutine(EnemyTryThrow(enemy, target));
+            if (!enemy.hasActed && IsEnemyInAttackRange(target.transform))
+            {
+                yield return new WaitForSeconds(0.25f);
+                PerformAttack(target.transform);
+                enemy.hasActed = true;
+            }
+        }
+        actingUnit = null;
     }
 
     private void OnDrawGizmosSelected()

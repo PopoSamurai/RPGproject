@@ -1,30 +1,77 @@
 using UnityEngine;
 public class TacticalUnit : MonoBehaviour
 {
-    [Header("Kontrola")]
+    [Header("Dane jednostki (wymagane)")]
+    public TacticalUnitData unitData;
+    public TacticalItemData equippedWeapon;
+    public TacticalItemData equippedArmor;
+    public TacticalSkillData[] AvailableSkills => unitData != null ? unitData.skills : null;
+
+    private void LoadUnitData()
+    {
+        if (unitData == null)
+        {
+            Debug.LogError($"{name}: brak Unit Data! Przypisz TacticalUnitData w Inspectorze.", this);
+            enabled = false;
+            return;
+        }
+        attackDamage = 0;
+        attackRange = 1;
+        isArcher = false;
+        maxHealth = unitData.maxHealth;
+        strength = unitData.strength;
+        movementRange = unitData.movementRange;
+        moveSpeed = unitData.moveSpeed;
+        weight = unitData.weight;
+        if (unitData.basicAttack != null)
+        {
+            attackDamage = unitData.basicAttack.damage;
+            attackRange = unitData.basicAttack.range;
+            isArcher = unitData.basicAttack.ranged;
+        }
+        if (equippedWeapon != null)
+        {
+            attackDamage += equippedWeapon.bonusAttack;
+            strength += equippedWeapon.bonusStrength;
+            movementRange += equippedWeapon.bonusMovement;
+            maxHealth += equippedWeapon.bonusHealth;
+        }
+        if (equippedArmor != null)
+        {
+            attackDamage += equippedArmor.bonusAttack;
+            strength += equippedArmor.bonusStrength;
+            movementRange += equippedArmor.bonusMovement;
+            maxHealth += equippedArmor.bonusHealth;
+        }
+    }
+
+    [Header("Druzyna / sterowanie")]
     public bool isPlayerControlled = true;
-    public bool isArcher = false;
 
-    [Header("Statystyki")]
-    [Min(1)] public int maxHealth = 10;
-    [Min(0)] public int strength = 2;
-    [Min(1)] public int attackDamage = 2;
-    [Min(1)] public int movementRange = 5;
-    [Min(0.1f)] public float moveSpeed = 4f;
+    // Statystyki
+    public bool isArcher { get; private set; }
+    public int maxHealth { get; private set; }
+    public int strength { get; private set; }
+    public int attackDamage { get; private set; }
+    public int movementRange { get; private set; }
+    public float moveSpeed { get; private set; }
+    public int weight { get; private set; }
+    public int attackRange { get; private set; }
 
-    [Min(1)]
-    [Tooltip("Waga obiektu. Gracz podniesie obiekt, jeœli jego Carry Strength jest >= tej wartoœci.")]
-    public int weight = 1;
-
-    [Header("Atak dystansowy")]
-    [Min(1)] public int attackRange = 4;
     [Header("Stan")]
     [SerializeField] private int currentHealth;
     public int CurrentHealth => currentHealth;
-    public bool IsAlive => currentHealth > 0;
+    public bool IsAlive => unitData != null && currentHealth > 0;
 
     [Header("Stan tury")]
     public bool hasMoved = false;
+    [SerializeField] private int remainingMovement;
+    public int RemainingMovement => remainingMovement;
+    public void SpendMovement(int cells)
+    {
+        remainingMovement = Mathf.Max(0, remainingMovement - Mathf.Max(0, cells));
+        hasMoved = remainingMovement == 0;
+    }
     public bool hasActed = false;
 
     [SerializeField] private bool isActiveUnit = false;
@@ -33,6 +80,8 @@ public class TacticalUnit : MonoBehaviour
 
     private void Awake()
     {
+        LoadUnitData();
+        if (unitData == null) return;
 
         currentHealth = Mathf.Clamp(
             currentHealth <= 0 ? maxHealth : currentHealth,
@@ -48,8 +97,9 @@ public class TacticalUnit : MonoBehaviour
         isActiveUnit = true;
         hasMoved = false;
         hasActed = false;
+        remainingMovement = movementRange;
 
-        Debug.Log($"{name}: rozpoczêcie tury.");
+        Debug.Log($"{name}: rozpoczecie tury");
     }
     public void EndTurn()
     {
@@ -65,7 +115,7 @@ public class TacticalUnit : MonoBehaviour
         currentHealth = Mathf.Max(0, currentHealth - damage);
 
         Debug.Log(
-            $"{name}: otrzymano {damage} obra¿eñ. " +
+            $"{name}: otrzymano {damage} obrazen " +
             $"HP: {currentHealth}/{maxHealth}"
         );
 
@@ -81,9 +131,7 @@ public class TacticalUnit : MonoBehaviour
     }
     private void Die()
     {
-        Debug.Log($"{name} zosta³a pokonana.");
-        // Na razie usuwamy jednostkê z gry.
-        // PóŸniej mo¿na tu dodaæ animacjê œmierci i system tur.
+        Debug.Log($"pokonano {name}");
         gameObject.SetActive(false);
     }
 }
