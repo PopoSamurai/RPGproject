@@ -13,7 +13,11 @@ MonoBehaviour:
   m_Name: Mage
   m_EditorClassIdentifier: 
   displayName: Mage
-  portrait: {fileID: 0}
+  portrait: {fileID: -2091798658, guid: 08d0948b10f5f734e8383b23797f920a, type: 3}
+  frontSprite: {fileID: -775320428, guid: 08d0948b10f5f734e8383b23797f920a, type: 3}
+  backSprite: {fileID: -1961104668, guid: 08d0948b10f5f734e8383b23797f920a, type: 3}
+  leftSprite: {fileID: -1703844352, guid: 08d0948b10f5f734e8383b23797f920a, type: 3}
+  rightSprite: {fileID: -768477029, guid: 08d0948b10f5f734e8383b23797f920a, type: 3}
   maxHealth: 15
   strength: 10
   movementRange: 4

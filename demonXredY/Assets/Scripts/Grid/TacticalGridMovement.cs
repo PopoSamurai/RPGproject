@@ -378,6 +378,7 @@ public class TacticalGridMovement : MonoBehaviour
     Transform enemy,
     Cell landingCell)
     {
+        if (enemy != null) FaceActingUnit(enemy.position);
         isMoving = true;
 
         if (carriedObject == null || enemy == null)
@@ -397,6 +398,7 @@ public class TacticalGridMovement : MonoBehaviour
         targetPosition.y = landingCell.surfaceY + carriedBottomOffset;
 
         thrownObject.SetParent(null, true);
+        FaceThrownUnit(thrownObject, startPosition, targetPosition);
 
         float distance = Vector3.Distance(startPosition, targetPosition);
         float duration = Mathf.Max(distance / moveSpeed, 0.25f);
@@ -422,6 +424,7 @@ public class TacticalGridMovement : MonoBehaviour
         }
 
         thrownObject.position = targetPosition;
+        FaceThrownUnit(thrownObject, startPosition, targetPosition);
 
         foreach (Collider col in carriedColliders)
         {
@@ -434,9 +437,10 @@ public class TacticalGridMovement : MonoBehaviour
         if (carriedBody != null)
             carriedBody.isKinematic = false;
 
-        // Obrażenia po zakończeniu rzutu.
+        // Trafiona jednostka obraca się w stronę rzucającego.
         if (enemy != null)
         {
+            FaceUnitTowards(enemy, actingUnit != null ? actingUnit.position : startPosition);
             enemy.gameObject.SendMessage(
                 "ApplyDamage",
                 attackDamage,
@@ -546,9 +550,41 @@ public class TacticalGridMovement : MonoBehaviour
         return distance >= 1 && distance <= (isArcher ? archerAttackRange : 1);
     }
 
+    // Kierunek wizualny niezalezny od obrotu kamery i kapsulki.
+    private void FaceActingUnit(Vector3 targetPosition)
+    {
+        if (actingUnit == null) return;
+        TacticalUnitSprite sprite = actingUnit.GetComponent<TacticalUnitSprite>();
+        if (sprite != null) sprite.FaceTarget(targetPosition);
+    }
+
+    // Ustawia kierunek dowolnej jednostki, nie tylko aktywnej.
+    private static void FaceUnitTowards(Transform unitTransform, Vector3 worldPosition)
+    {
+        if (unitTransform == null) return;
+        TacticalUnitSprite sprite = unitTransform.GetComponent<TacticalUnitSprite>();
+        if (sprite != null) sprite.FaceTarget(worldPosition);
+    }
+
+    // Zachowuje kierunek lotu po zakończeniu rzutu.
+    private static void FaceThrownUnit(Transform thrown, Vector3 from, Vector3 to)
+    {
+        if (thrown == null) return;
+        TacticalUnitSprite sprite = thrown.GetComponent<TacticalUnitSprite>();
+        if (sprite != null) sprite.FaceDirection(to - from);
+    }
+
+    private static bool IsStraightThrow(Vector2Int from, Vector2Int to)
+    {
+        return (from.x == to.x) != (from.y == to.y);
+    }
+
     private void PerformAttack(Transform enemy)
     {
         if (enemy == null) return;
+        FaceActingUnit(enemy.position);
+        // Trafiona jednostka odwraca się do napastnika.
+        FaceUnitTowards(enemy, actingUnit.position);
         int damage = attackDamage;
         // Enemy może mieć własny komponent z metodą public void ApplyDamage(int damage).
         enemy.gameObject.SendMessage("ApplyDamage", damage, SendMessageOptions.DontRequireReceiver);
@@ -814,6 +850,7 @@ public class TacticalGridMovement : MonoBehaviour
     private void PickUpObject(Transform objectToCarry)
     {
         if (objectToCarry == null) return;
+        FaceActingUnit(objectToCarry.position);
 
         carriedObject = objectToCarry;
         Collider[] carriedColliders = carriedObject.GetComponentsInChildren<Collider>();
@@ -855,7 +892,7 @@ public class TacticalGridMovement : MonoBehaviour
                     Mathf.Abs(coord.x - start.x) +
                     Mathf.Abs(coord.y - start.y);
 
-                if (distance <= throwRange)
+                if (distance <= throwRange && IsStraightThrow(start, coord))
                     throwCells.Add(coord);
             }
         }
@@ -884,7 +921,7 @@ public class TacticalGridMovement : MonoBehaviour
                 Mathf.Abs(enemyCoord.x - start.x) +
                 Mathf.Abs(enemyCoord.y - start.y);
 
-            if (distance < 1 || distance > throwRange)
+            if (distance < 1 || distance > throwRange || !IsStraightThrow(start, enemyCoord))
                 continue;
 
             throwCells.Add(enemyCoord);
@@ -925,7 +962,7 @@ public class TacticalGridMovement : MonoBehaviour
                 Mathf.Abs(coord.x - start.x) +
                 Mathf.Abs(coord.y - start.y);
 
-            if (distance < 1 || distance > throwRange)
+            if (distance < 1 || distance > throwRange || !IsStraightThrow(start, coord))
                 continue;
 
             // Przeciwnicy są obsługiwani przez osobny słownik.
@@ -938,6 +975,7 @@ public class TacticalGridMovement : MonoBehaviour
     }
     private IEnumerator ThrowUnitToCell(Cell targetCell)
     {
+        FaceActingUnit(CellWorldPosition(targetCell));
         isMoving = true;
         if (carriedObject == null)
         {
@@ -952,6 +990,7 @@ public class TacticalGridMovement : MonoBehaviour
         targetPosition.y = targetCell.surfaceY + carriedBottomOffset;
 
         carriedObject.SetParent(null, true);
+        FaceThrownUnit(carriedObject, startPosition, targetPosition);
         float distance = Vector3.Distance(startPosition, targetPosition);
         float duration = Mathf.Max(distance / moveSpeed, 0.25f);
         float elapsed = 0f;
@@ -965,6 +1004,7 @@ public class TacticalGridMovement : MonoBehaviour
             yield return null;
         }
         carriedObject.position = targetPosition;
+        FaceThrownUnit(carriedObject, startPosition, targetPosition);
         foreach (Collider col in carriedColliders) col.enabled = true;
         Rigidbody carriedBody = carriedObject.GetComponent<Rigidbody>();
         if (carriedBody != null) carriedBody.isKinematic = false;
@@ -1152,6 +1192,7 @@ public class TacticalGridMovement : MonoBehaviour
         {
             Vector3 startPosition = actingUnit.position;
             Vector3 targetPosition = CellWorldPosition(cell);
+            FaceActingUnit(targetPosition);
             float distance = Vector3.Distance(startPosition, targetPosition);
             float duration = Mathf.Max(distance / moveSpeed, 0.01f);
             float elapsed = 0f;
@@ -1178,6 +1219,7 @@ public class TacticalGridMovement : MonoBehaviour
 
     private IEnumerator JumpToCell(Cell targetCell)
     {
+        FaceActingUnit(CellWorldPosition(targetCell));
         isMoving = true;
         Vector3 startPosition = actingUnit.position;
         Vector3 targetPosition = CellWorldPosition(targetCell);
@@ -1286,17 +1328,11 @@ public class TacticalGridMovement : MonoBehaviour
         Vector2Int originCell = WorldToGrid(enemy.transform.position);
         Vector2Int targetCell = WorldToGrid(target.transform.position);
         int dist = Mathf.Abs(originCell.x - targetCell.x) + Mathf.Abs(originCell.y - targetCell.y);
-        if (dist < 1 || dist > throwRange) yield break;
+        if (dist < 1 || dist > throwRange || !IsStraightThrow(originCell, targetCell)) yield break;
 
-        Cell landing = null;
-        foreach (Vector2Int dir in directions)
-        {
-            Vector2Int adjacent = targetCell + dir;
-            if (adjacent == originCell) continue;
-            if (cells.TryGetValue(adjacent, out Cell candidate) && !IsCellBlocked(adjacent))
-            { landing = candidate; break; }
-        }
-        if (landing == null) yield break;
+        // Cel i rzucający muszą znajdować się na jednej osi gridu.
+        // Wybieramy pole lądowania dokładnie przed celem, bez odchylenia w bok.
+        if (!TryGetThrowLandingCell(originCell, targetCell, out Cell landing)) yield break;
 
         Transform objectToThrow = null;
         foreach (Vector2Int dir in directions)

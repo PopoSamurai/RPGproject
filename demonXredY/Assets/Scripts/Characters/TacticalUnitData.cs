@@ -5,6 +5,12 @@ public class TacticalUnitData : ScriptableObject
 {
     public string displayName = "Unit";
     public Sprite portrait;
+
+    [Header("Sprites 2.5D - widok wzgledem postaci")]
+    public Sprite frontSprite;
+    public Sprite backSprite;
+    public Sprite leftSprite;
+    public Sprite rightSprite;
     [Min(1)] public int maxHealth = 10;
     [Min(0)] public int strength = 2;
     [Min(1)] public int movementRange = 5;

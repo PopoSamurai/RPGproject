@@ -5,6 +5,7 @@ public class TacticalUnit : MonoBehaviour
     public TacticalUnitData unitData;
     public TacticalItemData equippedWeapon;
     public TacticalItemData equippedArmor;
+
     public TacticalSkillData[] AvailableSkills => unitData != null ? unitData.skills : null;
 
     private void LoadUnitData()
@@ -45,10 +46,23 @@ public class TacticalUnit : MonoBehaviour
         }
     }
 
+    // Called by the battle spawner after Instantiate (Awake may have run already).
+    public void Initialize(TacticalUnitData data, bool playerTeam)
+    {
+        unitData = data;
+        isPlayerControlled = playerTeam;
+        LoadUnitData();
+        currentHealth = maxHealth;
+        remainingMovement = 0;
+        hasMoved = false;
+        hasActed = false;
+        isActiveUnit = false;
+    }
+
     [Header("Druzyna / sterowanie")]
     public bool isPlayerControlled = true;
 
-    // Statystyki
+    // Statystyki sa wyliczane z UnitData i wyposazenia, a nie ustawiane na jednostce.
     public bool isArcher { get; private set; }
     public int maxHealth { get; private set; }
     public int strength { get; private set; }
@@ -99,7 +113,7 @@ public class TacticalUnit : MonoBehaviour
         hasActed = false;
         remainingMovement = movementRange;
 
-        Debug.Log($"{name}: rozpoczecie tury");
+        Debug.Log($"{name}: rozpoczêcie tury.");
     }
     public void EndTurn()
     {
@@ -115,7 +129,7 @@ public class TacticalUnit : MonoBehaviour
         currentHealth = Mathf.Max(0, currentHealth - damage);
 
         Debug.Log(
-            $"{name}: otrzymano {damage} obrazen " +
+            $"{name}: otrzymano {damage} obra¿eñ. " +
             $"HP: {currentHealth}/{maxHealth}"
         );
 
@@ -131,7 +145,9 @@ public class TacticalUnit : MonoBehaviour
     }
     private void Die()
     {
-        Debug.Log($"pokonano {name}");
+        Debug.Log($"{name} zosta³a pokonana.");
+        // Na razie usuwamy jednostkê z gry.
+        // PóŸniej mo¿na tu dodaæ animacjê œmierci i system tur.
         gameObject.SetActive(false);
     }
 }
