@@ -58,11 +58,9 @@ public class TacticalUnitSprite : MonoBehaviour
         if (gameCamera == null) gameCamera = Camera.main;
         if (gameCamera == null) return;
 
-        Vector3 delta = transform.position - previousPosition;
-        previousPosition = transform.position;
-        delta.y = 0f;
-        if (delta.magnitude > movementThreshold * Mathf.Max(Time.deltaTime, 0.0001f))
-            FaceDirection(delta);
+        // Facing is controlled explicitly by TacticalGridMovement.
+        // Do not infer it from position: knockback, throws, spawn adjustments
+        // and interpolation can overwrite the direction set for a step/action.
 
         // Use camera orientation rather than its position. This stays stable
         // while the camera follows another unit or moves between targets.

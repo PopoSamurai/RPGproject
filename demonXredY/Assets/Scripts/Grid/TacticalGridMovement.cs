@@ -1192,7 +1192,15 @@ public class TacticalGridMovement : MonoBehaviour
         {
             Vector3 startPosition = actingUnit.position;
             Vector3 targetPosition = CellWorldPosition(cell);
-            FaceActingUnit(targetPosition);
+            // Face the horizontal direction of THIS step, before moving.
+            // This works for player and AI, including turns along a path.
+            Vector3 stepDirection = targetPosition - startPosition;
+            stepDirection.y = 0f;
+            if (stepDirection.sqrMagnitude > 0.0001f)
+            {
+                TacticalUnitSprite unitSprite = actingUnit.GetComponent<TacticalUnitSprite>();
+                if (unitSprite != null) unitSprite.FaceDirection(stepDirection);
+            }
             float distance = Vector3.Distance(startPosition, targetPosition);
             float duration = Mathf.Max(distance / moveSpeed, 0.01f);
             float elapsed = 0f;
