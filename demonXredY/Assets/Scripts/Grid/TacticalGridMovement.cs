@@ -1188,6 +1188,9 @@ public class TacticalGridMovement : MonoBehaviour
     private IEnumerator FollowPath(List<Cell> path)
     {
         isMoving = true;
+        TacticalUnitSprite walkingSprite = actingUnit != null
+            ? actingUnit.GetComponent<TacticalUnitSprite>() : null;
+        if (walkingSprite != null) walkingSprite.SetWalking(true);
         foreach (Cell cell in path)
         {
             Vector3 startPosition = actingUnit.position;
@@ -1217,6 +1220,7 @@ public class TacticalGridMovement : MonoBehaviour
             }
             actingUnit.position = targetPosition;
         }
+        if (walkingSprite != null) walkingSprite.SetWalking(false);
         isMoving = false;
         if (CurrentUnit != null) CurrentUnit.SpendMovement(path.Count);
         ClearMovementTiles();

@@ -11,6 +11,18 @@ public class TacticalUnitData : ScriptableObject
     public Sprite backSprite;
     public Sprite leftSprite;
     public Sprite rightSprite;
+    [Header("Idle animation (4 frames per direction)")]
+    public Sprite[] idleFront = new Sprite[4];
+    public Sprite[] idleBack = new Sprite[4];
+    public Sprite[] idleLeft = new Sprite[4];
+    public Sprite[] idleRight = new Sprite[4];
+
+    [Header("Walk animation (4 frames per direction)")]
+    public Sprite[] walkFront = new Sprite[4];
+    public Sprite[] walkBack = new Sprite[4];
+    public Sprite[] walkLeft = new Sprite[4];
+    public Sprite[] walkRight = new Sprite[4];
+
     [Min(1)] public int maxHealth = 10;
     [Min(0)] public int strength = 2;
     [Min(1)] public int movementRange = 5;

@@ -15,7 +15,7 @@ public class TacticalCameraController : MonoBehaviour
     [Min(0f)] public float rotationSmoothness = 8f;
 
     [Header("Zoom")]
-    [Tooltip("Orthographic: Camera Size. Perspective: odleg³oœæ od celu.")]
+    [Tooltip("Orthographic: Camera Size. Perspective: odlegÅ‚oÅ›Ä‡ od celu.")]
     public float minZoom = 4f;
     public float maxZoom = 16f;
     public float zoomSensitivity = 1.5f;
@@ -28,6 +28,9 @@ public class TacticalCameraController : MonoBehaviour
     private Camera cam;
     private float yaw;
     private float desiredYaw;
+
+    // Docelowy obrot po Q/E, niezalezny od animacji przejscia kamery.
+    public float TargetYaw => initialized ? desiredYaw : transform.eulerAngles.y;
     private float zoom;
     private float desiredZoom;
     private Vector3 focusPoint;
@@ -68,7 +71,7 @@ public class TacticalCameraController : MonoBehaviour
         return target.position + Vector3.up * targetHeight + targetOffset;
     }
 
-    // Wywo³uj tê metodê po zaznaczeniu jednostki
+    // WywoÅ‚uj tÄ™ metodÄ™ po zaznaczeniu jednostki
     // albo po zmianie aktywnej jednostki w systemie tur.
     public void SetTarget(Transform newTarget)
     {
@@ -80,7 +83,7 @@ public class TacticalCameraController : MonoBehaviour
         if (!initialized)
             return;
 
-        // Kamera p³ynnie przejdzie do nowej jednostki.
+        // Kamera pÅ‚ynnie przejdzie do nowej jednostki.
         // Nie teleportujemy od razu punktu skupienia.
     }
 
