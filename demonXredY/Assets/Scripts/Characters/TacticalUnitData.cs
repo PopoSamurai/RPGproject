@@ -23,6 +23,24 @@ public class TacticalUnitData : ScriptableObject
     public Sprite[] walkLeft = new Sprite[4];
     public Sprite[] walkRight = new Sprite[4];
 
+    [Header("Pickup (2 frames per direction)")]
+    public Sprite[] pickupFront = new Sprite[2];
+    public Sprite[] pickupBack = new Sprite[2];
+    public Sprite[] pickupLeft = new Sprite[2];
+    public Sprite[] pickupRight = new Sprite[2];
+
+    [Header("Throw (2 frames per direction)")]
+    public Sprite[] throwFront = new Sprite[2];
+    public Sprite[] throwBack = new Sprite[2];
+    public Sprite[] throwLeft = new Sprite[2];
+    public Sprite[] throwRight = new Sprite[2];
+
+    [Header("Carried unit (1 frame per direction)")]
+    public Sprite heldFront;
+    public Sprite heldBack;
+    public Sprite heldLeft;
+    public Sprite heldRight;
+
     [Min(1)] public int maxHealth = 10;
     [Min(0)] public int strength = 2;
     [Min(1)] public int movementRange = 5;

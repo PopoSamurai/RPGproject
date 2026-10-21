@@ -58,6 +58,34 @@ MonoBehaviour:
   - {fileID: 1612962487, guid: 6c8d95cc72877de499d8505a13400af7, type: 3}
   - {fileID: -959955813, guid: 6c8d95cc72877de499d8505a13400af7, type: 3}
   - {fileID: 625974666, guid: 6c8d95cc72877de499d8505a13400af7, type: 3}
+  pickupFront:
+  - {fileID: 1438028270, guid: 6c8d95cc72877de499d8505a13400af7, type: 3}
+  - {fileID: -1569914434, guid: 6c8d95cc72877de499d8505a13400af7, type: 3}
+  pickupBack:
+  - {fileID: -1179975106, guid: 6c8d95cc72877de499d8505a13400af7, type: 3}
+  - {fileID: 1618056922, guid: 6c8d95cc72877de499d8505a13400af7, type: 3}
+  pickupLeft:
+  - {fileID: -1571579457, guid: 6c8d95cc72877de499d8505a13400af7, type: 3}
+  - {fileID: -1784420593, guid: 6c8d95cc72877de499d8505a13400af7, type: 3}
+  pickupRight:
+  - {fileID: -546730948, guid: 6c8d95cc72877de499d8505a13400af7, type: 3}
+  - {fileID: 263493831, guid: 6c8d95cc72877de499d8505a13400af7, type: 3}
+  throwFront:
+  - {fileID: 533377272, guid: 6c8d95cc72877de499d8505a13400af7, type: 3}
+  - {fileID: 903751785, guid: 6c8d95cc72877de499d8505a13400af7, type: 3}
+  throwBack:
+  - {fileID: 1395142095, guid: 6c8d95cc72877de499d8505a13400af7, type: 3}
+  - {fileID: 1024378194, guid: 6c8d95cc72877de499d8505a13400af7, type: 3}
+  throwLeft:
+  - {fileID: 262806462, guid: 6c8d95cc72877de499d8505a13400af7, type: 3}
+  - {fileID: 1387957566, guid: 6c8d95cc72877de499d8505a13400af7, type: 3}
+  throwRight:
+  - {fileID: 2097873054, guid: 6c8d95cc72877de499d8505a13400af7, type: 3}
+  - {fileID: 422231877, guid: 6c8d95cc72877de499d8505a13400af7, type: 3}
+  heldFront: {fileID: -65204441, guid: d8f213d1f4708be49adc19d47ed493d6, type: 3}
+  heldBack: {fileID: 960595178, guid: d8f213d1f4708be49adc19d47ed493d6, type: 3}
+  heldLeft: {fileID: -777580096, guid: d8f213d1f4708be49adc19d47ed493d6, type: 3}
+  heldRight: {fileID: -679571483, guid: d8f213d1f4708be49adc19d47ed493d6, type: 3}
   maxHealth: 15
   strength: 3
   movementRange: 7

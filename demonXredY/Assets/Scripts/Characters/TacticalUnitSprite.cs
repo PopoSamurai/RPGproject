@@ -34,6 +34,47 @@ public class TacticalUnitSprite : MonoBehaviour
     private bool walking;
     private bool walkingExplicit;
     private float animationTime;
+    private enum SpecialState { None, Pickup, Carrying, Throw, Held }
+    private SpecialState specialState;
+    private float specialTime;
+    private float specialDuration;
+
+    [Header("Pickup / Throw timing")]
+    [Min(0.01f)] public float pickupAnimationDuration = 0.30f;
+    [Min(0.01f)] public float throwAnimationDuration = 0.30f;
+
+    public void PlayPickup()
+    {
+        specialState = SpecialState.Pickup;
+        specialTime = 0f;
+        specialDuration = pickupAnimationDuration;
+        RefreshSprite();
+    }
+
+    // Freeze the lifter on the last (raised-hands) Pickup frame until throw begins.
+    public void HoldPickupPose()
+    {
+        specialState = SpecialState.Carrying;
+        specialTime = pickupAnimationDuration;
+        RefreshSprite();
+    }
+
+    public void PlayThrow()
+    {
+        specialState = SpecialState.Throw;
+        specialTime = 0f;
+        specialDuration = throwAnimationDuration;
+        RefreshSprite();
+    }
+
+    // Held is an indefinite, single-frame pose until release.
+    public void SetHeld(bool value)
+    {
+        specialState = value ? SpecialState.Held : SpecialState.None;
+        specialTime = 0f;
+        if (!value) animationTime = 0f;
+        RefreshSprite();
+    }
 
     private void Awake()
     {
@@ -110,6 +151,15 @@ public class TacticalUnitSprite : MonoBehaviour
             animationTime = 0f;
         }
         else animationTime += Time.deltaTime;
+        if (specialState == SpecialState.Pickup || specialState == SpecialState.Throw)
+        {
+            specialTime += Time.deltaTime;
+            if (specialTime >= specialDuration)
+            {
+                specialState = SpecialState.None;
+                animationTime = 0f;
+            }
+        }
         RefreshSprite();
     }
 
@@ -167,6 +217,31 @@ public class TacticalUnitSprite : MonoBehaviour
                     if (frames[i] == null) continue;
                     if (index-- == 0) { selected = frames[i]; break; }
                 }
+            }
+        }
+        // Action poses override Idle/Walk without changing logical facing.
+        if (specialState == SpecialState.Held)
+        {
+            Sprite held = direction == 0 ? data.heldFront :
+                          direction == 1 ? data.heldBack :
+                          direction == 2 ? data.heldRight : data.heldLeft;
+            if (held != null) selected = held;
+        }
+        else if (specialState == SpecialState.Pickup || specialState == SpecialState.Carrying || specialState == SpecialState.Throw)
+        {
+            bool pickup = specialState == SpecialState.Pickup || specialState == SpecialState.Carrying;
+            Sprite[] actionFrames = pickup
+                ? (direction == 0 ? data.pickupFront : direction == 1 ? data.pickupBack :
+                   direction == 2 ? data.pickupRight : data.pickupLeft)
+                : (direction == 0 ? data.throwFront : direction == 1 ? data.throwBack :
+                   direction == 2 ? data.throwRight : data.throwLeft);
+            if (actionFrames != null)
+            {
+                Sprite first = actionFrames.Length > 0 ? actionFrames[0] : null;
+                Sprite second = actionFrames.Length > 1 ? actionFrames[1] : null;
+                Sprite actionSprite = specialState == SpecialState.Carrying ? second : (specialTime < specialDuration * 0.5f ? first : second);
+                if (actionSprite == null) actionSprite = first != null ? first : second;
+                if (actionSprite != null) selected = actionSprite;
             }
         }
         if (selected == null) selected = fallback;

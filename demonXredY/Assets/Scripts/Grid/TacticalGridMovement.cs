@@ -35,7 +35,46 @@ public class TacticalGridMovement : MonoBehaviour
     [Min(1)] private int carryStrength = 5;
     public GameObject pickupTilePrefab;
     public float throwArcHeight = 2f;
+    [Tooltip("Legacy setting (not used for character carrying). Use heldFeetHeightFraction below.")]
     public float carryHeight = 1.5f;
+    [Header("Held unit position")]
+    [Range(0.35f, 1.25f)] public float heldFeetHeightFraction = 0.78f;
+    [Tooltip("Fine-tune held sprite height in world units; negative = lower.")]
+    public float heldVerticalOffset = -0.05f;
+
+    private IEnumerator FinishPickupPose(TacticalUnitSprite sprite)
+    {
+        if (sprite == null) yield break;
+        yield return new WaitForSeconds(sprite.pickupAnimationDuration);
+        // A throw may already have started; do not override Throw animation.
+        if (isCarrying && !isMoving && sprite != null)
+            sprite.HoldPickupPose();
+    }
+    [Header("Throw landing VFX")]
+    [Tooltip("Prefab ParticleSystem with Play On Awake enabled; spawned at ground contact.")]
+    public GameObject throwLandingDustPrefab;
+    [Min(0f)] public float dustHeightOffset = 0.03f;
+
+    private void SpawnLandingDust(Vector3 landingPosition, float surfaceY)
+    {
+        if (throwLandingDustPrefab == null) return;
+        landingPosition.y = surfaceY + dustHeightOffset;
+        GameObject fx = Instantiate(throwLandingDustPrefab, landingPosition, Quaternion.identity);
+        ParticleSystem[] particles = fx.GetComponentsInChildren<ParticleSystem>();
+        float lifetime = 3f;
+        foreach (ParticleSystem ps in particles)
+        {
+            ps.Play();
+            var main = ps.main;
+            lifetime = Mathf.Max(lifetime, main.duration + main.startLifetime.constantMax + 0.5f);
+        }
+        Destroy(fx, lifetime);
+    }
+
+    private static TacticalUnitSprite GetUnitSprite(Transform root)
+    {
+        return root != null ? root.GetComponent<TacticalUnitSprite>() : null;
+    }
 
     [Header("Attack")]
     private bool isArcher = false;
@@ -387,6 +426,14 @@ public class TacticalGridMovement : MonoBehaviour
             yield break;
         }
 
+        TacticalUnitSprite throwerSprite = GetUnitSprite(actingUnit);
+        if (throwerSprite != null)
+        {
+            throwerSprite.FaceTarget(enemy.position);
+            throwerSprite.PlayThrow();
+        }
+        TacticalUnitSprite thrownSprite = GetUnitSprite(carriedObject);
+        // Keep the thrown character in Held pose throughout the entire flight.
         Transform thrownObject = carriedObject;
 
         Vector3 startPosition = thrownObject.position;
@@ -397,6 +444,7 @@ public class TacticalGridMovement : MonoBehaviour
 
         targetPosition.y = landingCell.surfaceY + carriedBottomOffset;
 
+        if (thrownSprite != null) thrownSprite.FaceDirection(targetPosition - startPosition);
         thrownObject.SetParent(null, true);
         FaceThrownUnit(thrownObject, startPosition, targetPosition);
 
@@ -424,6 +472,8 @@ public class TacticalGridMovement : MonoBehaviour
         }
 
         thrownObject.position = targetPosition;
+        if (thrownSprite != null) thrownSprite.SetHeld(false);
+        SpawnLandingDust(targetPosition, landingCell.surfaceY);
         FaceThrownUnit(thrownObject, startPosition, targetPosition);
 
         foreach (Collider col in carriedColliders)
@@ -852,6 +902,12 @@ public class TacticalGridMovement : MonoBehaviour
         if (objectToCarry == null) return;
         FaceActingUnit(objectToCarry.position);
 
+        TacticalUnitSprite lifterSprite = GetUnitSprite(actingUnit);
+        if (lifterSprite != null)
+        {
+            lifterSprite.FaceTarget(objectToCarry.position);
+            lifterSprite.PlayPickup();
+        }
         carriedObject = objectToCarry;
         Collider[] carriedColliders = carriedObject.GetComponentsInChildren<Collider>();
         carriedBottomOffset = 0.5f;
@@ -859,8 +915,18 @@ public class TacticalGridMovement : MonoBehaviour
             carriedBottomOffset = Mathf.Max(carriedBottomOffset, carriedObject.position.y - col.bounds.min.y);
 
         isCarrying = true;
+        TacticalUnitSprite heldSprite = GetUnitSprite(carriedObject);
+        if (heldSprite != null) heldSprite.SetHeld(true);
         carriedObject.SetParent(actingUnit, true);
-        carriedObject.position = actingUnit.position + Vector3.up * carryHeight;
+        // Position the HELD UNIT'S FEET near the lifter's raised hands.
+        // Do not add the full carried capsule height on top of carryHeight.
+        Collider lifterCollider = actingUnit.GetComponent<Collider>();
+        float carrierFeet = lifterCollider != null ? lifterCollider.bounds.min.y : actingUnit.position.y;
+        float carrierHeight = lifterCollider != null ? lifterCollider.bounds.size.y : 1.5f;
+        float desiredFeetY = carrierFeet + carrierHeight * heldFeetHeightFraction + heldVerticalOffset;
+        carriedObject.position = new Vector3(actingUnit.position.x,
+            desiredFeetY + carriedBottomOffset, actingUnit.position.z);
+        if (lifterSprite != null) StartCoroutine(FinishPickupPose(lifterSprite));
         foreach (Collider col in carriedColliders) col.enabled = false;
 
         Rigidbody carriedBody = carriedObject.GetComponent<Rigidbody>();
@@ -984,11 +1050,20 @@ public class TacticalGridMovement : MonoBehaviour
             yield break;
         }
 
+        TacticalUnitSprite throwerSprite = GetUnitSprite(actingUnit);
+        if (throwerSprite != null)
+        {
+            throwerSprite.FaceTarget(GridToWorld(targetCell.coord));
+            throwerSprite.PlayThrow();
+        }
+        TacticalUnitSprite thrownSprite = GetUnitSprite(carriedObject);
+        // Keep the thrown character in Held pose throughout the entire flight.
         Vector3 startPosition = carriedObject.position;
         Vector3 targetPosition = GridToWorld(targetCell.coord);
         Collider[] carriedColliders = carriedObject.GetComponentsInChildren<Collider>();
         targetPosition.y = targetCell.surfaceY + carriedBottomOffset;
 
+        if (thrownSprite != null) thrownSprite.FaceDirection(targetPosition - startPosition);
         carriedObject.SetParent(null, true);
         FaceThrownUnit(carriedObject, startPosition, targetPosition);
         float distance = Vector3.Distance(startPosition, targetPosition);
@@ -1004,6 +1079,8 @@ public class TacticalGridMovement : MonoBehaviour
             yield return null;
         }
         carriedObject.position = targetPosition;
+        if (thrownSprite != null) thrownSprite.SetHeld(false);
+        SpawnLandingDust(targetPosition, targetCell.surfaceY);
         FaceThrownUnit(carriedObject, startPosition, targetPosition);
         foreach (Collider col in carriedColliders) col.enabled = true;
         Rigidbody carriedBody = carriedObject.GetComponent<Rigidbody>();
