@@ -25,6 +25,23 @@ public class TacticalGridMovement : MonoBehaviour
     public float maxStepHeight = 1.1f;
     private float moveSpeed = 4f;
 
+    [Header("Movement path preview")]
+    public bool showMovementPathPreview = true;
+    public Color pathDotColor = new Color(1f, 0.88f, 0.38f, 1f);
+    public Color cursorColor = new Color(1f, 0.95f, 0.35f, 1f);
+    [Min(1)] public int dotsPerCell = 4;
+    [Min(0.01f)] public float pathDotSize = 0.10f;
+    [Min(0f)] public float pathPreviewYOffset = 0.10f;
+    [Range(0.01f, 0.2f)] public float cursorLineWidth = 0.055f;
+
+    private Transform pathPreviewRoot;
+    private readonly List<GameObject> previewDots = new List<GameObject>();
+    private readonly List<GameObject> cursorEdges = new List<GameObject>();
+    private Vector2Int? lastPreviewCell;
+    private bool previewWasVisible;
+    private Material previewDotMaterial;
+    private Material previewCursorMaterial;
+
     [Header("Jump action")]
     [Min(1)] public int maxJumpGapCells = 1;
     public float maxJumpHeight = 1.5f;
@@ -184,10 +201,167 @@ public class TacticalGridMovement : MonoBehaviour
 
     private void Update()
     {
-        if (isMoving || actingUnit == null || gameCamera == null || !PlayerCanControl) return;
+        if (isMoving || actingUnit == null || gameCamera == null || !PlayerCanControl)
+        {
+            HidePathPreview();
+            return;
+        }
 
         if (Input.GetMouseButtonDown(0)) HandleClick();
         if (isSelected && Input.GetKeyDown(KeyCode.Escape)) DeselectUnit();
+        UpdatePathPreview();
+    }
+
+    // Preview uses the SAME FindWalkPath method as actual movement.
+    // No changes to FollowPath, SetWalking, AI or movement costs.
+    private void UpdatePathPreview()
+    {
+        if (!showMovementPathPreview || !isSelected || isCarrying || isAttackMode ||
+            isPickupMode || isJumpMode || CurrentUnit == null ||
+            CurrentUnit.RemainingMovement <= 0)
+        {
+            HidePathPreview();
+            return;
+        }
+
+        // Avoid highlighting cells while interacting with a Unity UI button.
+        if (UnityEngine.EventSystems.EventSystem.current != null &&
+            UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+        {
+            HidePathPreview();
+            return;
+        }
+
+        Ray ray = gameCamera.ScreenPointToRay(Input.mousePosition);
+        if (!Physics.Raycast(ray, out RaycastHit hit, 1000f, terrainMask,
+                QueryTriggerInteraction.Ignore) || hit.normal.y < 0.5f)
+        {
+            HidePathPreview();
+            return;
+        }
+
+        Vector2Int destination = WorldToGrid(hit.point);
+        if (!reachableCells.Contains(destination) || !cells.ContainsKey(destination))
+        {
+            HidePathPreview();
+            return;
+        }
+
+        if (previewWasVisible && lastPreviewCell.HasValue &&
+            lastPreviewCell.Value == destination)
+            return;
+
+        Vector2Int start = WorldToGrid(actingUnit.position);
+        List<Cell> path = FindWalkPath(start, destination);
+        if (path == null || path.Count == 0)
+        {
+            HidePathPreview();
+            return;
+        }
+
+        CreatePathPreviewObjectsIfNeeded();
+        HidePreviewObjects();
+        lastPreviewCell = destination;
+        previewWasVisible = true;
+
+        Vector3 from = GridToWorld(start);
+        from.y = cells[start].surfaceY + pathPreviewYOffset;
+        int dotIndex = 0;
+        foreach (Cell cell in path)
+        {
+            Vector3 to = GridToWorld(cell.coord);
+            to.y = cell.surfaceY + pathPreviewYOffset;
+            for (int i = 1; i <= Mathf.Max(1, dotsPerCell); i++)
+            {
+                float t = i / (float)(Mathf.Max(1, dotsPerCell) + 1);
+                GameObject dot = GetPreviewDot(dotIndex++);
+                dot.transform.position = Vector3.Lerp(from, to, t);
+                dot.transform.localScale = Vector3.one * pathDotSize;
+                dot.SetActive(true);
+            }
+            from = to;
+        }
+
+        Vector3 center = GridToWorld(destination);
+        center.y = cells[destination].surfaceY + pathPreviewYOffset;
+        float half = cellSize * 0.43f;
+        float thickness = Mathf.Max(0.01f, cursorLineWidth);
+        SetCursorEdge(0, center + new Vector3(0, 0, half),
+            new Vector3(half * 2f, thickness, thickness));
+        SetCursorEdge(1, center + new Vector3(0, 0, -half),
+            new Vector3(half * 2f, thickness, thickness));
+        SetCursorEdge(2, center + new Vector3(half, 0, 0),
+            new Vector3(thickness, thickness, half * 2f));
+        SetCursorEdge(3, center + new Vector3(-half, 0, 0),
+            new Vector3(thickness, thickness, half * 2f));
+    }
+
+    private void CreatePathPreviewObjectsIfNeeded()
+    {
+        if (pathPreviewRoot != null) return;
+        GameObject root = new GameObject("MovementPathPreview (runtime)");
+        pathPreviewRoot = root.transform;
+        Shader shader = Shader.Find("Sprites/Default");
+        if (shader == null) shader = Shader.Find("Unlit/Color");
+        if (shader == null) shader = Shader.Find("Standard");
+        if (shader != null)
+        {
+            previewDotMaterial = new Material(shader);
+            previewDotMaterial.color = pathDotColor;
+            previewCursorMaterial = new Material(shader);
+            previewCursorMaterial.color = cursorColor;
+        }
+    }
+
+    private GameObject MakePreviewPrimitive(PrimitiveType primitive, string name, Material material)
+    {
+        GameObject go = GameObject.CreatePrimitive(primitive);
+        go.name = name;
+        go.transform.SetParent(pathPreviewRoot, true);
+        Collider col = go.GetComponent<Collider>();
+        if (col != null) Destroy(col);
+        Renderer renderer = go.GetComponent<Renderer>();
+        if (renderer != null && material != null) renderer.sharedMaterial = material;
+        go.SetActive(false);
+        return go;
+    }
+
+    private GameObject GetPreviewDot(int index)
+    {
+        while (previewDots.Count <= index)
+            previewDots.Add(MakePreviewPrimitive(PrimitiveType.Sphere, "Path dot", previewDotMaterial));
+        return previewDots[index];
+    }
+
+    private void SetCursorEdge(int index, Vector3 position, Vector3 scale)
+    {
+        while (cursorEdges.Count <= index)
+            cursorEdges.Add(MakePreviewPrimitive(PrimitiveType.Cube, "Cursor edge", previewCursorMaterial));
+        GameObject edge = cursorEdges[index];
+        edge.transform.position = position;
+        edge.transform.localScale = scale;
+        edge.SetActive(true);
+    }
+
+    private void HidePreviewObjects()
+    {
+        foreach (GameObject dot in previewDots) if (dot != null) dot.SetActive(false);
+        foreach (GameObject edge in cursorEdges) if (edge != null) edge.SetActive(false);
+    }
+
+    private void HidePathPreview()
+    {
+        if (!previewWasVisible) return;
+        previewWasVisible = false;
+        lastPreviewCell = null;
+        HidePreviewObjects();
+    }
+
+    private void OnDestroy()
+    {
+        if (pathPreviewRoot != null) Destroy(pathPreviewRoot.gameObject);
+        if (previewDotMaterial != null) Destroy(previewDotMaterial);
+        if (previewCursorMaterial != null) Destroy(previewCursorMaterial);
     }
 
     // Podlacz te metody do UI Button -> On Click().
@@ -1163,6 +1337,7 @@ public class TacticalGridMovement : MonoBehaviour
     }
     private void ClearMovementTiles()
     {
+        HidePathPreview();
         foreach (GameObject tile in movementTiles)
             if (tile != null) Destroy(tile);
         movementTiles.Clear();
