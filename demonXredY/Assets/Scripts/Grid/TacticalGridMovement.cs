@@ -34,6 +34,49 @@ public class TacticalGridMovement : MonoBehaviour
     [Min(0f)] public float pathPreviewYOffset = 0.10f;
     [Range(0.01f, 0.2f)] public float cursorLineWidth = 0.055f;
 
+    [Header("Custom movement cursor")]
+    [Tooltip("Optional prefab with SpriteRenderer or mesh. If empty, use the original yellow outline.")]
+    public GameObject movementCursorPrefab;
+    [Min(0.01f)] public float movementCursorScale = 1f;
+    [Tooltip("For a flat SpriteRenderer lying on the ground use X = 90; for an upright sprite use X = 0.")]
+    public Vector3 movementCursorRotation = new Vector3(90f, 0f, 0f);
+    public float movementCursorYOffset = 0.02f;
+
+    [Header("Cursor above units / hover information")]
+    public bool cursorAboveUnits = true;
+    [Min(0f)] public float cursorAboveHeadGap = 0.12f;
+    public bool showHoveredUnitInfo = true;
+    public bool highlightHoveredUnit = true;
+    [Header("Hover stability")]
+    [Min(0f)] public float hoverExitDelay = 0.15f;
+    private float lastHoverSeenTime = -100f;
+    [Header("Hovered unit visuals")]
+    [Min(0.005f)] public float whiteOutlineThickness = 0.035f;
+    public Color hoveredTileColor = new Color(1f, 0.82f, 0.12f, 0.55f);
+    [Range(0.5f, 1f)] public float hoveredTileScale = 0.92f;
+    [Min(0f)] public float hoveredTileYOffset = 0.065f;
+    [Header("Hovered unit info panel")]
+    [Min(240f)] public float hoverPanelWidth = 520f;
+    [Min(120f)] public float hoverPanelHeight = 280f;
+    [Range(1f, 3f)] public float hoverPanelUIScale = 1.5f;
+    public Vector2 hoverPanelTopRightMargin = new Vector2(18f, 75f);
+    [Header("Hovered unit panel text")]
+    [Range(18, 64)] public int hoverTitleFontSize = 38;
+    [Range(16, 52)] public int hoverInfoFontSize = 28;
+    [Min(12f)] public float hoverHPBarHeight = 32f;
+    [Tooltip("Optional material using the included Tactical/CursorAlwaysVisible shader. Assign to ensure the cursor draws over terrain and characters.")]
+    public Material cursorAlwaysVisibleMaterial;
+    private TacticalUnit hoveredUnit;
+    private TacticalHoverWhiteOutline hoveredOutline;
+    private GameObject hoveredTile;
+    private Renderer hoveredTileRenderer;
+    private Material hoveredTileMaterial;
+    private readonly Dictionary<Renderer, Material[]> cursorOriginalMaterials = new Dictionary<Renderer, Material[]>();
+    private GUIStyle hoverTitleStyle;
+    private GUIStyle hoverTextStyle;
+
+    private GameObject customCursorInstance;
+    private GameObject customCursorSource;
     private Transform pathPreviewRoot;
     private readonly List<GameObject> previewDots = new List<GameObject>();
     private readonly List<GameObject> cursorEdges = new List<GameObject>();
@@ -216,15 +259,12 @@ public class TacticalGridMovement : MonoBehaviour
     // No changes to FollowPath, SetWalking, AI or movement costs.
     private void UpdatePathPreview()
     {
-        if (!showMovementPathPreview || !isSelected || isCarrying || isAttackMode ||
-            isPickupMode || isJumpMode || CurrentUnit == null ||
-            CurrentUnit.RemainingMovement <= 0)
+        if (!showMovementPathPreview || !isSelected || CurrentUnit == null)
         {
             HidePathPreview();
             return;
         }
 
-        // Avoid highlighting cells while interacting with a Unity UI button.
         if (UnityEngine.EventSystems.EventSystem.current != null &&
             UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
         {
@@ -241,59 +281,244 @@ public class TacticalGridMovement : MonoBehaviour
         }
 
         Vector2Int destination = WorldToGrid(hit.point);
-        if (!reachableCells.Contains(destination) || !cells.ContainsKey(destination))
+        if (!cells.TryGetValue(destination, out Cell destinationCell))
         {
             HidePathPreview();
             return;
         }
 
-        if (previewWasVisible && lastPreviewCell.HasValue &&
-            lastPreviewCell.Value == destination)
-            return;
-
-        Vector2Int start = WorldToGrid(actingUnit.position);
-        List<Cell> path = FindWalkPath(start, destination);
-        if (path == null || path.Count == 0)
+        TacticalUnit targetUnit = FindUnitAtCell(destination);
+        if (targetUnit != null) lastHoverSeenTime = Time.unscaledTime;
+        if (targetUnit != null || Time.unscaledTime - lastHoverSeenTime >= hoverExitDelay)
+            SetHoveredUnit(targetUnit);
+        UpdateHoveredTile(targetUnit, destinationCell);
+        bool canShowPath = !isCarrying && !isAttackMode && !isPickupMode &&
+            !isJumpMode && CurrentUnit.RemainingMovement > 0 &&
+            reachableCells.Contains(destination);
+        bool canShowCursor = canShowPath || targetUnit != null;
+        if (!canShowCursor)
         {
             HidePathPreview();
             return;
         }
 
-        CreatePathPreviewObjectsIfNeeded();
-        HidePreviewObjects();
-        lastPreviewCell = destination;
-        previewWasVisible = true;
+        // Update the cursor every frame: moving/animated characters may change height.
+        bool needsRebuild = !previewWasVisible || !lastPreviewCell.HasValue ||
+            lastPreviewCell.Value != destination ||
+            (movementCursorPrefab != null && customCursorSource != movementCursorPrefab);
 
-        Vector3 from = GridToWorld(start);
-        from.y = cells[start].surfaceY + pathPreviewYOffset;
-        int dotIndex = 0;
-        foreach (Cell cell in path)
+        if (needsRebuild)
         {
-            Vector3 to = GridToWorld(cell.coord);
-            to.y = cell.surfaceY + pathPreviewYOffset;
-            for (int i = 1; i <= Mathf.Max(1, dotsPerCell); i++)
+            CreatePathPreviewObjectsIfNeeded();
+            HidePreviewObjects();
+            lastPreviewCell = destination;
+            previewWasVisible = true;
+
+            if (canShowPath)
             {
-                float t = i / (float)(Mathf.Max(1, dotsPerCell) + 1);
-                GameObject dot = GetPreviewDot(dotIndex++);
-                dot.transform.position = Vector3.Lerp(from, to, t);
-                dot.transform.localScale = Vector3.one * pathDotSize;
-                dot.SetActive(true);
+                Vector2Int start = WorldToGrid(actingUnit.position);
+                List<Cell> path = FindWalkPath(start, destination);
+                if (path != null && cells.ContainsKey(start))
+                {
+                    Vector3 from = GridToWorld(start);
+                    from.y = cells[start].surfaceY + pathPreviewYOffset;
+                    int dotIndex = 0;
+                    foreach (Cell cell in path)
+                    {
+                        Vector3 to = GridToWorld(cell.coord);
+                        to.y = cell.surfaceY + pathPreviewYOffset;
+                        for (int i = 1; i <= Mathf.Max(1, dotsPerCell); i++)
+                        {
+                            float t = i / (float)(Mathf.Max(1, dotsPerCell) + 1);
+                            GameObject dot = GetPreviewDot(dotIndex++);
+                            dot.transform.position = Vector3.Lerp(from, to, t);
+                            dot.transform.localScale = Vector3.one * pathDotSize;
+                            dot.SetActive(true);
+                        }
+                        from = to;
+                    }
+                }
             }
-            from = to;
         }
 
         Vector3 center = GridToWorld(destination);
-        center.y = cells[destination].surfaceY + pathPreviewYOffset;
-        float half = cellSize * 0.43f;
-        float thickness = Mathf.Max(0.01f, cursorLineWidth);
-        SetCursorEdge(0, center + new Vector3(0, 0, half),
-            new Vector3(half * 2f, thickness, thickness));
-        SetCursorEdge(1, center + new Vector3(0, 0, -half),
-            new Vector3(half * 2f, thickness, thickness));
-        SetCursorEdge(2, center + new Vector3(half, 0, 0),
-            new Vector3(thickness, thickness, half * 2f));
-        SetCursorEdge(3, center + new Vector3(-half, 0, 0),
-            new Vector3(thickness, thickness, half * 2f));
+        center.y = destinationCell.surfaceY + pathPreviewYOffset;
+        if (movementCursorPrefab != null)
+        {
+            ShowCustomCursor(center, targetUnit);
+        }
+        else
+        {
+            float half = cellSize * 0.43f;
+            float thickness = Mathf.Max(0.01f, cursorLineWidth);
+            SetCursorEdge(0, center + new Vector3(0, 0, half),
+                new Vector3(half * 2f, thickness, thickness));
+            SetCursorEdge(1, center + new Vector3(0, 0, -half),
+                new Vector3(half * 2f, thickness, thickness));
+            SetCursorEdge(2, center + new Vector3(half, 0, 0),
+                new Vector3(thickness, thickness, half * 2f));
+            SetCursorEdge(3, center + new Vector3(-half, 0, 0),
+                new Vector3(thickness, thickness, half * 2f));
+        }
+    }
+
+    private void ShowCustomCursor(Vector3 center, TacticalUnit targetUnit)
+    {
+        if (customCursorInstance == null || customCursorSource != movementCursorPrefab)
+        {
+            if (customCursorInstance != null) Destroy(customCursorInstance);
+            customCursorSource = movementCursorPrefab;
+            customCursorInstance = Instantiate(movementCursorPrefab, pathPreviewRoot);
+            customCursorInstance.name = "Custom movement cursor (runtime)";
+            foreach (Collider collider in customCursorInstance.GetComponentsInChildren<Collider>(true))
+                collider.enabled = false;
+            // Keep the material optional: works with the original prefab without it.
+            if (cursorAlwaysVisibleMaterial != null)
+            {
+                foreach (Renderer rend in customCursorInstance.GetComponentsInChildren<Renderer>(true))
+                    rend.sharedMaterial = cursorAlwaysVisibleMaterial;
+            }
+        }
+        customCursorInstance.SetActive(true);
+        Transform cursor = customCursorInstance.transform;
+        cursor.rotation = Quaternion.Euler(movementCursorRotation);
+        cursor.localScale = Vector3.one * movementCursorScale;
+        cursor.position = center;
+
+        // Sprite pivot may be in the middle. Raise its visible bottom to the tile surface.
+        float minY = float.PositiveInfinity;
+        foreach (Renderer rend in customCursorInstance.GetComponentsInChildren<Renderer>(true))
+            if (rend.enabled) minY = Mathf.Min(minY, rend.bounds.min.y);
+        if (!float.IsInfinity(minY))
+            cursor.position += Vector3.up * (center.y + movementCursorYOffset - minY);
+        else
+            cursor.position += Vector3.up * movementCursorYOffset;
+
+        if (cursorAboveUnits && targetUnit != null)
+        {
+            float headY = targetUnit.transform.position.y;
+            foreach (Renderer rend in targetUnit.GetComponentsInChildren<Renderer>(true))
+            {
+                if (rend.enabled) headY = Mathf.Max(headY, rend.bounds.max.y);
+            }
+            // Fallback to the capsule when sprites have no valid bounds.
+            Collider col = targetUnit.GetComponent<Collider>();
+            if (col != null) headY = Mathf.Max(headY, col.bounds.max.y);
+            if (!float.IsInfinity(minY))
+            {
+                float raisedMin = minY + (cursor.position.y - center.y);
+                cursor.position += Vector3.up * Mathf.Max(0f, headY + cursorAboveHeadGap - raisedMin);
+            }
+            else cursor.position = new Vector3(center.x, headY + cursorAboveHeadGap, center.z);
+        }
+    }
+
+    private void SetHoveredUnit(TacticalUnit unit)
+    {
+        if (hoveredUnit == unit) return;
+        if (hoveredOutline != null) hoveredOutline.enabled = false;
+        hoveredOutline = null;
+        hoveredUnit = unit;
+        if (hoveredTile != null) hoveredTile.SetActive(false);
+        if (unit != null && highlightHoveredUnit)
+        {
+            SpriteRenderer source = unit.GetComponentInChildren<SpriteRenderer>(true);
+            if (source != null)
+            {
+                hoveredOutline = source.GetComponent<TacticalHoverWhiteOutline>();
+                if (hoveredOutline == null)
+                    hoveredOutline = source.gameObject.AddComponent<TacticalHoverWhiteOutline>();
+                hoveredOutline.outlineThickness = whiteOutlineThickness;
+                hoveredOutline.enabled = true;
+            }
+        }
+    }
+
+    private void UpdateHoveredTile(TacticalUnit unit, Cell cell)
+    {
+        if (unit == null || cell == null)
+        {
+            if (hoveredTile != null) hoveredTile.SetActive(false);
+            return;
+        }
+        if (hoveredTile == null)
+        {
+            hoveredTile = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            hoveredTile.name = "Hovered unit yellow tile (runtime)";
+            Collider col = hoveredTile.GetComponent<Collider>();
+            if (col != null) Destroy(col);
+            hoveredTileRenderer = hoveredTile.GetComponent<Renderer>();
+            Shader shader = Shader.Find("Sprites/Default");
+            if (shader == null) shader = Shader.Find("Unlit/Transparent");
+            if (shader != null)
+            {
+                hoveredTileMaterial = new Material(shader);
+                hoveredTileRenderer.sharedMaterial = hoveredTileMaterial;
+            }
+        }
+        if (hoveredTileMaterial != null) hoveredTileMaterial.color = hoveredTileColor;
+        hoveredTile.transform.position = new Vector3(
+            GridToWorld(cell.coord).x, cell.surfaceY + hoveredTileYOffset,
+            GridToWorld(cell.coord).z);
+        hoveredTile.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
+        hoveredTile.transform.localScale = new Vector3(
+            cellSize * hoveredTileScale, cellSize * hoveredTileScale, 1f);
+        hoveredTile.SetActive(true);
+    }
+
+    private void OnGUI()
+    {
+        if (!showHoveredUnitInfo || hoveredUnit == null || !hoveredUnit.IsAlive ||
+            !PlayerCanControl || isMoving) return;
+
+        float uiScale = Mathf.Max(1f, hoverPanelUIScale);
+        Matrix4x4 oldGuiMatrix = GUI.matrix;
+        GUI.matrix = Matrix4x4.Scale(new Vector3(uiScale, uiScale, 1f)) * oldGuiMatrix;
+        if (hoverTitleStyle == null) hoverTitleStyle = new GUIStyle(GUI.skin.label);
+        if (hoverTextStyle == null) hoverTextStyle = new GUIStyle(GUI.skin.label);
+        hoverTitleStyle.fontSize = hoverTitleFontSize;
+        hoverTitleStyle.fontStyle = FontStyle.Bold;
+        hoverTitleStyle.normal.textColor = Color.white;
+        hoverTitleStyle.alignment = TextAnchor.MiddleLeft;
+        hoverTextStyle.fontSize = hoverInfoFontSize;
+        hoverTextStyle.normal.textColor = Color.white;
+        hoverTextStyle.alignment = TextAnchor.MiddleLeft;
+
+        // Scale panel contents and panel dimensions together to fit the text.
+        float pad = 22f;
+        float titleH = hoverTitleFontSize * 1.55f;
+        float infoH = hoverInfoFontSize * 1.55f;
+        float gap = 12f;
+        float requiredHeight = pad * 2f + titleH + infoH * 2f + hoverHPBarHeight + gap * 3f;
+        float width = Mathf.Max(hoverPanelWidth, 440f);
+        float height = Mathf.Max(hoverPanelHeight, requiredHeight);
+        Rect panel = new Rect(Screen.width / uiScale - width - hoverPanelTopRightMargin.x,
+            hoverPanelTopRightMargin.y, width, height);
+        GUI.Box(panel, GUIContent.none);
+
+        string unitName = hoveredUnit.unitData != null &&
+            !string.IsNullOrEmpty(hoveredUnit.unitData.displayName)
+            ? hoveredUnit.unitData.displayName : hoveredUnit.name;
+        float x = panel.x + pad;
+        float textWidth = width - pad * 2f;
+        float y = panel.y + pad;
+        GUI.Label(new Rect(x, y, textWidth, titleH), unitName, hoverTitleStyle);
+        y += titleH + gap;
+        GUI.Label(new Rect(x, y, textWidth, infoH),
+            "HP: " + hoveredUnit.CurrentHealth + " / " + hoveredUnit.maxHealth, hoverTextStyle);
+        y += infoH + gap;
+        Rect bar = new Rect(x, y, textWidth, hoverHPBarHeight);
+        GUI.DrawTexture(bar, Texture2D.grayTexture);
+        float healthRatio = hoveredUnit.maxHealth > 0
+            ? Mathf.Clamp01((float)hoveredUnit.CurrentHealth / hoveredUnit.maxHealth) : 0f;
+        Color old = GUI.color;
+        GUI.color = Color.Lerp(new Color(0.90f, 0.23f, 0.18f), new Color(0.22f, 0.80f, 0.35f), healthRatio);
+        GUI.DrawTexture(new Rect(bar.x, bar.y, bar.width * healthRatio, bar.height), Texture2D.whiteTexture);
+        GUI.color = old;
+        y += hoverHPBarHeight + gap;
+        GUI.Label(new Rect(x, y, textWidth, infoH),
+            hoveredUnit.isPlayerControlled ? "Drużyna: Gracz" : "Drużyna: Przeciwnik", hoverTextStyle);
+        GUI.matrix = oldGuiMatrix;
     }
 
     private void CreatePathPreviewObjectsIfNeeded()
@@ -347,10 +572,13 @@ public class TacticalGridMovement : MonoBehaviour
     {
         foreach (GameObject dot in previewDots) if (dot != null) dot.SetActive(false);
         foreach (GameObject edge in cursorEdges) if (edge != null) edge.SetActive(false);
+        if (customCursorInstance != null) customCursorInstance.SetActive(false);
     }
 
     private void HidePathPreview()
     {
+        if (Time.unscaledTime - lastHoverSeenTime >= hoverExitDelay) SetHoveredUnit(null);
+        if (hoveredTile != null) hoveredTile.SetActive(false);
         if (!previewWasVisible) return;
         previewWasVisible = false;
         lastPreviewCell = null;
@@ -359,6 +587,9 @@ public class TacticalGridMovement : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (Time.unscaledTime - lastHoverSeenTime >= hoverExitDelay) SetHoveredUnit(null);
+        if (hoveredTile != null) Destroy(hoveredTile);
+        if (hoveredTileMaterial != null) Destroy(hoveredTileMaterial);
         if (pathPreviewRoot != null) Destroy(pathPreviewRoot.gameObject);
         if (previewDotMaterial != null) Destroy(previewDotMaterial);
         if (previewCursorMaterial != null) Destroy(previewCursorMaterial);

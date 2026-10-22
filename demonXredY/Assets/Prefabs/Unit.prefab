@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 8808407542919998286}
   - component: {fileID: 2639017019375212273}
   - component: {fileID: 5705885518267544936}
+  - component: {fileID: 3772672564969443520}
   m_Layer: 8
   m_Name: Visual
   m_TagString: Untagged
@@ -106,6 +107,20 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &3772672564969443520
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5830837363884130951}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c6ff2ce8195af146a06fae2b2101b60, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outlineThickness: 0.015
+  outlinePixels: 3
 --- !u!1 &6377369978160553504
 GameObject:
   m_ObjectHideFlags: 0
@@ -258,7 +273,10 @@ MonoBehaviour:
   initialFacing: {x: 0, y: 0, z: 1}
   idleFramesPerSecond: 3
   walkFramesPerSecond: 8
+  viewAngleOffset: 45
   showFacingGizmo: 1
+  pickupAnimationDuration: 0.3
+  throwAnimationDuration: 0.3
 --- !u!1 &6712749194839813071
 GameObject:
   m_ObjectHideFlags: 0
