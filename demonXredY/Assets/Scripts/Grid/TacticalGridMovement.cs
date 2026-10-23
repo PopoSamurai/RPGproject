@@ -50,6 +50,16 @@ public class TacticalGridMovement : MonoBehaviour
     [Header("Hover stability")]
     [Min(0f)] public float hoverExitDelay = 0.15f;
     private float lastHoverSeenTime = -100f;
+    [Header("Selection tile prefabs")]
+    [Tooltip("Yellow tile under the hovered free cell or any hovered unit.")]
+    public GameObject selectionTilePrefab;
+    [Tooltip("Marker under friendly units adjacent to the movement range.")]
+    public GameObject teammateTilePrefab;
+    [Tooltip("Marker under enemy units adjacent to the movement range.")]
+    public GameObject enemyRangeTilePrefab;
+    [Range(0.1f, 1.5f)] public float selectionTileScale = 0.95f;
+    [Min(0f)] public float selectionTileYOffset = 0.07f;
+    [Min(0f)] public float rangeUnitTileYOffset = 0.06f;
     [Header("Hovered unit visuals")]
     [Min(0.005f)] public float whiteOutlineThickness = 0.035f;
     public Color hoveredTileColor = new Color(1f, 0.82f, 0.12f, 0.55f);
@@ -69,6 +79,8 @@ public class TacticalGridMovement : MonoBehaviour
     private TacticalUnit hoveredUnit;
     private TacticalHoverWhiteOutline hoveredOutline;
     private GameObject hoveredTile;
+    private GameObject hoveredTileSource;
+    private readonly List<GameObject> unitRangeMarkers = new List<GameObject>();
     private Renderer hoveredTileRenderer;
     private Material hoveredTileMaterial;
     private readonly Dictionary<Renderer, Material[]> cursorOriginalMaterials = new Dictionary<Renderer, Material[]>();
@@ -250,7 +262,8 @@ public class TacticalGridMovement : MonoBehaviour
             return;
         }
 
-        if (Input.GetMouseButtonDown(0)) HandleClick();
+        // UI clicks must never pass through to the tactical map.
+        if (Input.GetMouseButtonDown(0) && !IsPointerOverBattleUI()) HandleClick();
         if (isSelected && Input.GetKeyDown(KeyCode.Escape)) DeselectUnit();
         UpdatePathPreview();
     }
@@ -436,15 +449,36 @@ public class TacticalGridMovement : MonoBehaviour
 
     private void UpdateHoveredTile(TacticalUnit unit, Cell cell)
     {
-        if (unit == null || cell == null)
+        bool valid = cell != null && (unit != null ||
+            (!isAttackMode && !isPickupMode && !isJumpMode && !isCarrying &&
+             CurrentUnit != null && CurrentUnit.RemainingMovement > 0 &&
+             reachableCells.Contains(cell.coord)));
+        if (!valid)
         {
             if (hoveredTile != null) hoveredTile.SetActive(false);
             return;
         }
-        if (hoveredTile == null)
+
+        if (selectionTilePrefab != null)
         {
+            if (hoveredTile == null || hoveredTileSource != selectionTilePrefab)
+            {
+                if (hoveredTile != null) Destroy(hoveredTile);
+                if (hoveredTileMaterial != null) Destroy(hoveredTileMaterial);
+                hoveredTileMaterial = null;
+                hoveredTileSource = selectionTilePrefab;
+                hoveredTile = Instantiate(selectionTilePrefab);
+                hoveredTile.name = "Selected yellow tile (runtime)";
+                foreach (Collider col in hoveredTile.GetComponentsInChildren<Collider>(true))
+                    col.enabled = false;
+            }
+        }
+        else if (hoveredTile == null || hoveredTileSource != null)
+        {
+            if (hoveredTile != null) Destroy(hoveredTile);
+            hoveredTileSource = null;
             hoveredTile = GameObject.CreatePrimitive(PrimitiveType.Quad);
-            hoveredTile.name = "Hovered unit yellow tile (runtime)";
+            hoveredTile.name = "Selected yellow tile fallback (runtime)";
             Collider col = hoveredTile.GetComponent<Collider>();
             if (col != null) Destroy(col);
             hoveredTileRenderer = hoveredTile.GetComponent<Renderer>();
@@ -457,13 +491,72 @@ public class TacticalGridMovement : MonoBehaviour
             }
         }
         if (hoveredTileMaterial != null) hoveredTileMaterial.color = hoveredTileColor;
-        hoveredTile.transform.position = new Vector3(
-            GridToWorld(cell.coord).x, cell.surfaceY + hoveredTileYOffset,
-            GridToWorld(cell.coord).z);
+        Vector3 pos = GridToWorld(cell.coord);
+        pos.y = cell.surfaceY + (selectionTilePrefab != null ? selectionTileYOffset : hoveredTileYOffset);
+        hoveredTile.transform.position = pos;
         hoveredTile.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
-        hoveredTile.transform.localScale = new Vector3(
-            cellSize * hoveredTileScale, cellSize * hoveredTileScale, 1f);
+        hoveredTile.transform.localScale = new Vector3(cellSize * selectionTileScale, cellSize * selectionTileScale, 1f);
         hoveredTile.SetActive(true);
+    }
+
+    private void ClearUnitRangeMarkers()
+    {
+        foreach (GameObject marker in unitRangeMarkers)
+            if (marker != null) Destroy(marker);
+        unitRangeMarkers.Clear();
+    }
+
+    // Unit markers are visual only: they are NOT added to reachableCells.
+    private void BuildUnitRangeMarkers(Vector2Int start)
+    {
+        if (CurrentUnit == null || isCarrying || isAttackMode || isPickupMode || isJumpMode)
+            return;
+        Dictionary<Vector2Int, int> steps = new Dictionary<Vector2Int, int>();
+        Queue<Vector2Int> queue = new Queue<Vector2Int>();
+        steps[start] = 0;
+        queue.Enqueue(start);
+        while (queue.Count > 0)
+        {
+            Vector2Int at = queue.Dequeue();
+            foreach (Vector2Int dir in directions)
+            {
+                Vector2Int next = at + dir;
+                if (!reachableCells.Contains(next) || steps.ContainsKey(next)) continue;
+                steps[next] = steps[at] + 1;
+                queue.Enqueue(next);
+            }
+        }
+        foreach (TacticalUnit target in FindObjectsOfType<TacticalUnit>())
+        {
+            if (target == null || !target.IsAlive || target == CurrentUnit) continue;
+            Vector2Int coord = WorldToGrid(target.transform.position);
+            if (!cells.TryGetValue(coord, out Cell targetCell)) continue;
+            // A unit is within the displayed movement area if one of its neighboring
+            // cells is the starting tile or a reachable tile, and the step is legal.
+            bool inRange = false;
+            foreach (Vector2Int dir in directions)
+            {
+                Vector2Int adjacent = coord + dir;
+                if (!steps.TryGetValue(adjacent, out int usedSteps) ||
+                    usedSteps >= CurrentUnit.RemainingMovement) continue;
+                if (!cells.TryGetValue(adjacent, out Cell neighbor)) continue;
+                if (Mathf.Abs(neighbor.surfaceY - targetCell.surfaceY) > maxStepHeight) continue;
+                inRange = true;
+                break;
+            }
+            if (!inRange) continue;
+            GameObject prefab = target.isPlayerControlled == CurrentUnit.isPlayerControlled
+                ? teammateTilePrefab : enemyRangeTilePrefab;
+            if (prefab == null) continue;
+            Vector3 pos = GridToWorld(coord);
+            pos.y = targetCell.surfaceY + rangeUnitTileYOffset;
+            GameObject marker = Instantiate(prefab, pos, Quaternion.Euler(90f, 0f, 0f));
+            marker.name = (target.isPlayerControlled == CurrentUnit.isPlayerControlled
+                ? "Teammate marker " : "Enemy marker ") + target.name;
+            marker.transform.localScale = new Vector3(cellSize * 0.95f, cellSize * 0.95f, 1f);
+            foreach (Collider col in marker.GetComponentsInChildren<Collider>(true)) col.enabled = false;
+            unitRangeMarkers.Add(marker);
+        }
     }
 
     private void OnGUI()
@@ -588,6 +681,7 @@ public class TacticalGridMovement : MonoBehaviour
     private void OnDestroy()
     {
         if (Time.unscaledTime - lastHoverSeenTime >= hoverExitDelay) SetHoveredUnit(null);
+        ClearUnitRangeMarkers();
         if (hoveredTile != null) Destroy(hoveredTile);
         if (hoveredTileMaterial != null) Destroy(hoveredTileMaterial);
         if (pathPreviewRoot != null) Destroy(pathPreviewRoot.gameObject);
@@ -638,8 +732,16 @@ public class TacticalGridMovement : MonoBehaviour
         RefreshMovementTiles();
     }
 
+    private static bool IsPointerOverBattleUI()
+    {
+        var eventSystem = UnityEngine.EventSystems.EventSystem.current;
+        return eventSystem != null && eventSystem.IsPointerOverGameObject();
+    }
+
     private void HandleClick()
     {
+        // Also guard direct callers, not only the Update input path.
+        if (IsPointerOverBattleUI()) return;
         Ray ray = gameCamera.ScreenPointToRay(Input.mousePosition);
         if (!Physics.Raycast(ray, out RaycastHit hit, 1000f, terrainMask, QueryTriggerInteraction.Ignore))
             return;
@@ -933,6 +1035,10 @@ public class TacticalGridMovement : MonoBehaviour
         else if (isAttackMode && !CurrentUnit.hasActed) BuildAttackTargets(start);
         else if (isJumpMode && CurrentUnit.RemainingMovement > 0) BuildJumpTargets(start);
         else if (CurrentUnit.RemainingMovement > 0) BuildWalkTargets(start);
+
+        if (!isCarrying && !isPickupMode && !isAttackMode && !isJumpMode &&
+            CurrentUnit.RemainingMovement > 0)
+            BuildUnitRangeMarkers(start);
 
         if (isPickupMode)
         {
@@ -1568,6 +1674,7 @@ public class TacticalGridMovement : MonoBehaviour
     }
     private void ClearMovementTiles()
     {
+        ClearUnitRangeMarkers();
         HidePathPreview();
         foreach (GameObject tile in movementTiles)
             if (tile != null) Destroy(tile);

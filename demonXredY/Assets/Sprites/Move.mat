@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Move
+  m_Shader: {fileID: 4800000, guid: 4dfe9da07af0c3149923c1cfef690514, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 11defefe70ae99d4e95a32fcb45023b0, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _BorderWidth: 0.0262
+    - _ColorMask: 15
+    - _Cutoff: 0.08
+    - _EdgeIntensity: 0.65
+    - _EdgeOpacity: 0.596
+    - _EdgeWidth: 0.08
+    - _EnergyScale: 20
+    - _EnergySpeed: 3
+    - _EnergyStrength: 0.919
+    - _FillOpacity: 0.082
+    - _FlowBandWidth: 0.226
+    - _FrameGlow: 8
+    - _FrameOpacity: 0.336
+    - _FrameTint: 1
+    - _GlowWidth: 0.213
+    - _OutlinePixels: 3
+    - _PulseAmount: 0.5
+    - _PulseSpeed: 1.6
+    - _SpriteBorderThreshold: 0.8
+    - _Stencil: 0
+    - _StencilComp: 8
+    - _StencilOp: 0
+    - _StencilReadMask: 255
+    - _StencilWriteMask: 255
+    - _UseSpriteBorder: 0
+    - _UseUIAlphaClip: 0
+    - _ZTest: 4
+    m_Colors:
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _EnergyColor: {r: 0, g: 0.6666667, b: 0.046150208, a: 0.79607844}
+    - _FrameColor: {r: 0, g: 0, b: 0, a: 1}
+    - _OutlineColor: {r: 1, g: 1, b: 1, a: 1}
+    - _Tint: {r: 1, g: 0.05098039, b: 0.05409378, a: 1}
+  m_BuildTextureStacks: []
