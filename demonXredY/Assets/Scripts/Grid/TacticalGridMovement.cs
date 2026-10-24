@@ -32,6 +32,10 @@ public class TacticalGridMovement : MonoBehaviour
     [Min(1)] public int dotsPerCell = 4;
     [Min(0.01f)] public float pathDotSize = 0.10f;
     [Min(0f)] public float pathPreviewYOffset = 0.10f;
+    [Header("Path preview on height changes")]
+    [Min(0f)] public float pathStepArcHeight = 0.18f;
+    [Tooltip("Legacy setting, no longer used. Smooth height transitions are now sampled by arc length.")]
+    [Min(0f)] public float pathStepRiseMultiplier = 0.65f;
     [Range(0.01f, 0.2f)] public float cursorLineWidth = 0.055f;
 
     [Header("Custom movement cursor")]
@@ -48,7 +52,7 @@ public class TacticalGridMovement : MonoBehaviour
     public bool showHoveredUnitInfo = true;
     public bool highlightHoveredUnit = true;
     [Header("Hover stability")]
-    [Min(0f)] public float hoverExitDelay = 0.15f;
+    [Min(0f)] public float hoverExitDelay = 0.35f;
     private float lastHoverSeenTime = -100f;
     [Header("Selection tile prefabs")]
     [Tooltip("Yellow tile under the hovered free cell or any hovered unit.")]
@@ -80,6 +84,10 @@ public class TacticalGridMovement : MonoBehaviour
     private TacticalHoverWhiteOutline hoveredOutline;
     private GameObject hoveredTile;
     private GameObject hoveredTileSource;
+    // Temporarily hide only the range tile covered by the selection tile.
+    // Restore the exact previous active state when the selection moves/disappears.
+    private readonly Dictionary<GameObject, bool> tilesCoveredBySelection = new Dictionary<GameObject, bool>();
+    private Vector2Int? lastCoveredCell;
     private readonly List<GameObject> unitRangeMarkers = new List<GameObject>();
     private Renderer hoveredTileRenderer;
     private Material hoveredTileMaterial;
@@ -301,10 +309,21 @@ public class TacticalGridMovement : MonoBehaviour
         }
 
         TacticalUnit targetUnit = FindUnitAtCell(destination);
+        // If the sprite projects over an adjacent tile, preserve hover while the
+        // pointer is visibly over that character. Do not change the movement cell.
+        if (targetUnit == null && hoveredUnit != null && IsPointerOverUnitSprite(hoveredUnit))
+            targetUnit = hoveredUnit;
         if (targetUnit != null) lastHoverSeenTime = Time.unscaledTime;
         if (targetUnit != null || Time.unscaledTime - lastHoverSeenTime >= hoverExitDelay)
             SetHoveredUnit(targetUnit);
-        UpdateHoveredTile(targetUnit, destinationCell);
+        Cell hoverTileCell = destinationCell;
+        if (targetUnit != null)
+        {
+            Vector2Int unitCell = WorldToGrid(targetUnit.transform.position);
+            if (cells.TryGetValue(unitCell, out Cell actualUnitCell))
+                hoverTileCell = actualUnitCell;
+        }
+        UpdateHoveredTile(targetUnit, hoverTileCell);
         bool canShowPath = !isCarrying && !isAttackMode && !isPickupMode &&
             !isJumpMode && CurrentUnit.RemainingMovement > 0 &&
             reachableCells.Contains(destination);
@@ -333,29 +352,78 @@ public class TacticalGridMovement : MonoBehaviour
                 List<Cell> path = FindWalkPath(start, destination);
                 if (path != null && cells.ContainsKey(start))
                 {
+                    // Build a continuous curve over the entire route, then sample by
+                    // accumulated 3D distance. This avoids gaps at cell boundaries.
+                    List<Vector3> curve = new List<Vector3>();
                     Vector3 from = GridToWorld(start);
                     from.y = cells[start].surfaceY + pathPreviewYOffset;
-                    int dotIndex = 0;
+                    curve.Add(from);
                     foreach (Cell cell in path)
                     {
                         Vector3 to = GridToWorld(cell.coord);
                         to.y = cell.surfaceY + pathPreviewYOffset;
-                        for (int i = 1; i <= Mathf.Max(1, dotsPerCell); i++)
+                        float rise = Mathf.Abs(to.y - from.y);
+                        // Keep X/Z strictly on the grid path; no sideways bend.
+                        // Height changes smoothly near the edge between the tiles.
+                        const int samplesPerCell = 32;
+                        for (int j = 1; j <= samplesPerCell; j++)
                         {
-                            float t = i / (float)(Mathf.Max(1, dotsPerCell) + 1);
-                            GameObject dot = GetPreviewDot(dotIndex++);
-                            dot.transform.position = Vector3.Lerp(from, to, t);
-                            dot.transform.localScale = Vector3.one * pathDotSize;
-                            dot.SetActive(true);
+                            float t = j / (float)samplesPerCell;
+                            Vector3 p = Vector3.Lerp(from, to, t);
+                            if (rise > 0.05f)
+                            {
+                                float u = Mathf.Clamp01((t - 0.22f) / 0.56f);
+                                float smooth = u * u * (3f - 2f * u);
+                                p.y = Mathf.Lerp(from.y, to.y, smooth);
+                                // Small clearance over the transition, without the
+                                // exaggerated sine arc that looked like a detour.
+                                p.y += Mathf.Sin(u * Mathf.PI) * Mathf.Min(pathStepArcHeight, 0.08f);
+                            }
+                            curve.Add(p);
                         }
                         from = to;
+                    }
+                    // Arc-length sampling means a constant spacing even when the
+                    // path rises, descends, or crosses a cell boundary.
+                    float spacing = cellSize / Mathf.Max(1, dotsPerCell);
+                    float nextDistance = spacing;
+                    float distance = 0f;
+                    int dotIndex = 0;
+                    for (int k = 1; k < curve.Count; k++)
+                    {
+                        Vector3 a = curve[k - 1];
+                        Vector3 b = curve[k];
+                        float length = Vector3.Distance(a, b);
+                        if (length < 0.00001f) continue;
+                        while (nextDistance <= distance + length + 0.00001f)
+                        {
+                            float t = Mathf.Clamp01((nextDistance - distance) / length);
+                            GameObject dot = GetPreviewDot(dotIndex++);
+                            dot.transform.position = Vector3.Lerp(a, b, t);
+                            dot.transform.localScale = Vector3.one * pathDotSize;
+                            dot.SetActive(true);
+                            nextDistance += spacing;
+                        }
+                        distance += length;
+                    }
+                    // Ensure the destination is marked even when its distance is
+                    // not an exact multiple of the dot spacing.
+                    if (curve.Count > 1 && distance > 0.0001f &&
+                        distance - (nextDistance - spacing) > spacing * 0.45f)
+                    {
+                        GameObject dot = GetPreviewDot(dotIndex++);
+                        dot.transform.position = curve[curve.Count - 1];
+                        dot.transform.localScale = Vector3.one * pathDotSize;
+                        dot.SetActive(true);
                     }
                 }
             }
         }
 
-        Vector3 center = GridToWorld(destination);
-        center.y = destinationCell.surfaceY + pathPreviewYOffset;
+        Vector2Int cursorCell = targetUnit != null ? WorldToGrid(targetUnit.transform.position) : destination;
+        Cell cursorCellData = targetUnit != null ? hoverTileCell : destinationCell;
+        Vector3 center = GridToWorld(cursorCell);
+        center.y = cursorCellData.surfaceY + pathPreviewYOffset;
         if (movementCursorPrefab != null)
         {
             ShowCustomCursor(center, targetUnit);
@@ -426,9 +494,44 @@ public class TacticalGridMovement : MonoBehaviour
         }
     }
 
+    private bool IsPointerOverUnitSprite(TacticalUnit unit)
+    {
+        if (unit == null || !unit.IsAlive || gameCamera == null) return false;
+        SpriteRenderer sprite = unit.GetComponentInChildren<SpriteRenderer>(true);
+        if (sprite == null || !sprite.enabled || sprite.sprite == null) return false;
+        Bounds b = sprite.bounds;
+        Vector3 min = b.min;
+        Vector3 max = b.max;
+        Vector2 low = new Vector2(float.PositiveInfinity, float.PositiveInfinity);
+        Vector2 high = new Vector2(float.NegativeInfinity, float.NegativeInfinity);
+        bool anyVisible = false;
+        for (int x = 0; x < 2; x++)
+        for (int y = 0; y < 2; y++)
+        for (int z = 0; z < 2; z++)
+        {
+            Vector3 p = gameCamera.WorldToScreenPoint(new Vector3(
+                x == 0 ? min.x : max.x, y == 0 ? min.y : max.y,
+                z == 0 ? min.z : max.z));
+            if (p.z <= 0f) continue;
+            anyVisible = true;
+            low = Vector2.Min(low, new Vector2(p.x, p.y));
+            high = Vector2.Max(high, new Vector2(p.x, p.y));
+        }
+        if (!anyVisible) return false;
+        const float padding = 5f;
+        Vector2 mouse = Input.mousePosition;
+        return mouse.x >= low.x - padding && mouse.x <= high.x + padding &&
+               mouse.y >= low.y - padding && mouse.y <= high.y + padding;
+    }
+
     private void SetHoveredUnit(TacticalUnit unit)
     {
-        if (hoveredUnit == unit) return;
+        if (hoveredUnit == unit)
+        {
+            if (unit != null && hoveredOutline != null && highlightHoveredUnit && !hoveredOutline.enabled)
+                hoveredOutline.enabled = true;
+            return;
+        }
         if (hoveredOutline != null) hoveredOutline.enabled = false;
         hoveredOutline = null;
         hoveredUnit = unit;
@@ -447,6 +550,37 @@ public class TacticalGridMovement : MonoBehaviour
         }
     }
 
+    private void RestoreCoveredRangeTiles()
+    {
+        foreach (KeyValuePair<GameObject, bool> entry in tilesCoveredBySelection)
+            if (entry.Key != null) entry.Key.SetActive(entry.Value);
+        tilesCoveredBySelection.Clear();
+        lastCoveredCell = null;
+    }
+
+    private void HideRangeTilesUnderSelection(Vector2Int selectedCell)
+    {
+        if (lastCoveredCell.HasValue && lastCoveredCell.Value == selectedCell)
+            return;
+        RestoreCoveredRangeTiles();
+        lastCoveredCell = selectedCell;
+
+        // Regular walk/attack/jump/throw range tiles.
+        foreach (GameObject tile in movementTiles)
+            HideRangeTileAtCell(tile, selectedCell);
+        // Markers below friendly and enemy units.
+        foreach (GameObject marker in unitRangeMarkers)
+            HideRangeTileAtCell(marker, selectedCell);
+    }
+
+    private void HideRangeTileAtCell(GameObject tile, Vector2Int selectedCell)
+    {
+        if (tile == null || !tile.activeSelf) return;
+        if (WorldToGrid(tile.transform.position) != selectedCell) return;
+        tilesCoveredBySelection[tile] = tile.activeSelf;
+        tile.SetActive(false);
+    }
+
     private void UpdateHoveredTile(TacticalUnit unit, Cell cell)
     {
         bool valid = cell != null && (unit != null ||
@@ -456,6 +590,7 @@ public class TacticalGridMovement : MonoBehaviour
         if (!valid)
         {
             if (hoveredTile != null) hoveredTile.SetActive(false);
+            RestoreCoveredRangeTiles();
             return;
         }
 
@@ -497,6 +632,7 @@ public class TacticalGridMovement : MonoBehaviour
         hoveredTile.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
         hoveredTile.transform.localScale = new Vector3(cellSize * selectionTileScale, cellSize * selectionTileScale, 1f);
         hoveredTile.SetActive(true);
+        HideRangeTilesUnderSelection(cell.coord);
     }
 
     private void ClearUnitRangeMarkers()
@@ -624,8 +760,13 @@ public class TacticalGridMovement : MonoBehaviour
         if (shader == null) shader = Shader.Find("Standard");
         if (shader != null)
         {
-            previewDotMaterial = new Material(shader);
+            // Render path dots after transparent tile overlays, without depth occlusion.
+            // Requires TacticalPathDotsOverlay.shader included in the package.
+            Shader dotsShader = Shader.Find("Tactical/PathDotsOverlay");
+            previewDotMaterial = new Material(dotsShader != null ? dotsShader : shader);
             previewDotMaterial.color = pathDotColor;
+            if (dotsShader == null)
+                Debug.LogWarning("Missing Tactical/PathDotsOverlay shader. Path dots may be hidden by tiles.", this);
             previewCursorMaterial = new Material(shader);
             previewCursorMaterial.color = cursorColor;
         }
@@ -672,6 +813,7 @@ public class TacticalGridMovement : MonoBehaviour
     {
         if (Time.unscaledTime - lastHoverSeenTime >= hoverExitDelay) SetHoveredUnit(null);
         if (hoveredTile != null) hoveredTile.SetActive(false);
+        RestoreCoveredRangeTiles();
         if (!previewWasVisible) return;
         previewWasVisible = false;
         lastPreviewCell = null;
@@ -680,7 +822,8 @@ public class TacticalGridMovement : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (Time.unscaledTime - lastHoverSeenTime >= hoverExitDelay) SetHoveredUnit(null);
+        RestoreCoveredRangeTiles();
+        SetHoveredUnit(null);
         ClearUnitRangeMarkers();
         if (hoveredTile != null) Destroy(hoveredTile);
         if (hoveredTileMaterial != null) Destroy(hoveredTileMaterial);
@@ -1674,6 +1817,7 @@ public class TacticalGridMovement : MonoBehaviour
     }
     private void ClearMovementTiles()
     {
+        RestoreCoveredRangeTiles();
         ClearUnitRangeMarkers();
         HidePathPreview();
         foreach (GameObject tile in movementTiles)

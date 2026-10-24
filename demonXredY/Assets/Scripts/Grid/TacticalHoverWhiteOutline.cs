@@ -1,6 +1,8 @@
 using UnityEngine;
 
-// Adds a white pixel outline to the ORIGINAL animated sprite, without cloning it.
+// Kontur na oryginalnym SpriteRenderer; materiał jest tworzony tylko raz.
+// Run AFTER TacticalUnitSprite (DefaultExecutionOrder 10000), so sprite UVs are in sync.
+[DefaultExecutionOrder(11000)]
 [DisallowMultipleComponent]
 [RequireComponent(typeof(SpriteRenderer))]
 public class TacticalHoverWhiteOutline : MonoBehaviour
@@ -19,15 +21,20 @@ public class TacticalHoverWhiteOutline : MonoBehaviour
     {
         if (source == null) source = GetComponent<SpriteRenderer>();
         if (source == null) return;
-        Shader shader = Shader.Find("Tactical/AnimatedWhiteSpriteOutline");
-        if (shader == null)
+        if (outlineMaterial == null)
         {
-            Debug.LogError("Brak shadera Tactical/AnimatedWhiteSpriteOutline. Dodaj TacticalAnimatedWhiteSpriteOutline.shader do Assets.", this);
-            enabled = false;
-            return;
+            Shader shader = Shader.Find("Tactical/AnimatedWhiteSpriteOutline");
+            if (shader == null)
+            {
+                Debug.LogError("Brak shadera Tactical/AnimatedWhiteSpriteOutline.", this);
+                enabled = false;
+                return;
+            }
+            outlineMaterial = new Material(shader) { name = "Animated white outline (runtime)" };
         }
-        originalMaterial = source.sharedMaterial;
-        outlineMaterial = new Material(shader) { name = "Animated white outline (runtime)" };
+        // Zachowaj oryginalny material, nie zapamietuj wlasnego jako oryginalu.
+        if (source.sharedMaterial != outlineMaterial)
+            originalMaterial = source.sharedMaterial;
         source.sharedMaterial = outlineMaterial;
         previousSprite = null;
         Sync();
@@ -38,8 +45,6 @@ public class TacticalHoverWhiteOutline : MonoBehaviour
     private void Sync()
     {
         if (source == null || outlineMaterial == null) return;
-        // Previous GridMovement versions control outlineThickness in world units.
-        // Convert it to pixels so existing Inspector values remain useful.
         Sprite sprite = source.sprite;
         float worldPixels = sprite != null ? outlineThickness * sprite.pixelsPerUnit : 3f;
         outlineMaterial.SetFloat("_OutlinePixels", Mathf.Clamp(Mathf.Max(outlinePixels, worldPixels), 1f, 8f));
@@ -56,8 +61,14 @@ public class TacticalHoverWhiteOutline : MonoBehaviour
     {
         if (source != null && outlineMaterial != null && source.sharedMaterial == outlineMaterial)
             source.sharedMaterial = originalMaterial;
+        // NIE niszcz materialu tutaj: hover moze wlaczac/wylaczac komponent.
+    }
+
+    private void OnDestroy()
+    {
+        if (source != null && outlineMaterial != null && source.sharedMaterial == outlineMaterial)
+            source.sharedMaterial = originalMaterial;
         if (outlineMaterial != null) Destroy(outlineMaterial);
         outlineMaterial = null;
-        previousSprite = null;
     }
 }
