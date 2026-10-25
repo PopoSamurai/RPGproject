@@ -9,6 +9,15 @@ public class TacticalItemData : ScriptableObject
     public Sprite icon;
     [TextArea] public string description;
     public TacticalItemType type;
+    [Header("Equipment rules")]
+    public TacticalArmorClass armorClass = TacticalArmorClass.None;
+    public bool isShield;
+    [Min(0)] public int itemWeight;
+    [Header("Additional stat modifiers")]
+    public int bonusDefense;
+    public int bonusMana;
+    public int bonusJump;
+    public int bonusJumpDistance;
     [Min(0)] public int bonusHealth;
     [Min(0)] public int bonusAttack;
     [Min(0)] public int bonusStrength;

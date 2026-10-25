@@ -86,11 +86,10 @@ MonoBehaviour:
   heldBack: {fileID: 960595178, guid: d8f213d1f4708be49adc19d47ed493d6, type: 3}
   heldLeft: {fileID: -777580096, guid: d8f213d1f4708be49adc19d47ed493d6, type: 3}
   heldRight: {fileID: -679571483, guid: d8f213d1f4708be49adc19d47ed493d6, type: 3}
-  maxHealth: 30
-  strength: 10
-  movementRange: 5
+  startingLevel: 1
+  unitClass: {fileID: 11400000, guid: c1d54cfb8ed4594459e56dcc25f307b2, type: 2}
+  subclass: {fileID: 11400000, guid: 74419c6db7a387f40a830c51ec23d1e1, type: 2}
   moveSpeed: 4
-  weight: 1
   basicAttack: {fileID: 0}
   skills: []
   startingItems: []

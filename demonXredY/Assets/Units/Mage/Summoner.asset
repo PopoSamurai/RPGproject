@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1777b69772634048ad078dec20b0f76, type: 3}
+  m_Name: Summoner
+  m_EditorClassIdentifier: 
+  baseClass: 2
+  displayName: Subclass
+  roleDescription: "Tworzenie dodatkowych jednostek (\u017Cywio\u0142aki, konstrukty)"
+  startingStats:
+    hp: 11
+    mp: 22
+    str: 1
+    def: 2
+    spd: 4
+    intelligence: 7
+    accuracy: 11
+    evasion: 4
+    movement: 4
+    jump: 1
+    jumpDistance: 2
+    weight: 1
+    fireRes: 0
+    iceRes: 0
+    lightningRes: 0
+    darkRes: 0
+    lightRes: 0
+  growth:
+    hp: 6
+    mp: 8
+    str: 0.2
+    def: 0.4
+    spd: 0.6
+    intelligence: 2.1
+    accuracy: 0
+    evasion: 0
+    fireRes: 0
+    iceRes: 0
+    lightningRes: 0
+    darkRes: 0
+    lightRes: 0
+  levelBonuses: []
+  maximumArmor: 1
+  canUseShields: 0
+  skillUnlocks: []

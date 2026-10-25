@@ -244,13 +244,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48c36fc3dc036d941ac935bcc32359d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  unitData: {fileID: 11400000, guid: 5bd7b34854ca8334a9f5ae6847800a46, type: 2}
-  equippedWeapon: {fileID: 11400000, guid: d6a24f7c4e5ccf64d8dece3ec9dde291, type: 2}
+  unitData: {fileID: 0}
+  equippedWeapon: {fileID: 0}
   equippedArmor: {fileID: 0}
+  level: 1
+  experience: 0
+  currentMana: 0
   isPlayerControlled: 1
-  currentHealth: 10
+  currentHealth: 0
   hasMoved: 0
   remainingMovement: 0
+  hasJumpedThisTurn: 0
   hasActed: 0
   isActiveUnit: 0
 --- !u!114 &5077166799100485453

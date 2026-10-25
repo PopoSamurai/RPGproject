@@ -86,6 +86,28 @@ MonoBehaviour:
   heldBack: {fileID: 960595178, guid: d8f213d1f4708be49adc19d47ed493d6, type: 3}
   heldLeft: {fileID: -777580096, guid: d8f213d1f4708be49adc19d47ed493d6, type: 3}
   heldRight: {fileID: -679571483, guid: d8f213d1f4708be49adc19d47ed493d6, type: 3}
+  startingLevel: 1
+  unitClass: {fileID: 11400000, guid: 6d458fccfba52294682465fb5ba54ae9, type: 2}
+  subclass: {fileID: 11400000, guid: a2fa4c4e0799e01489ba17ce8a382fcb, type: 2}
+  baseStats:
+    hp: 10
+    mp: 0
+    str: 2
+    def: 1
+    spd: 5
+    intelligence: 2
+    accuracy: 10
+    evasion: 5
+    movement: 5
+    jump: 1
+    jumpDistance: 2
+    weight: 1
+    fireRes: 0
+    waterRes: 0
+    earthRes: 0
+    airRes: 0
+    lightRes: 0
+    darkRes: 0
   maxHealth: 15
   strength: 3
   movementRange: 7

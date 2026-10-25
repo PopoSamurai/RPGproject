@@ -188,6 +188,8 @@ public class TacticalGridMovement : MonoBehaviour
         DeselectUnit();
         actingUnit = unit != null && unit.isPlayerControlled ? unit.transform : null;
         if (actingUnit == null) return;
+        maxJumpGapCells = Mathf.Max(0, unit.JumpDistance - 1);
+        maxJumpHeight = unit.JumpHeight * cellSize;
         movementRange = unit.movementRange;
         moveSpeed = unit.moveSpeed;
         carryStrength = unit.strength;
@@ -867,7 +869,7 @@ public class TacticalGridMovement : MonoBehaviour
 
     public void OnJumpButton()
     {
-        if (!PlayerCanControl || isMoving || isCarrying || CurrentUnit.RemainingMovement <= 0) return;
+        if (!PlayerCanControl || isMoving || isCarrying || !CurrentUnit.CanJumpThisTurn || CurrentUnit.JumpHeight <= 0 || CurrentUnit.JumpDistance < 2) return;
         isSelected = true;
         isAttackMode = false;
         isPickupMode = false;
@@ -1012,7 +1014,7 @@ public class TacticalGridMovement : MonoBehaviour
 
         if (isJumpMode)
         {
-            if (!jumpCells.Contains(clickedCoord)) return;
+            if (!CurrentUnit.CanJumpThisTurn || !jumpCells.Contains(clickedCoord)) return;
             if (IsCellBlocked(clickedCoord)) return;
             if (!cells.TryGetValue(clickedCoord, out Cell jumpTarget)) return;
 
@@ -1143,12 +1145,12 @@ public class TacticalGridMovement : MonoBehaviour
             FaceUnitTowards(enemy, actingUnit != null ? actingUnit.position : startPosition);
             enemy.gameObject.SendMessage(
                 "ApplyDamage",
-                attackDamage,
+                CalculateAttackDamage(CurrentUnit, enemy.GetComponent<TacticalUnit>()),
                 SendMessageOptions.DontRequireReceiver);
 
             Debug.Log(
                 $"Rzut istotą trafił {enemy.name}. " +
-                $"Obrażenia: {attackDamage}.");
+                $"Obrażenia: {CalculateAttackDamage(CurrentUnit, enemy.GetComponent<TacticalUnit>())}.");
         }
 
         isCarrying = false;
@@ -1176,7 +1178,7 @@ public class TacticalGridMovement : MonoBehaviour
         if (isCarrying) BuildThrowTargets(start);
         else if (isPickupMode) BuildPickupTargets(start);
         else if (isAttackMode && !CurrentUnit.hasActed) BuildAttackTargets(start);
-        else if (isJumpMode && CurrentUnit.RemainingMovement > 0) BuildJumpTargets(start);
+        else if (isJumpMode && CurrentUnit.CanJumpThisTurn) BuildJumpTargets(start);
         else if (CurrentUnit.RemainingMovement > 0) BuildWalkTargets(start);
 
         if (!isCarrying && !isPickupMode && !isAttackMode && !isJumpMode &&
@@ -1283,14 +1285,28 @@ public class TacticalGridMovement : MonoBehaviour
         return (from.x == to.x) != (from.y == to.y);
     }
 
+    // Damage is derived from the attacking unit's actual calculated stats.
+    // BasicAttack.damage and item bonusAttack are optional flat power bonuses.
+    private int CalculateAttackDamage(TacticalUnit attacker, TacticalUnit defender)
+    {
+        if (attacker == null) return Mathf.Max(1, attackDamage);
+        bool magic = attacker.unitData != null && attacker.unitData.basicAttack != null &&
+                     attacker.unitData.basicAttack.usesMagic;
+        int offensiveStat = magic ? attacker.Intelligence : attacker.strength;
+        int flatPower = attacker.attackDamage;
+        int defense = defender != null ? defender.Defense : 0;
+        // Half DEF mitigation avoids making low-level attacks always deal zero.
+        return Mathf.Max(1, offensiveStat + flatPower - Mathf.FloorToInt(defense * 0.5f));
+    }
+
     private void PerformAttack(Transform enemy)
     {
         if (enemy == null) return;
         FaceActingUnit(enemy.position);
         // Trafiona jednostka odwraca się do napastnika.
         FaceUnitTowards(enemy, actingUnit.position);
-        int damage = attackDamage;
-        // Enemy może mieć własny komponent z metodą public void ApplyDamage(int damage).
+        int damage = CalculateAttackDamage(CurrentUnit, enemy.GetComponent<TacticalUnit>());
+        // Support other damageable objects through the existing message API.
         enemy.gameObject.SendMessage("ApplyDamage", damage, SendMessageOptions.DontRequireReceiver);
         if (CurrentUnit != null) CurrentUnit.hasActed = true;
         Debug.Log($"{(isArcher ? "Strzał z łuku" : "Atak wręcz")}: {enemy.name}, obrażenia: {damage}.");
@@ -1334,44 +1350,50 @@ public class TacticalGridMovement : MonoBehaviour
             if (coord != start) reachableCells.Add(coord);
     }
 
+    private static readonly Vector2Int[] jumpDirections =
+    {
+        Vector2Int.right, Vector2Int.left, Vector2Int.up, Vector2Int.down,
+        new Vector2Int(1, 1), new Vector2Int(1, -1),
+        new Vector2Int(-1, 1), new Vector2Int(-1, -1)
+    };
+
+    // JumpHeight is measured in terrain levels (one level = cellSize in world units).
+    // JumpDistance counts grid cells from the start to the landing tile.
+    private bool CanJump(Vector2Int start, Vector2Int landing, TacticalUnit jumper)
+    {
+        if (jumper == null || !jumper.CanJumpThisTurn || jumper.JumpHeight <= 0 || jumper.JumpDistance < 2) return false;
+        if (!cells.TryGetValue(start, out Cell from) || !cells.TryGetValue(landing, out Cell to)) return false;
+        if (IsCellBlocked(landing)) return false;
+        Vector2Int delta = landing - start;
+        int distance = Mathf.Max(Mathf.Abs(delta.x), Mathf.Abs(delta.y));
+        if (distance < 2 || distance > jumper.JumpDistance) return false;
+        if (!(delta.x == 0 || delta.y == 0 || Mathf.Abs(delta.x) == Mathf.Abs(delta.y))) return false;
+        float allowedRise = jumper.JumpHeight * cellSize;
+        if (to.surfaceY - from.surfaceY > allowedRise) return false;
+        Vector2Int step = new Vector2Int(System.Math.Sign(delta.x), System.Math.Sign(delta.y));
+        for (int i = 1; i < distance; i++)
+        {
+            Vector2Int middle = start + step * i;
+            if (cells.TryGetValue(middle, out Cell obstacleCell) &&
+                obstacleCell.surfaceY - from.surfaceY > allowedRise) return false;
+            // Units and low obstacles may be jumped over, but tall solid blocking
+            // volumes need a later collider-height check before being allowed.
+            if (IsBlockingVolumeAt(middle) && FindUnitAtCell(middle) == null) return false;
+        }
+        return true;
+    }
+
     private void BuildJumpTargets(Vector2Int start)
     {
         jumpCells.Clear();
-        if (!cells.TryGetValue(start, out Cell startCell)) return;
-
-        // To jest osobna akcja: lądowanie musi być w linii prostej,
-        // a pomiędzy startem i celem musi istnieć co najmniej jedno pole bez Walkable.
-        foreach (Vector2Int dir in directions)
-        {
-            for (int gap = 1; gap <= maxJumpGapCells; gap++)
+        TacticalUnit jumper = CurrentUnit;
+        if (jumper == null || !jumper.CanJumpThisTurn) return;
+        foreach (Vector2Int dir in jumpDirections)
+            for (int distance = 2; distance <= jumper.JumpDistance; distance++)
             {
-                int landingDistance = gap + 1;
-                if (landingDistance > (CurrentUnit != null && CurrentUnit.isPlayerControlled ? CurrentUnit.RemainingMovement : movementRange)) break;
-
-                Vector2Int landing = start + dir * landingDistance;
-                bool clearGap = true;
-                for (int i = 1; i <= gap; i++)
-                {
-                    Vector2Int middle = start + dir * i;
-                    // Skok jest przeznaczony do pokonywania pól bez Walkable,
-                    // np. wody lub dziury. Nie przeskakujemy przez inne pola terenu.
-                    if (cells.ContainsKey(middle))
-                    {
-                        clearGap = false;
-                        break;
-                    }
-                    if (IsBlockingVolumeAt(middle))
-                    {
-                        clearGap = false;
-                        break;
-                    }
-                }
-                if (!clearGap || !cells.TryGetValue(landing, out Cell landingCell)) continue;
-                if (IsCellBlocked(landing)) continue;
-                if (Mathf.Abs(landingCell.surfaceY - startCell.surfaceY) > maxJumpHeight) continue;
-                jumpCells.Add(landing);
+                Vector2Int landing = start + dir * distance;
+                if (CanJump(start, landing, jumper)) jumpCells.Add(landing);
             }
-        }
     }
 
     private bool IsCellBlocked(Vector2Int coord)
@@ -1770,6 +1792,8 @@ public class TacticalGridMovement : MonoBehaviour
         actingUnit = unit.transform;
 
         // Statystyki kontrolera pochodzą od zaznaczonej jednostki.
+        maxJumpGapCells = Mathf.Max(0, unit.JumpDistance - 1);
+        maxJumpHeight = unit.JumpHeight * cellSize;
         movementRange = unit.movementRange;
         moveSpeed = unit.moveSpeed;
         carryStrength = unit.strength;
@@ -1965,6 +1989,8 @@ public class TacticalGridMovement : MonoBehaviour
 
     private IEnumerator JumpToCell(Cell targetCell)
     {
+        TacticalUnit jumper = CurrentUnit;
+        if (jumper == null || !jumper.TryUseJump()) yield break;
         FaceActingUnit(CellWorldPosition(targetCell));
         isMoving = true;
         Vector3 startPosition = actingUnit.position;
@@ -1983,7 +2009,7 @@ public class TacticalGridMovement : MonoBehaviour
         }
         actingUnit.position = targetPosition;
         isMoving = false;
-        if (CurrentUnit != null) CurrentUnit.SpendMovement(Mathf.Abs(WorldToGrid(startPosition).x - targetCell.coord.x) + Mathf.Abs(WorldToGrid(startPosition).y - targetCell.coord.y));
+        // Movement points and the once-per-turn jump are consumed in TryUseJump().
         ClearMovementTiles();
         isSelected = CurrentUnit != null && CurrentUnit.isPlayerControlled;
         isJumpMode = false;
@@ -2001,7 +2027,7 @@ public class TacticalGridMovement : MonoBehaviour
         { this.coord = coord; this.jump = jump; this.cost = cost; }
     }
 
-    private List<AIPlanStep> FindAIPlan(Vector2Int start, Vector2Int goal, int budget, int range)
+    private List<AIPlanStep> FindAIPlan(Vector2Int start, Vector2Int goal, int budget, int range, TacticalUnit enemy, bool allowJumps)
     {
         if (!cells.ContainsKey(start)) return null;
         var distances = new Dictionary<Vector2Int, int> { [start] = 0 };
@@ -2026,21 +2052,15 @@ public class TacticalGridMovement : MonoBehaviour
                     bool jump = distance > 1;
                     if (jump)
                     {
-                        bool validGap = true;
-                        for (int k = 1; k < distance; k++)
-                        {
-                            Vector2Int mid = current + dir * k;
-                            if (cells.ContainsKey(mid) || IsBlockingVolumeAt(mid)) { validGap = false; break; }
-                        }
-                        if (!validGap || Mathf.Abs(cells[next].surfaceY - cells[current].surfaceY) > maxJumpHeight) continue;
+                        if (!allowJumps || !CanJump(current, next, enemy)) continue;
                     }
                     else if (Mathf.Abs(cells[next].surfaceY - cells[current].surfaceY) > maxStepHeight) continue;
-                    int newCost = currentCost + distance;
+                    int newCost = currentCost + (jump ? 2 : 1);
                     if (newCost > budget || (distances.ContainsKey(next) && distances[next] <= newCost)) continue;
                     distances[next] = newCost;
                     previous[next] = current;
                     jumps[next] = jump;
-                    costs[next] = distance;
+                    costs[next] = jump ? 2 : 1;
                     if (!frontier.Contains(next)) frontier.Add(next);
                 }
             }
@@ -2112,6 +2132,8 @@ public class TacticalGridMovement : MonoBehaviour
     {
         if (enemy == null || !enemy.IsAlive) yield break;
         actingUnit = enemy.transform;
+        maxJumpGapCells = Mathf.Max(0, enemy.JumpDistance - 1);
+        maxJumpHeight = enemy.JumpHeight * cellSize;
         movementRange = enemy.movementRange;
         moveSpeed = enemy.moveSpeed;
         carryStrength = enemy.strength;
@@ -2136,7 +2158,24 @@ public class TacticalGridMovement : MonoBehaviour
         int range = enemy.isArcher ? enemy.attackRange : 1;
         if (nearest > range)
         {
-            List<AIPlanStep> plan = FindAIPlan(start, WorldToGrid(target.transform.position), enemy.RemainingMovement, range);
+            // First try walking only. Jump is a last resort when ordinary walking
+            // cannot bring us closer to the target during this turn.
+            Vector2Int targetCoord = WorldToGrid(target.transform.position);
+            List<AIPlanStep> plan = FindAIPlan(start, targetCoord, enemy.RemainingMovement, range, enemy, false);
+            Vector2Int walkEnd = plan != null && plan.Count > 0 ? plan[plan.Count - 1].coord : start;
+            int walkDistance = Mathf.Abs(walkEnd.x - targetCoord.x) + Mathf.Abs(walkEnd.y - targetCoord.y);
+            int startDistance = Mathf.Abs(start.x - targetCoord.x) + Mathf.Abs(start.y - targetCoord.y);
+            // Only consider a jump when walking cannot make progress at all.
+            if (walkDistance >= startDistance && enemy.CanJumpThisTurn)
+            {
+                List<AIPlanStep> jumpPlan = FindAIPlan(start, targetCoord, enemy.RemainingMovement, range, enemy, true);
+                if (jumpPlan != null && jumpPlan.Count > 0)
+                {
+                    Vector2Int jumpEnd = jumpPlan[jumpPlan.Count - 1].coord;
+                    int jumpDistance = Mathf.Abs(jumpEnd.x - targetCoord.x) + Mathf.Abs(jumpEnd.y - targetCoord.y);
+                    if (jumpDistance < walkDistance) plan = jumpPlan;
+                }
+            }
             if (plan != null)
             {
                 foreach (AIPlanStep step in plan)
@@ -2144,7 +2183,10 @@ public class TacticalGridMovement : MonoBehaviour
                     if (!enemy.IsAlive || !target.IsAlive || enemy.RemainingMovement < step.cost) break;
                     if (IsCellBlocked(step.coord)) break;
                     if (step.jump)
+                    {
+                        if (!enemy.CanJumpThisTurn) break;
                         yield return StartCoroutine(JumpToCell(cells[step.coord]));
+                    }
                     else
                         yield return StartCoroutine(FollowPath(new List<Cell> { cells[step.coord] }));
                     Vector2Int now = WorldToGrid(enemy.transform.position);

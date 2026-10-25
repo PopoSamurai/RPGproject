@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1777b69772634048ad078dec20b0f76, type: 3}
+  m_Name: Guard
+  m_EditorClassIdentifier: 
+  baseClass: 0
+  displayName: Subclass
+  roleDescription: "Tank i ochrona (Przejmowanie obra\u017Ce\u0144, os\u0142anianie
+    sojusznik\xF3w, kontrataki)"
+  startingStats:
+    hp: 18
+    mp: 2
+    str: 4
+    def: 7
+    spd: 3
+    intelligence: 2
+    accuracy: 10
+    evasion: 3
+    movement: 4
+    jump: 1
+    jumpDistance: 2
+    weight: 3
+    fireRes: 0
+    iceRes: 0
+    lightningRes: 0
+    darkRes: 0
+    lightRes: 0
+  growth:
+    hp: 11
+    mp: 0
+    str: 1
+    def: 2
+    spd: 0.3
+    intelligence: 0.2
+    accuracy: 0
+    evasion: 0
+    fireRes: 0
+    iceRes: 0
+    lightningRes: 0
+    darkRes: 0
+    lightRes: 0
+  levelBonuses: []
+  maximumArmor: 3
+  canUseShields: 1
+  skillUnlocks: []

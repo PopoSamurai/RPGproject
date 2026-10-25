@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1777b69772634048ad078dec20b0f76, type: 3}
+  m_Name: Assasin
+  m_EditorClassIdentifier: 
+  baseClass: 1
+  displayName: Subclass
+  roleDescription: "Eliminacja cel\xF3w (ataki z ukrycia i od ty\u0142u z wi\u0119kszym
+    dmg, rozbrajanie pu\u0142apek, eliminacja mag\xF3w, nak\u0142adanie trucizn)"
+  startingStats:
+    hp: 12
+    mp: 4
+    str: 4
+    def: 3
+    spd: 7
+    intelligence: 3
+    accuracy: 13
+    evasion: 8
+    movement: 6
+    jump: 2
+    jumpDistance: 3
+    weight: 1
+    fireRes: 0
+    iceRes: 0
+    lightningRes: 0
+    darkRes: 0
+    lightRes: 0
+  growth:
+    hp: 7
+    mp: 0
+    str: 1.3
+    def: 0.4
+    spd: 1.5
+    intelligence: 0.2
+    accuracy: 0
+    evasion: 0
+    fireRes: 0
+    iceRes: 0
+    lightningRes: 0
+    darkRes: 0
+    lightRes: 0
+  levelBonuses: []
+  maximumArmor: 3
+  canUseShields: 0
+  skillUnlocks: []

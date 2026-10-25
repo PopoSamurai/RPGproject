@@ -7,6 +7,73 @@ public class TacticalUnit : MonoBehaviour
     public TacticalItemData equippedArmor;
 
     public TacticalSkillData[] AvailableSkills => unitData != null ? unitData.skills : null;
+    public TacticalSubclassData Subclass => unitData != null ? unitData.subclass : null;
+    public TacticalClassData UnitClass => unitData != null ? unitData.unitClass : null;
+    public const int MaxLevel = 50;
+    [Header("Progression (runtime)")]
+    [SerializeField, Range(1, 50)] private int level = 1;
+    [SerializeField] private int experience;
+    [SerializeField] private int currentMana;
+    public int Level => level;
+    public int Experience => experience;
+    public int CurrentMana => currentMana;
+    public int MaxMana => calculatedStats.mp;
+    public TacticalStats Stats => calculatedStats;
+    public int Defense => calculatedStats.def;
+    public int Speed => calculatedStats.spd;
+    public int Intelligence => calculatedStats.intelligence;
+    public int Accuracy => calculatedStats.accuracy;
+    public int Evasion => calculatedStats.evasion;
+    public int JumpHeight => calculatedStats.jump;
+    public int JumpDistance => calculatedStats.jumpDistance;
+    public int FireResistance => calculatedStats.fireRes;
+    public int IceResistance => calculatedStats.iceRes;
+    public int LightningResistance => calculatedStats.lightningRes;
+    public int LightResistance => calculatedStats.lightRes;
+    public int DarkResistance => calculatedStats.darkRes;
+    public bool CanEquip(TacticalItemData item)
+    {
+        if (item == null) return true;
+        TacticalSubclassData sub = unitData != null ? unitData.subclass : null;
+        if (sub == null) return true;
+        if (item.type == TacticalItemType.Armor && item.armorClass > sub.maximumArmor) return false;
+        if (item.isShield && !sub.canUseShields) return false;
+        return true;
+    }
+    public void RefreshStats()
+    {
+        int previousMaxHp = maxHealth;
+        int previousMaxMp = MaxMana;
+        LoadUnitData();
+        currentHealth = Mathf.Clamp(currentHealth + Mathf.Max(0, maxHealth - previousMaxHp), 0, maxHealth);
+        currentMana = Mathf.Clamp(currentMana + Mathf.Max(0, MaxMana - previousMaxMp), 0, MaxMana);
+        remainingMovement = Mathf.Min(remainingMovement, movementRange);
+    }
+    private TacticalStats calculatedStats;
+
+    public static int ExperienceToNextLevel(int currentLevel)
+    {
+        return currentLevel >= MaxLevel ? 0 : Mathf.RoundToInt(100f * Mathf.Pow(currentLevel, 1.5f));
+    }
+
+    public void GainExperience(int amount)
+    {
+        if (amount <= 0 || level >= MaxLevel) return;
+        experience += amount;
+        while (level < MaxLevel && experience >= ExperienceToNextLevel(level))
+        {
+            experience -= ExperienceToNextLevel(level);
+            SetLevel(level + 1);
+        }
+        if (level >= MaxLevel) experience = 0;
+    }
+
+    public void SetLevel(int newLevel)
+    {
+        level = Mathf.Clamp(newLevel, 1, MaxLevel);
+        RefreshStats();
+    }
+
 
     private void LoadUnitData()
     {
@@ -19,31 +86,40 @@ public class TacticalUnit : MonoBehaviour
         attackDamage = 0;
         attackRange = 1;
         isArcher = false;
-        maxHealth = unitData.maxHealth;
-        strength = unitData.strength;
-        movementRange = unitData.movementRange;
+        calculatedStats = unitData.GetStatsAtLevel(level);
         moveSpeed = unitData.moveSpeed;
-        weight = unitData.weight;
         if (unitData.basicAttack != null)
         {
             attackDamage = unitData.basicAttack.damage;
-            attackRange = unitData.basicAttack.range;
+            attackRange = Mathf.Max(1, unitData.basicAttack.range);
             isArcher = unitData.basicAttack.ranged;
         }
-        if (equippedWeapon != null)
+        ApplyEquipment(equippedWeapon);
+        ApplyEquipment(equippedArmor);
+        maxHealth = calculatedStats.hp;
+        strength = calculatedStats.str;
+        movementRange = calculatedStats.movement;
+        weight = calculatedStats.weight;
+
+    }
+
+    private void ApplyEquipment(TacticalItemData item)
+    {
+        if (item == null) return;
+        if (!CanEquip(item))
         {
-            attackDamage += equippedWeapon.bonusAttack;
-            strength += equippedWeapon.bonusStrength;
-            movementRange += equippedWeapon.bonusMovement;
-            maxHealth += equippedWeapon.bonusHealth;
+            Debug.LogWarning($"{name}: item {item.name} is not allowed for this subclass.", this);
+            return;
         }
-        if (equippedArmor != null)
-        {
-            attackDamage += equippedArmor.bonusAttack;
-            strength += equippedArmor.bonusStrength;
-            movementRange += equippedArmor.bonusMovement;
-            maxHealth += equippedArmor.bonusHealth;
-        }
+        attackDamage += item.bonusAttack;
+        calculatedStats.hp += item.bonusHealth;
+        calculatedStats.str += item.bonusStrength;
+        calculatedStats.movement += item.bonusMovement;
+        calculatedStats.def += item.bonusDefense;
+        calculatedStats.mp += item.bonusMana;
+        calculatedStats.weight += Mathf.Max(0, item.itemWeight);
+        calculatedStats.jump = Mathf.Max(0, calculatedStats.jump + item.bonusJump);
+        calculatedStats.jumpDistance = Mathf.Max(0, calculatedStats.jumpDistance + item.bonusJumpDistance);
     }
 
     // Called by the battle spawner after Instantiate (Awake may have run already).
@@ -51,11 +127,23 @@ public class TacticalUnit : MonoBehaviour
     {
         unitData = data;
         isPlayerControlled = playerTeam;
+        if (unitData == null)
+        {
+            Debug.LogError($"{name}: brak Unit Data w TacticalBattleSetup!", this);
+            enabled = false;
+            return;
+        }
+
+        enabled = true;
+        level = Mathf.Clamp(unitData.startingLevel, 1, MaxLevel);
+        experience = 0;
         LoadUnitData();
         currentHealth = maxHealth;
+        currentMana = MaxMana;
         remainingMovement = 0;
         hasMoved = false;
         hasActed = false;
+        hasJumpedThisTurn = false;
         isActiveUnit = false;
     }
 
@@ -86,6 +174,19 @@ public class TacticalUnit : MonoBehaviour
         remainingMovement = Mathf.Max(0, remainingMovement - Mathf.Max(0, cells));
         hasMoved = remainingMovement == 0;
     }
+    [Header("Jump limit")]
+    [SerializeField] private bool hasJumpedThisTurn;
+    public bool HasJumpedThisTurn => hasJumpedThisTurn;
+    public bool CanJumpThisTurn => IsAlive && isActiveUnit && !hasJumpedThisTurn && remainingMovement >= 2;
+
+    public bool TryUseJump()
+    {
+        if (!CanJumpThisTurn) return false;
+        hasJumpedThisTurn = true;
+        SpendMovement(2);
+        return true;
+    }
+
     public bool hasActed = false;
 
     [SerializeField] private bool isActiveUnit = false;
@@ -94,15 +195,16 @@ public class TacticalUnit : MonoBehaviour
 
     private void Awake()
     {
-        LoadUnitData();
+        // Instantiate calls Awake before TacticalBattleSetup.Initialize.
+        // An empty Unit Data field on the shared spawn prefab is expected.
         if (unitData == null) return;
 
-        currentHealth = Mathf.Clamp(
-            currentHealth <= 0 ? maxHealth : currentHealth,
-            0,
-            maxHealth
-        );
+        level = Mathf.Clamp(unitData.startingLevel, 1, MaxLevel);
+        LoadUnitData();
+        currentMana = MaxMana;
+        currentHealth = maxHealth;
     }
+
     public void BeginTurn()
     {
         if (!IsAlive)
@@ -111,6 +213,7 @@ public class TacticalUnit : MonoBehaviour
         isActiveUnit = true;
         hasMoved = false;
         hasActed = false;
+        hasJumpedThisTurn = false;
         remainingMovement = movementRange;
 
         Debug.Log($"{name}: rozpoczêcie tury.");

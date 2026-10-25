@@ -41,12 +41,40 @@ public class TacticalUnitData : ScriptableObject
     public Sprite heldLeft;
     public Sprite heldRight;
 
-    [Min(1)] public int maxHealth = 10;
-    [Min(0)] public int strength = 2;
-    [Min(1)] public int movementRange = 5;
+    [Header("Progression - max level 50")]
+    [Range(1, 50)] public int startingLevel = 1;
+    public TacticalClassData unitClass;
+    public TacticalSubclassData subclass;
+
+    public bool IsSubclassCompatible => unitClass == null || subclass == null || unitClass.Allows(subclass);
+[Header("Movement settings (animation/world speed, not a stat)")]
     [Min(0.1f)] public float moveSpeed = 4f;
-    [Min(1)] public int weight = 1;
+
+    [Header("Combat")]
     public TacticalAttackData basicAttack;
     public TacticalSkillData[] skills;
     public TacticalItemData[] startingItems;
+
+    public TacticalStats GetStatsAtLevel(int level)
+    {
+        if (subclass == null || !IsSubclassCompatible)
+            Debug.LogError($"{name}: przypisz poprawna podklase z ustawionymi Starting Stats.", this);
+        TacticalStats stats = subclass != null && IsSubclassCompatible
+            ? subclass.Calculate(level)
+            : new TacticalStats();
+        stats.hp = Mathf.Max(1, stats.hp);
+        stats.mp = Mathf.Max(0, stats.mp);
+        stats.movement = Mathf.Max(0, stats.movement);
+        stats.jump = Mathf.Max(0, stats.jump);
+        stats.jumpDistance = Mathf.Max(0, stats.jumpDistance);
+        stats.weight = Mathf.Max(1, stats.weight);
+        return stats;
+    }
+
+    private void OnValidate()
+    {
+        startingLevel = Mathf.Clamp(startingLevel, 1, 50);
+        if (unitClass != null && subclass != null && !unitClass.Allows(subclass))
+            Debug.LogWarning($"{name}: subclass {subclass.name} does not belong to class {unitClass.name}.", this);
+    }
 }

@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1777b69772634048ad078dec20b0f76, type: 3}
+  m_Name: Warlock
+  m_EditorClassIdentifier: 
+  baseClass: 0
+  displayName: Subclass
+  roleDescription: "K\u0105twy i wykorzystanie \u015Bmierci (os\u0142abienie, przywo\u0142ywanie
+    nieumar\u0142ego)"
+  startingStats:
+    hp: 12
+    mp: 17
+    str: 2
+    def: 2
+    spd: 5
+    intelligence: 8
+    accuracy: 12
+    evasion: 5
+    movement: 0
+    jump: 1
+    jumpDistance: 2
+    weight: 2
+    fireRes: 0
+    iceRes: 0
+    lightningRes: 0
+    darkRes: 0
+    lightRes: 0
+  growth:
+    hp: 7
+    mp: 7
+    str: 0.3
+    def: 0.5
+    spd: 0.7
+    intelligence: 2
+    accuracy: 0
+    evasion: 0
+    fireRes: 0
+    iceRes: 0
+    lightningRes: 0
+    darkRes: 0
+    lightRes: 0
+  levelBonuses: []
+  maximumArmor: 1
+  canUseShields: 0
+  skillUnlocks: []
