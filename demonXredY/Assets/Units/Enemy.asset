@@ -89,30 +89,8 @@ MonoBehaviour:
   startingLevel: 1
   unitClass: {fileID: 11400000, guid: c1d54cfb8ed4594459e56dcc25f307b2, type: 2}
   subclass: {fileID: 11400000, guid: 35d819ffa347a084b80079a9fd37a060, type: 2}
-  baseStats:
-    hp: 10
-    mp: 0
-    str: 2
-    def: 1
-    spd: 5
-    intelligence: 2
-    accuracy: 10
-    evasion: 5
-    movement: 5
-    jump: 1
-    jumpDistance: 2
-    weight: 1
-    fireRes: 0
-    waterRes: 0
-    earthRes: 0
-    airRes: 0
-    lightRes: 0
-    darkRes: 0
-  maxHealth: 10
-  strength: 5
-  movementRange: 4
   moveSpeed: 4
-  weight: 1
+  element: 1
   basicAttack: {fileID: 0}
   skills: []
   startingItems: []

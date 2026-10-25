@@ -1145,12 +1145,13 @@ public class TacticalGridMovement : MonoBehaviour
             FaceUnitTowards(enemy, actingUnit != null ? actingUnit.position : startPosition);
             enemy.gameObject.SendMessage(
                 "ApplyDamage",
-                CalculateAttackDamage(CurrentUnit, enemy.GetComponent<TacticalUnit>()),
+                ApplyMatchupMultipliers(CalculateAttackDamage(CurrentUnit, enemy.GetComponent<TacticalUnit>()),
+                    CurrentUnit, enemy.GetComponent<TacticalUnit>()),
                 SendMessageOptions.DontRequireReceiver);
 
             Debug.Log(
                 $"Rzut istotą trafił {enemy.name}. " +
-                $"Obrażenia: {CalculateAttackDamage(CurrentUnit, enemy.GetComponent<TacticalUnit>())}.");
+                $"Obrażenia: {ApplyMatchupMultipliers(CalculateAttackDamage(CurrentUnit, enemy.GetComponent<TacticalUnit>()), CurrentUnit, enemy.GetComponent<TacticalUnit>())}.");
         }
 
         isCarrying = false;
@@ -1299,13 +1300,31 @@ public class TacticalGridMovement : MonoBehaviour
         return Mathf.Max(1, offensiveStat + flatPower - Mathf.FloorToInt(defense * 0.5f));
     }
 
+    // Both player and AI attacks use the same class + element modifiers.
+    // Multipliers are combined before rounding; elemental resistance is applied last.
+    private int ApplyMatchupMultipliers(int baseDamage, TacticalUnit attacker, TacticalUnit defender)
+    {
+        if (attacker == null || defender == null) return Mathf.Max(1, baseDamage);
+        float classMultiplier = TacticalClassMatchup.Multiplier(attacker.UnitClass, defender.UnitClass);
+        TacticalElement element = attacker.Element;
+        float elementMultiplier = TacticalElementRules.Multiplier(element, defender.Element);
+        int resistance = Mathf.Clamp(TacticalElementRules.Resistance(defender.Stats, element), -100, 90);
+        float finalMultiplier = classMultiplier * elementMultiplier * (1f - resistance / 100f);
+        int result = Mathf.Max(1, Mathf.RoundToInt(baseDamage * finalMultiplier));
+        Debug.Log($"{attacker.name} -> {defender.name}: class x{classMultiplier:0.###}, " +
+                  $"element {element} x{elementMultiplier:0.###}, res {resistance}% => {result} DMG");
+        return result;
+    }
+
     private void PerformAttack(Transform enemy)
     {
         if (enemy == null) return;
         FaceActingUnit(enemy.position);
         // Trafiona jednostka odwraca się do napastnika.
         FaceUnitTowards(enemy, actingUnit.position);
-        int damage = CalculateAttackDamage(CurrentUnit, enemy.GetComponent<TacticalUnit>());
+        TacticalUnit defender = enemy.GetComponent<TacticalUnit>();
+        int damage = CalculateAttackDamage(CurrentUnit, defender);
+        damage = ApplyMatchupMultipliers(damage, CurrentUnit, defender);
         // Support other damageable objects through the existing message API.
         enemy.gameObject.SendMessage("ApplyDamage", damage, SendMessageOptions.DontRequireReceiver);
         if (CurrentUnit != null) CurrentUnit.hasActed = true;
@@ -2027,60 +2046,86 @@ public class TacticalGridMovement : MonoBehaviour
         { this.coord = coord; this.jump = jump; this.cost = cost; }
     }
 
+    // Plan on the WHOLE map, not only within this turn's movement budget.
+    // This prevents choosing a dead-end/retreat just because the first step
+    // of a real detour temporarily increases distance to the target.
+    // State z tracks whether the one jump has already been used.
     private List<AIPlanStep> FindAIPlan(Vector2Int start, Vector2Int goal, int budget, int range, TacticalUnit enemy, bool allowJumps)
     {
-        if (!cells.ContainsKey(start)) return null;
-        var distances = new Dictionary<Vector2Int, int> { [start] = 0 };
-        var previous = new Dictionary<Vector2Int, Vector2Int>();
-        var jumps = new Dictionary<Vector2Int, bool>();
-        var costs = new Dictionary<Vector2Int, int>();
-        var frontier = new List<Vector2Int> { start };
-        while (frontier.Count > 0)
+        if (!cells.ContainsKey(start) || budget <= 0) return null;
+        Vector3Int origin = new Vector3Int(start.x, start.y, 0);
+        var distances = new Dictionary<Vector3Int, int> { [origin] = 0 };
+        var previous = new Dictionary<Vector3Int, Vector3Int>();
+        var stepJump = new Dictionary<Vector3Int, bool>();
+        var open = new List<Vector3Int> { origin };
+        var closed = new HashSet<Vector3Int>();
+        Vector3Int bestGoal = origin;
+        int bestGoalCost = int.MaxValue;
+        Vector3Int bestPartial = origin;
+        int bestPartialDistance = Mathf.Abs(start.x - goal.x) + Mathf.Abs(start.y - goal.y);
+        int bestPartialCost = int.MaxValue;
+
+        while (open.Count > 0)
         {
-            int bestIndex = 0;
-            for (int i = 1; i < frontier.Count; i++)
-                if (distances[frontier[i]] < distances[frontier[bestIndex]]) bestIndex = i;
-            Vector2Int current = frontier[bestIndex];
-            frontier.RemoveAt(bestIndex);
-            int currentCost = distances[current];
+            int pick = 0;
+            for (int i = 1; i < open.Count; i++)
+                if (distances[open[i]] < distances[open[pick]]) pick = i;
+            Vector3Int state = open[pick];
+            open.RemoveAt(pick);
+            if (!closed.Add(state)) continue;
+            int cost = distances[state];
+            Vector2Int at = new Vector2Int(state.x, state.y);
+            int manhattan = Mathf.Abs(at.x - goal.x) + Mathf.Abs(at.y - goal.y);
+            if (manhattan <= range && cost < bestGoalCost)
+            {
+                bestGoal = state;
+                bestGoalCost = cost;
+            }
+            // Fallback ONLY if it makes progress this turn. Never wander away
+            // when no route to an attack position exists.
+            if (cost <= budget && state != origin &&
+                (manhattan < bestPartialDistance ||
+                 (manhattan == bestPartialDistance && cost < bestPartialCost)))
+            {
+                bestPartial = state;
+                bestPartialDistance = manhattan;
+                bestPartialCost = cost;
+            }
             foreach (Vector2Int dir in directions)
             {
-                for (int distance = 1; distance <= maxJumpGapCells + 1; distance++)
+                int maxDistance = allowJumps && state.z == 0 && enemy.CanJumpThisTurn
+                    ? Mathf.Max(1, enemy.JumpDistance) : 1;
+                for (int d = 1; d <= maxDistance; d++)
                 {
-                    Vector2Int next = current + dir * distance;
+                    Vector2Int next = at + dir * d;
                     if (!cells.ContainsKey(next) || IsCellBlocked(next)) continue;
-                    bool jump = distance > 1;
+                    bool jump = d > 1;
                     if (jump)
                     {
-                        if (!allowJumps || !CanJump(current, next, enemy)) continue;
+                        if (!CanJump(at, next, enemy)) continue;
                     }
-                    else if (Mathf.Abs(cells[next].surfaceY - cells[current].surfaceY) > maxStepHeight) continue;
-                    int newCost = currentCost + (jump ? 2 : 1);
-                    if (newCost > budget || (distances.ContainsKey(next) && distances[next] <= newCost)) continue;
-                    distances[next] = newCost;
-                    previous[next] = current;
-                    jumps[next] = jump;
-                    costs[next] = jump ? 2 : 1;
-                    if (!frontier.Contains(next)) frontier.Add(next);
+                    else if (Mathf.Abs(cells[next].surfaceY - cells[at].surfaceY) > maxStepHeight) continue;
+                    Vector3Int nextState = new Vector3Int(next.x, next.y, jump ? 1 : state.z);
+                    // Jump penalty strongly prefers walking when both reach the goal.
+                    int newCost = cost + (jump ? 102 : 1);
+                    if (distances.TryGetValue(nextState, out int old) && old <= newCost) continue;
+                    distances[nextState] = newCost;
+                    previous[nextState] = state;
+                    stepJump[nextState] = jump;
+                    open.Add(nextState);
                 }
             }
         }
-        Vector2Int destination = start;
-        int bestScore = int.MaxValue;
-        foreach (var entry in distances)
-        {
-            Vector2Int cell = entry.Key;
-            int dist = Mathf.Abs(cell.x - goal.x) + Mathf.Abs(cell.y - goal.y);
-            int score = Mathf.Max(0, dist - range) * 100 + entry.Value;
-            if (score < bestScore) { bestScore = score; destination = cell; }
-        }
-        if (destination == start) return null;
+        Vector3Int chosen = bestGoalCost != int.MaxValue ? bestGoal : bestPartial;
+        if (chosen == origin) return null;
         var plan = new List<AIPlanStep>();
-        Vector2Int cursor = destination;
-        while (cursor != start)
+        Vector3Int cursor = chosen;
+        while (cursor != origin)
         {
-            plan.Add(new AIPlanStep(cursor, jumps[cursor], costs[cursor]));
-            cursor = previous[cursor];
+            if (!previous.TryGetValue(cursor, out Vector3Int from)) return null;
+            bool jump = stepJump[cursor];
+            plan.Add(new AIPlanStep(new Vector2Int(cursor.x, cursor.y), jump, jump ? 2 : 1));
+            cursor = from;
         }
         plan.Reverse();
         return plan;
@@ -2158,22 +2203,23 @@ public class TacticalGridMovement : MonoBehaviour
         int range = enemy.isArcher ? enemy.attackRange : 1;
         if (nearest > range)
         {
-            // First try walking only. Jump is a last resort when ordinary walking
-            // cannot bring us closer to the target during this turn.
             Vector2Int targetCoord = WorldToGrid(target.transform.position);
             List<AIPlanStep> plan = FindAIPlan(start, targetCoord, enemy.RemainingMovement, range, enemy, false);
-            Vector2Int walkEnd = plan != null && plan.Count > 0 ? plan[plan.Count - 1].coord : start;
-            int walkDistance = Mathf.Abs(walkEnd.x - targetCoord.x) + Mathf.Abs(walkEnd.y - targetCoord.y);
-            int startDistance = Mathf.Abs(start.x - targetCoord.x) + Mathf.Abs(start.y - targetCoord.y);
-            // Only consider a jump when walking cannot make progress at all.
-            if (walkDistance >= startDistance && enemy.CanJumpThisTurn)
+            // A full walk route is preferred even if its first steps go around an ally.
+            // Only consider jumps when walking cannot reach an attack position at all.
+            if (enemy.CanJumpThisTurn)
             {
-                List<AIPlanStep> jumpPlan = FindAIPlan(start, targetCoord, enemy.RemainingMovement, range, enemy, true);
-                if (jumpPlan != null && jumpPlan.Count > 0)
+                List<AIPlanStep> withJump = FindAIPlan(start, targetCoord, enemy.RemainingMovement, range, enemy, true);
+                if (withJump != null && withJump.Count > 0)
                 {
-                    Vector2Int jumpEnd = jumpPlan[jumpPlan.Count - 1].coord;
-                    int jumpDistance = Mathf.Abs(jumpEnd.x - targetCoord.x) + Mathf.Abs(jumpEnd.y - targetCoord.y);
-                    if (jumpDistance < walkDistance) plan = jumpPlan;
+                    int walkEndDistance = plan != null && plan.Count > 0
+                        ? Mathf.Abs(plan[plan.Count - 1].coord.x - targetCoord.x) + Mathf.Abs(plan[plan.Count - 1].coord.y - targetCoord.y)
+                        : int.MaxValue;
+                    int jumpEndDistance = Mathf.Abs(withJump[withJump.Count - 1].coord.x - targetCoord.x)
+                        + Mathf.Abs(withJump[withJump.Count - 1].coord.y - targetCoord.y);
+                    // Do not switch to a jump merely to save steps.
+                    if (plan == null || (walkEndDistance > range && jumpEndDistance <= range))
+                        plan = withJump;
                 }
             }
             if (plan != null)

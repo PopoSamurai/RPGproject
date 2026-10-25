@@ -51,6 +51,9 @@ public class TacticalUnitData : ScriptableObject
     [Min(0.1f)] public float moveSpeed = 4f;
 
     [Header("Combat")]
+    [Header("Element - unit affinity")]
+    public TacticalElement element = TacticalElement.Fire;
+
     public TacticalAttackData basicAttack;
     public TacticalSkillData[] skills;
     public TacticalItemData[] startingItems;

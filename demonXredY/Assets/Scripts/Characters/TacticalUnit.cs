@@ -7,6 +7,7 @@ public class TacticalUnit : MonoBehaviour
     public TacticalItemData equippedArmor;
 
     public TacticalSkillData[] AvailableSkills => unitData != null ? unitData.skills : null;
+    public TacticalElement Element => unitData != null ? unitData.element : TacticalElement.Fire;
     public TacticalSubclassData Subclass => unitData != null ? unitData.subclass : null;
     public TacticalClassData UnitClass => unitData != null ? unitData.unitClass : null;
     public const int MaxLevel = 50;
@@ -96,6 +97,17 @@ public class TacticalUnit : MonoBehaviour
         }
         ApplyEquipment(equippedWeapon);
         ApplyEquipment(equippedArmor);
+        // Wrodzona odpornosc: jednostka ma +25 punktow procentowych
+        // do odpornosci swojego zywiolu. Bonus jest runtime-only:
+        // nie modyfikuje assetu ScriptableObject i nie kumuluje sie po RefreshStats().
+        switch (Element)
+        {
+            case TacticalElement.Fire: calculatedStats.fireRes += 25; break;
+            case TacticalElement.Ice: calculatedStats.iceRes += 25; break;
+            case TacticalElement.Lightning: calculatedStats.lightningRes += 25; break;
+            case TacticalElement.Light: calculatedStats.lightRes += 25; break;
+            case TacticalElement.Dark: calculatedStats.darkRes += 25; break;
+        }
         maxHealth = calculatedStats.hp;
         strength = calculatedStats.str;
         movementRange = calculatedStats.movement;
